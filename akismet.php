@@ -1,23 +1,19 @@
 <?php
-
 /*
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://faq.wordpress.com/2005/10/19/api-key/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
 Author: Matt Mullenweg
-Version: 1.01
+Version: 1.02
 Author URI: http://photomatt.net/
 */
-
-
 
 add_action('admin_menu', 'ksd_config_page');
 
 function ksd_config_page() {
 	global $wpdb;
-
-if ( function_exists('add_submenu_page') )
-	add_submenu_page('plugins.php', 'Akismet Configuration', 'Akismet Configuration', 1, basename(__FILE__), 'akismet_conf');
+	if ( function_exists('add_submenu_page') )
+		add_submenu_page('plugins.php', 'Akismet Configuration', 'Akismet Configuration', 1, basename(__FILE__), 'akismet_conf');
 }
 
 function akismet_conf() {
@@ -29,6 +25,8 @@ function akismet_conf() {
 		else
 			$invalid_key = true;
 	}
+	if ( !akismet_verify_key( get_option('wordpress_api_key') ) )
+		$invalid_key = true;
 ?>
 
 <div class="wrap">
@@ -36,11 +34,11 @@ function akismet_conf() {
 <p>For many people, <a href="http://akismet.com/">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don't have a WordPress.com account yet, you can get one at <a href="http://wordpress.com/">WordPress.com</a>.</p>
 
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 25em; ">
-<h3>WordPress.com API Key</h3>
+<h3><label for="key">WordPress.com API Key</label></h3>
 <?php if ( $invalid_key ) { ?>
 <p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;">Your key appears invalid. Double-check it.</p>
 <?php } ?>
-<p><input name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>)</p>
+<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>)</p>
 <p class="submit"><input type="submit" name="submit" value="Update API Key &raquo;" /></p>
 </form>
 </div>
@@ -50,7 +48,6 @@ function akismet_conf() {
 function akismet_verify_key( $key ) {
 	global $auto_comment_approved, $ksd_api_host, $ksd_api_port;
 	$blog = urlencode( get_option('home') );
-
 	$response = ksd_http_post("key=$key&blog=$blog", 'rest.akismet.com', '/1.1/verify-key', $ksd_api_port);
 	if ( 'valid' == $response[1] )
 		return true;
@@ -60,12 +57,13 @@ function akismet_verify_key( $key ) {
 
 if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 	function akismet_warning() {
-		echo "<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must enter your WordPress.com API for it to work.</p></div>
-	<style type='text/css'>
-	#adminmenu { margin-bottom: 5em; }
-	#akismet-warning { position: absolute; top: 7em; }
-	</style>
-	";
+		echo "
+		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must enter your WordPress.com API for it to work.</p></div>
+		<style type='text/css'>
+		#adminmenu { margin-bottom: 5em; }
+		#akismet-warning { position: absolute; top: 7em; }
+		</style>
+		";
 	}
 	add_action('admin_footer', 'akismet_warning');
 	return;
@@ -73,7 +71,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 
 $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
-$ksd_user_agent = 'Akismet/1.01';
+$ksd_user_agent = 'Akismet/1.02';
 
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
@@ -125,6 +123,7 @@ function akismet_delete_old() {
 	global $wpdb;
 	$now_gmt = current_time('mysql', 1);
 	$wpdb->query("DELETE FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
+	$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
 }
 
 function ksd_auto_approved( $approved ) {
@@ -139,8 +138,6 @@ function ksd_submit_nonspam_comment ( $comment_id ) {
 
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
-		return;
-	if ( '1' != $comment->comment_approved )
 		return;
 	$comment->blog = get_option('home');
 	$query_string = '';
@@ -162,7 +159,7 @@ function ksd_submit_spam_comment ( $comment_id ) {
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
-	$response = ksd_http_post($query_string, $ksd_api_host, "/1.0/submit-spam", $ksd_api_port);
+	$response = ksd_http_post($query_string, $ksd_api_host, "/1.1/submit-spam", $ksd_api_port);
 }
 
 add_action('wp_set_comment_status', 'ksd_submit_spam_comment');
@@ -179,9 +176,9 @@ function ksd_spam_count() {
 
 function ksd_manage_page() {
 	global $wpdb;
-	$count = "Spam (" . ksd_spam_count() . ")";
+	$count = 'Akismet Spam (' . ksd_spam_count() . ')';
 	if ( function_exists('add_management_page') )
-		add_management_page('Spam', $count, 1, __FILE__, 'ksd_caught');
+		add_management_page('Akismet Spam', $count, 1, __FILE__, 'ksd_caught');
 }
 
 function ksd_caught() {
@@ -190,7 +187,7 @@ function ksd_caught() {
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
 			$comment = (int) $comment;
-			$wpdb->query("UPDATE $wpdb->comments SET comment_approved = '1' WHERE comment_ID = '$comment' AND comment_approved = 'spam'");
+			$wpdb->query("UPDATE $wpdb->comments SET comment_approved = '1' WHERE comment_ID = '$comment'");
 			ksd_submit_nonspam_comment($comment);
 			++$i;
 		endforeach;
@@ -256,7 +253,7 @@ $bgcolor = '';
 $class = ('alternate' == $class) ? '' : 'alternate';
 ?>
 <tr class='<?php echo $class; ?>'>
-<td style="text-align: center"><input type="checkbox" name="not_spam[]" value="<?php echo $c->comment_post_ID; ?>" /></td>
+<td style="text-align: center"><input type="checkbox" name="not_spam[]" value="<?php echo $c->comment_ID; ?>" /></td>
 <td><?php echo $c->comment_author; ?></td>
 <td><?php echo $c->comment_author_email; ?></td>
 <td><?php echo $c->comment_author_url; ?></td>
