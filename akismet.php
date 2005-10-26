@@ -4,7 +4,7 @@ Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://faq.wordpress.com/2005/10/19/api-key/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
 Author: Matt Mullenweg
-Version: 1.02
+Version: 1.03
 Author URI: http://photomatt.net/
 */
 
@@ -58,7 +58,7 @@ function akismet_verify_key( $key ) {
 if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 	function akismet_warning() {
 		echo "
-		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must enter your WordPress.com API for it to work.</p></div>
+		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must <a href='plugins.php?page=akismet.php'>enter your WordPress.com API key</a> for it to work.</p></div>
 		<style type='text/css'>
 		#adminmenu { margin-bottom: 5em; }
 		#akismet-warning { position: absolute; top: 7em; }
@@ -71,7 +71,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 
 $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
-$ksd_user_agent = 'Akismet/1.02';
+$ksd_user_agent = 'Akismet/1.03';
 
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
@@ -123,7 +123,9 @@ function akismet_delete_old() {
 	global $wpdb;
 	$now_gmt = current_time('mysql', 1);
 	$wpdb->query("DELETE FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
-	$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
+	$n = mt_rand(1, 5);
+	if ( $n % 5 )
+		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
 }
 
 function ksd_auto_approved( $approved ) {
