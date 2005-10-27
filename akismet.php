@@ -4,7 +4,7 @@ Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://faq.wordpress.com/2005/10/19/api-key/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
 Author: Matt Mullenweg
-Version: 1.04
+Version: 1.05
 Author URI: http://photomatt.net/
 */
 
@@ -71,7 +71,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 
 $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
-$ksd_user_agent = "WordPress/$wp_version | Akismet/1.04";
+$ksd_user_agent = "WordPress/$wp_version | Akismet/1.05";
 
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
@@ -196,7 +196,8 @@ function ksd_caught() {
 		echo '<div class="updated"><p>' . sprintf(__('%s comments recovered.'), $i) . "</p></div>";
 	}
 	if ('delete' == $_POST['action']) {
-		$nuked = $wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = 'spam'");
+		$delete_time = addslashes( $_POST['display_time'] );
+		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
 		if (isset($nuked)) {
 			echo '<div class="updated"><p>';
 			if ($nuked) {
@@ -225,6 +226,7 @@ if (0 == $spam_count) {
 <form method="post" action="">
 <input type="hidden" name="action" value="delete" />
 There are currently <?php echo $spam_count; ?> comments identified as spam.&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
+<input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
 </form>
 </div>
 <div class="wrap">
