@@ -237,7 +237,7 @@ $comments = $wpdb->get_results("SELECT *, COUNT(*) AS ccount FROM $wpdb->comment
 
 if ($comments) {
 ?>
-<form method="post" action="edit.php?page=akismet/akismet.php">
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 <input type="hidden" name="action" value="recover" />
 <input type="submit" name="submit" value="<?php _e('Not Spam'); ?>" />
 <table width="100%" cellpadding="3" cellspacing="3">
