@@ -86,7 +86,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 	$http_request .= $request;
 
 	$response = '';
-	if( false !== ( $fs = fsockopen($host, $port, $errno, $errstr, 3) ) ) {
+	if( false !== ( $fs = @fsockopen($host, $port, $errno, $errstr, 3) ) ) {
 		fwrite($fs, $http_request);
 		while ( !feof($fs) )
 			$response .= fgets($fs, 1160); // One TCP-IP packet
@@ -185,7 +185,7 @@ function ksd_manage_page() {
 
 function ksd_caught() {
 	global $wpdb;
-	if (isset($_POST['submit']) && 'recover' == $_POST['action']) {
+	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
 			$comment = (int) $comment;
@@ -237,7 +237,7 @@ $comments = $wpdb->get_results("SELECT *, COUNT(*) AS ccount FROM $wpdb->comment
 
 if ($comments) {
 ?>
-<form method="post" action="admin.php?page=akismet.php">
+<form method="post" action="edit.php?page=akismet/akismet.php">
 <input type="hidden" name="action" value="recover" />
 <input type="submit" name="submit" value="<?php _e('Not Spam'); ?>" />
 <table width="100%" cellpadding="3" cellspacing="3">
