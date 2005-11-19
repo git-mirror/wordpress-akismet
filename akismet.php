@@ -184,7 +184,7 @@ function ksd_manage_page() {
 }
 
 function ksd_caught() {
-	global $wpdb;
+	global $wpdb, $comment;
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
@@ -233,43 +233,37 @@ There are currently <?php echo $spam_count; ?> comments identified as spam.&nbsp
 <h2><?php _e('Last 15 days'); ?></h2>
 <?php _e('<p>These are the latest comments identified as spam by Akismet. If you see any mistakes, simple mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.</p>'); ?>
 <?php
-$comments = $wpdb->get_results("SELECT *, COUNT(*) AS ccount FROM $wpdb->comments WHERE comment_approved = 'spam' GROUP BY comment_author_IP LIMIT 150");
+$comments = $wpdb->get_results("SELECT *, COUNT(*) AS ccount FROM $wpdb->comments WHERE comment_approved = 'spam' GROUP BY comment_author_IP ORDER BY comment_date DESC LIMIT 150");
 
 if ($comments) {
 ?>
 <form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 <input type="hidden" name="action" value="recover" />
-<input type="submit" name="submit" value="<?php _e('Not Spam'); ?>" />
-<table width="100%" cellpadding="3" cellspacing="3">
-<tr>
-<th scope="col"><?php _e('Not Spam') ?></th>
-<th scope="col"><?php _e('Name') ?></th>
-<th scope="col"><?php _e('Email') ?></th>
-<th scope="col"><?php _e('URI') ?></th>
-<th scope="col"><?php _e('IP') ?></th>
-<th scope="col"><?php _e('Comments') ?></th>
-</tr>
+<ol id="spam-list" class="commentlist">
 <?php
-foreach($comments as $c) {
-$comment_date = mysql2date(get_settings("date_format") . " @ " . get_settings("time_format"), $c->comment_date);
-$post_title = $wpdb->get_var("SELECT post_title FROM $wpdb->posts WHERE ID='$c->comment_post_ID'");
-$bgcolor = '';
-$class = ('alternate' == $class) ? '' : 'alternate';
-?>
-<tr class='<?php echo $class; ?>'>
-<td style="text-align: center"><input type="checkbox" name="not_spam[]" value="<?php echo $c->comment_ID; ?>" /></td>
-<td><?php echo $c->comment_author; ?></td>
-<td><?php echo $c->comment_author_email; ?></td>
-<td><?php echo $c->comment_author_url; ?></td>
-<td style="text-align: center"><a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php echo $c->comment_author_IP; ?>"><?php echo $c->comment_author_IP; ?></a></td>
-<td style="text-align: center"><?php echo $c->ccount ?></td>
-</tr>
+$i = 0;
+foreach($comments as $comment) {
+	$i++;
+	$comment_date = mysql2date(get_settings("date_format") . " @ " . get_settings("time_format"), $comment->comment_date);
+	$post = get_post($comment->comment_post_ID);
+	$post_title = $post->post_title;
+	if ($i % 2) $class = 'class="alternate"';
+	else $class = '';
+	echo "\n\t<li id='comment-$comment->comment_ID' $class>"; 
+	?>
+	<p><strong><?php _e('Name:') ?></strong> <?php comment_author_link() ?> <?php if ($comment->comment_author_email) { ?>| <strong><?php _e('E-mail:') ?></strong> <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <strong><?php _e('URI:') ?></strong> <?php comment_author_url_link() ?> <?php } ?>| <strong><?php _e('IP:') ?></strong> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a> | <strong><?php _e('Date:') ?></strong> <?php comment_date(); ?></p>
+<?php comment_text() ?>
+<label for="not_spam">
+<input type="checkbox" name="not_spam[]" value="<?php echo $comment->comment_ID; ?>" />
+<?php _e('Not Spam') ?></label>
 <?php
 }
 }
 ?>
-</table>
+</ol>
+<p class="submit"> 
 <input type="submit" name="submit" value="<?php _e('Not Spam'); ?>" />
+</p>
 </form>
 </div>
 <?php
