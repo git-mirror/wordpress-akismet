@@ -4,7 +4,7 @@ Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://faq.wordpress.com/2005/10/19/api-key/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
 Author: Matt Mullenweg
-Version: 1.1
+Version: 1.11
 Author URI: http://photomatt.net/
 */
 
@@ -71,7 +71,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 
 $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
-$ksd_user_agent = "WordPress/$wp_version | Akismet/1.1";
+$ksd_user_agent = "WordPress/$wp_version | Akismet/1.11";
 
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
@@ -103,8 +103,11 @@ function ksd_auto_check_comment( $comment ) {
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
 	$comment['blog']       = get_option('home');
 
+	$ignore = array( 'HTTP_COOKIE' );
+
 	foreach ( $_SERVER as $key => $value )
-		$comment["$key"] = $value;
+		if ( !in_array( $key, $ignore ) )
+			$comment["$key"] = $value;
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
