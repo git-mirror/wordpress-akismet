@@ -13,7 +13,7 @@ add_action('admin_menu', 'ksd_config_page');
 function ksd_config_page() {
 	global $wpdb;
 	if ( function_exists('add_submenu_page') )
-		add_submenu_page('plugins.php', 'Akismet Configuration', 'Akismet Configuration', 1, basename(__FILE__), 'akismet_conf');
+		add_submenu_page('plugins.php', 'Akismet Configuration', 'Akismet Configuration', 1, __FILE__, 'akismet_conf');
 }
 
 function akismet_conf() {
@@ -57,8 +57,9 @@ function akismet_verify_key( $key ) {
 
 if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 	function akismet_warning() {
+	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
 		echo "
-		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must <a href='plugins.php?page=akismet.php'>enter your WordPress.com API key</a> for it to work.</p></div>
+		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must <a href='plugins.php?page=$path'>enter your WordPress.com API key</a> for it to work.</p></div>
 		<style type='text/css'>
 		#adminmenu { margin-bottom: 5em; }
 		#akismet-warning { position: absolute; top: 7em; }
@@ -88,6 +89,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 	$response = '';
 	if( false !== ( $fs = @fsockopen($host, $port, $errno, $errstr, 3) ) ) {
 		fwrite($fs, $http_request);
+
 		while ( !feof($fs) )
 			$response .= fgets($fs, 1160); // One TCP-IP packet
 		fclose($fs);
@@ -279,8 +281,9 @@ function akismet_stats() {
 	$count = get_option('akismet_spam_count');
 	if ( !$count )
 		return;
+	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
 	echo "<h3>Spam</h3>";
-	echo "<p><a href='http://akismet.com/'>Akismet</a> has protected your site from <a href='edit.php?page=akismet.php'>$count spam comments</a>.</p>";
+	echo "<p><a href='http://akismet.com/'>Akismet</a> has protected your site from <a href='edit.php?page=$path'>$count spam comments</a>.</p>";
 }
 
 add_action('activity_box_end', 'akismet_stats');
