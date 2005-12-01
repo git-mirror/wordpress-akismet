@@ -258,8 +258,8 @@ foreach($comments as $comment) {
 	?>
 	<p><strong><?php _e('Name:') ?></strong> <?php comment_author_link() ?> <?php if ($comment->comment_author_email) { ?>| <strong><?php _e('E-mail:') ?></strong> <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <strong><?php _e('URI:') ?></strong> <?php comment_author_url_link() ?> <?php } ?>| <strong><?php _e('IP:') ?></strong> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a> | <strong><?php _e('Date:') ?></strong> <?php comment_date(); ?></p>
 <?php comment_text() ?>
-<label for="not_spam">
-<input type="checkbox" name="not_spam[]" value="<?php echo $comment->comment_ID; ?>" />
+<label for="spam-<?php echo $comment->comment_ID; ?>">
+<input type="checkbox" id="spam-<?php echo $comment->comment_ID; ?>" name="not_spam[]" value="<?php echo $comment->comment_ID; ?>" />
 <?php _e('Not Spam') ?></label>
 <?php
 }
