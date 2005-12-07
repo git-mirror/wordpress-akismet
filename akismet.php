@@ -30,16 +30,16 @@ function akismet_conf() {
 ?>
 
 <div class="wrap">
-<h2>Akismet Configuration</h2>
-<p>For many people, <a href="http://akismet.com/">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don't have a WordPress.com account yet, you can get one at <a href="http://wordpress.com/api-keys/">WordPress.com</a>.</p>
+<h2><?php _e('Akismet Configuration'); ?></h2>
+	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have a WordPress.com account yet, you can get one at <a href="%2$s">WordPress.com</a>.'), 'http://akismet.com/', 'http://wordpress.com/api-keys/'); ?></p>
 
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 25em; ">
-<h3><label for="key">WordPress.com API Key</label></h3>
+<h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
 <?php if ( $invalid_key ) { ?>
-<p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;">Your key appears invalid. Double-check it.</p>
+	<p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;"><?php _e('Your key appears invalid. Double-check it.'); ?></p>
 <?php } ?>
-<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>)</p>
-<p class="submit"><input type="submit" name="submit" value="Update API Key &raquo;" /></p>
+<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
+	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update API Key &raquo;'); ?>" /></p>
 </form>
 </div>
 <?php
@@ -59,7 +59,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 	function akismet_warning() {
 	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
 		echo "
-		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>Akismet is not active.</strong> You must <a href='plugins.php?page=$path'>enter your WordPress.com API key</a> for it to work.</p></div>
+		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>".__('Akismet is not active.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=$path")."</p></div>
 		<style type='text/css'>
 		#adminmenu { margin-bottom: 5em; }
 		#akismet-warning { position: absolute; top: 7em; }
@@ -183,9 +183,9 @@ function ksd_spam_count() {
 
 function ksd_manage_page() {
 	global $wpdb;
-	$count = 'Akismet Spam (' . ksd_spam_count() . ')';
+	$count = sprintf(__('Akismet Spam (%s)'), ksd_spam_count());
 	if ( function_exists('add_management_page') )
-		add_management_page('Akismet Spam', $count, 1, __FILE__, 'ksd_caught');
+		add_management_page(__('Akismet Spam'), $count, 1, __FILE__, 'ksd_caught');
 }
 
 function ksd_caught() {
@@ -198,7 +198,7 @@ function ksd_caught() {
 			ksd_submit_nonspam_comment($comment);
 			++$i;
 		endforeach;
-		echo '<div class="updated"><p>' . sprintf(__('%s comments recovered.'), $i) . "</p></div>";
+		echo '<div class="updated"><p>' . sprintf(__('%1$s comments recovered.'), $i) . "</p></div>";
 	}
 	if ('delete' == $_POST['action']) {
 		$delete_time = addslashes( $_POST['display_time'] );
@@ -206,7 +206,7 @@ function ksd_caught() {
 		if (isset($nuked)) {
 			echo '<div class="updated"><p>';
 			if ($nuked) {
-				echo __("All spam deleted.");
+				_e('All spam deleted.');
 			}
 			echo "</p></div>";
 		}
@@ -218,25 +218,25 @@ function ksd_caught() {
 $count = get_option('akismet_spam_count');
 if ( $count ) {
 ?>
-<p>Akismet has caught <strong><?php echo $count; ?></strong> for you since you installed it. </p>
+<p><?php printf(__('Akismet has caught <strong>%1$s</strong> for you since you installed it.'), $count); ?></p>
 <?php
 }
 $spam_count = ksd_spam_count();
 if (0 == $spam_count) {
-	_e('<p>You have no spam currently in the queue. Must be your lucky day. :)</p>');
+	echo '<p>'.__('You have no spam currently in the queue. Must be your lucky day. :)').'</p>';
 	echo '</div>';
 } else {
-	_e('<p>You can delete all of the spam from your database with a single click. This operation cannot be undone, so you may wish to check to ensure that no legitimate comments got through first. Spam is automattically deleted after 15 days, so don&#8217;t sweat it.</p>');
+	echo '<p>'.__('You can delete all of the spam from your database with a single click. This operation cannot be undone, so you may wish to check to ensure that no legitimate comments got through first. Spam is automattically deleted after 15 days, so don&#8217;t sweat it.').'</p>';
 ?>
 <form method="post" action="">
 <input type="hidden" name="action" value="delete" />
-There are currently <?php echo $spam_count; ?> comments identified as spam.&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
+<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
 </form>
 </div>
 <div class="wrap">
 <h2><?php _e('Last 15 days'); ?></h2>
-<?php _e('<p>These are the latest comments identified as spam by Akismet. If you see any mistakes, simple mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.</p>'); ?>
+<?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simple mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
 <?php
 $comments = $wpdb->get_results("SELECT *, COUNT(*) AS ccount FROM $wpdb->comments WHERE comment_approved = 'spam' GROUP BY comment_author_IP ORDER BY comment_date DESC LIMIT 150");
 
@@ -282,8 +282,8 @@ function akismet_stats() {
 	if ( !$count )
 		return;
 	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
-	echo "<h3>Spam</h3>";
-	echo "<p><a href='http://akismet.com/'>Akismet</a> has protected your site from <a href='edit.php?page=$path'>$count spam comments</a>.</p>";
+	echo '<h3>'.__('Spam').'</h3>';
+	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', "edit.php?page=$path", $count).'</p>';
 }
 
 add_action('activity_box_end', 'akismet_stats');
