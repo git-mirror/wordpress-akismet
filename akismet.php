@@ -194,7 +194,10 @@ function ksd_caught() {
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
 			$comment = (int) $comment;
-			$wpdb->query("UPDATE $wpdb->comments SET comment_approved = '1' WHERE comment_ID = '$comment'");
+			if ( function_exists('wp_set_comment_status') )
+				wp_set_comment_status($comment, 'approve');
+			else
+				$wpdb->query("UPDATE $wpdb->comments SET comment_approved = '1' WHERE comment_ID = '$comment'");
 			ksd_submit_nonspam_comment($comment);
 			++$i;
 		endforeach;
