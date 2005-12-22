@@ -57,7 +57,7 @@ function akismet_verify_key( $key ) {
 
 if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 	function akismet_warning() {
-	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
+	$path = plugin_basename(__FILE__);
 		echo "
 		<div id='akismet-warning' class='updated fade-ff0000'><p><strong>".__('Akismet is not active.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=$path")."</p></div>
 		<style type='text/css'>
@@ -284,7 +284,7 @@ function akismet_stats() {
 	$count = get_option('akismet_spam_count');
 	if ( !$count )
 		return;
-	$path = preg_replace('|(.*?plugins/)|', '', __FILE__);
+	$path = plugin_basename(__FILE__);
 	echo '<h3>'.__('Spam').'</h3>';
 	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', "edit.php?page=$path", $count).'</p>';
 }
