@@ -13,7 +13,7 @@ add_action('admin_menu', 'ksd_config_page');
 function ksd_config_page() {
 	global $wpdb;
 	if ( function_exists('add_submenu_page') )
-		add_submenu_page('plugins.php', 'Akismet Configuration', 'Akismet Configuration', 1, __FILE__, 'akismet_conf');
+		add_submenu_page('plugins.php', __('Akismet Configuration'), __('Akismet Configuration'), 1, __FILE__, 'akismet_conf');
 }
 
 function akismet_conf() {
