@@ -221,7 +221,7 @@ function ksd_caught() {
 $count = get_option('akismet_spam_count');
 if ( $count ) {
 ?>
-<p><?php printf(__('Akismet has caught <strong>%1$s</strong> for you since you installed it.'), number_format($count) ); ?></p>
+<p><?php printf(__('Akismet has caught <strong>%1$s</strong> spam for you since you installed it.'), number_format($count) ); ?></p>
 <?php
 }
 $spam_count = ksd_spam_count();
