@@ -239,7 +239,7 @@ if (0 == $spam_count) {
 </div>
 <div class="wrap">
 <h2><?php _e('Last 15 days'); ?></h2>
-<?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simple mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
+<?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simply mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
 <?php
 $comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' ORDER BY comment_date DESC LIMIT 150");
 
