@@ -4,7 +4,7 @@ Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
 Author: Matt Mullenweg
-Version: 1.14
+Version: 1.15
 Author URI: http://photomatt.net/
 */
 
@@ -72,7 +72,7 @@ if ( !get_option('wordpress_api_key') && !isset($_POST['submit']) ) {
 
 $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
-$ksd_user_agent = "WordPress/$wp_version | Akismet/1.14";
+$ksd_user_agent = "WordPress/$wp_version | Akismet/1.15";
 
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
@@ -87,7 +87,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 	$http_request .= $request;
 
 	$response = '';
-	if( false !== ( $fs = @fsockopen($host, $port, $errno, $errstr, 3) ) ) {
+	if( false !== ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
 		fwrite($fs, $http_request);
 
 		while ( !feof($fs) )
@@ -221,7 +221,7 @@ function ksd_caught() {
 $count = get_option('akismet_spam_count');
 if ( $count ) {
 ?>
-<p><?php printf(__('Akismet has caught <strong>%1$s</strong> spam for you since you installed it.'), number_format($count) ); ?></p>
+<p><?php printf(__('Akismet has caught <strong>%1$s spam</strong> for you since you first installed it.'), number_format($count) ); ?></p>
 <?php
 }
 $spam_count = ksd_spam_count();
@@ -238,7 +238,7 @@ if (0 == $spam_count) {
 </form>
 </div>
 <div class="wrap">
-<h2><?php _e('Last 15 days'); ?></h2>
+<h2><?php _e('Latest Spam'); ?></h2>
 <?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simply mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
 <?php
 $comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' ORDER BY comment_date DESC LIMIT 150");
@@ -247,7 +247,7 @@ if ($comments) {
 ?>
 <form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 <input type="hidden" name="action" value="recover" />
-<ol id="spam-list" class="commentlist">
+<ul id="spam-list" class="commentlist" style="list-style: none; margin: 0; padding: 0;">
 <?php
 $i = 0;
 foreach($comments as $comment) {
@@ -259,19 +259,36 @@ foreach($comments as $comment) {
 	else $class = '';
 	echo "\n\t<li id='comment-$comment->comment_ID' $class>"; 
 	?>
-	<p><strong><?php _e('Name:') ?></strong> <?php comment_author_link() ?> <?php if ($comment->comment_author_email) { ?>| <strong><?php _e('E-mail:') ?></strong> <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <strong><?php _e('URI:') ?></strong> <?php comment_author_url_link() ?> <?php } ?>| <strong><?php _e('IP:') ?></strong> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a> | <strong><?php _e('Date:') ?></strong> <?php comment_date(); ?></p>
+
+<p><strong><?php comment_author() ?></strong> <?php if ($comment->comment_author_email) { ?>| <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <?php comment_author_url_link() ?> <?php } ?>| <?php _e('IP:') ?> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></p>
+
 <?php comment_text() ?>
-<label for="spam-<?php echo $comment->comment_ID; ?>">
+
+<p><label for="spam-<?php echo $comment->comment_ID; ?>">
 <input type="checkbox" id="spam-<?php echo $comment->comment_ID; ?>" name="not_spam[]" value="<?php echo $comment->comment_ID; ?>" />
-<?php _e('Not Spam') ?></label>
+<?php _e('Not Spam') ?></label> &#8212; <?php comment_date('M j, g:i A');  ?> &#8212; [ 
+<?php
+$post = get_post($comment->comment_post_ID);
+$post_title = wp_specialchars( $post->post_title, 'double' );
+$post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
+?>
+ <a href="<?php echo get_permalink($comment->comment_post_ID); ?>" title="<?php echo $post_title; ?>"><?php _e('View Post') ?></a> ] </p>
+
+
 <?php
 }
 }
 ?>
-</ol>
+</ul>
 <p class="submit"> 
-<input type="submit" name="submit" value="<?php _e('Not Spam &raquo;'); ?>" />
+<input type="submit" name="submit" value="<?php _e('De-spam marked comments &raquo;'); ?>" />
 </p>
+<p><?php _e('Comments you de-spam will be submitted to Akismet as mistakes so it can learn and get better.'); ?></p>
+</form>
+<form method="post" action="">
+<p><input type="hidden" name="action" value="delete" />
+<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
+<input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" /></p>
 </form>
 </div>
 <?php
