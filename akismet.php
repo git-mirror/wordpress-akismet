@@ -10,6 +10,18 @@ Author URI: http://photomatt.net/
 
 add_action('admin_menu', 'ksd_config_page');
 
+if ( ! function_exists('wp_nonce_field') ) {
+	function akismet_nonce_field($action = -1) {
+		return;	
+	}
+	$akismet_nonce = -1;
+} else {
+	function akismet_nonce_field($action = -1) {
+		return wp_nonce_field($action);
+	}
+	$akismet_nonce = 'akismet-update-key';
+}
+
 function ksd_config_page() {
 	global $wpdb;
 	if ( function_exists('add_submenu_page') )
@@ -17,8 +29,9 @@ function ksd_config_page() {
 }
 
 function akismet_conf() {
+	global $akismet_nonce;
 	if ( isset($_POST['submit']) ) {
-		check_admin_referer();
+		check_admin_referer($akismet_nonce);
 		$key = preg_replace('/[^a-h0-9]/i', '', $_POST['key']);
 		if ( akismet_verify_key( $key ) )
 			update_option('wordpress_api_key', $key);
@@ -34,6 +47,7 @@ function akismet_conf() {
 	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have a WordPress.com account yet, you can get one at <a href="%2$s">WordPress.com</a>.'), 'http://akismet.com/', 'http://wordpress.com/api-keys/'); ?></p>
 
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 25em; ">
+<?php akismet_nonce_field($akismet_nonce) ?>
 <h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
 <?php if ( $invalid_key ) { ?>
 	<p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;"><?php _e('Your key appears invalid. Double-check it.'); ?></p>
