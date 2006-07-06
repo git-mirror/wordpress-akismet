@@ -114,7 +114,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 
 function ksd_auto_check_comment( $comment ) {
 	global $auto_comment_approved, $ksd_api_host, $ksd_api_port;
-	$comment['user_ip']    = $_SERVER['REMOTE_ADDR'];
+	$comment['user_ip']    = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
 	$comment['blog']       = get_option('home');
