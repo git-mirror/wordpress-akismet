@@ -25,12 +25,15 @@ if ( ! function_exists('wp_nonce_field') ) {
 function ksd_config_page() {
 	global $wpdb;
 	if ( function_exists('add_submenu_page') )
-		add_submenu_page('plugins.php', __('Akismet Configuration'), __('Akismet Configuration'), 1, __FILE__, 'akismet_conf');
+		add_submenu_page('plugins.php', __('Akismet Configuration'), __('Akismet Configuration'), 'manage_options', __FILE__, 'akismet_conf');
 }
 
 function akismet_conf() {
 	global $akismet_nonce;
 	if ( isset($_POST['submit']) ) {
+		if ( !current_user_can('manage_options') )
+			die(__('Cheatin&#8217; uh?'));
+
 		check_admin_referer($akismet_nonce);
 		$key = preg_replace('/[^a-h0-9]/i', '', $_POST['key']);
 		if ( akismet_verify_key( $key ) )
@@ -199,12 +202,15 @@ function ksd_manage_page() {
 	global $wpdb;
 	$count = sprintf(__('Akismet Spam (%s)'), ksd_spam_count());
 	if ( function_exists('add_management_page') )
-		add_management_page(__('Akismet Spam'), $count, 1, __FILE__, 'ksd_caught');
+		add_management_page(__('Akismet Spam'), $count, 'moderate_comments', __FILE__, 'ksd_caught');
 }
 
 function ksd_caught() {
 	global $wpdb, $comment;
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
+		if ( ! current_user_can('moderate_comments') )
+			die(__('You do not have sufficient permission to moderate comments.'));
+		
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
 			$comment = (int) $comment;
@@ -218,6 +224,9 @@ function ksd_caught() {
 		echo '<div class="updated"><p>' . sprintf(__('%1$s comments recovered.'), $i) . "</p></div>";
 	}
 	if ('delete' == $_POST['action']) {
+		if ( ! current_user_can('moderate_comments') )
+			die(__('You do not have sufficient permission to moderate comments.'));
+
 		$delete_time = addslashes( $_POST['display_time'] );
 		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
 		if (isset($nuked)) {
