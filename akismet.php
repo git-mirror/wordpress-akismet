@@ -31,7 +31,7 @@ function ksd_config_page() {
 function akismet_conf() {
 	global $akismet_nonce;
 	if ( isset($_POST['submit']) ) {
-		if ( !current_user_can('manage_options') )
+		if ( function_exists('current_user_can') && !current_user_can('manage_options') )
 			die(__('Cheatin&#8217; uh?'));
 
 		check_admin_referer($akismet_nonce);
@@ -208,7 +208,7 @@ function ksd_manage_page() {
 function ksd_caught() {
 	global $wpdb, $comment;
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
-		if ( ! current_user_can('moderate_comments') )
+		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
 		
 		$i = 0;
@@ -224,7 +224,7 @@ function ksd_caught() {
 		echo '<div class="updated"><p>' . sprintf(__('%1$s comments recovered.'), $i) . "</p></div>";
 	}
 	if ('delete' == $_POST['action']) {
-		if ( ! current_user_can('moderate_comments') )
+		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
 
 		$delete_time = addslashes( $_POST['display_time'] );
