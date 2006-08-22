@@ -104,7 +104,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 	$http_request .= $request;
 
 	$response = '';
-	if( false !== ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
+	if( false != ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
 		fwrite($fs, $http_request);
 
 		while ( !feof($fs) )
