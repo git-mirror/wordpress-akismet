@@ -97,7 +97,7 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 
 	$http_request  = "POST $path HTTP/1.0\r\n";
 	$http_request .= "Host: $host\r\n";
-	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_settings('blog_charset') . "\r\n";
+	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
 	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
 	$http_request .= "User-Agent: $ksd_user_agent\r\n";
 	$http_request .= "\r\n";
@@ -275,7 +275,7 @@ if ($comments) {
 $i = 0;
 foreach($comments as $comment) {
 	$i++;
-	$comment_date = mysql2date(get_settings("date_format") . " @ " . get_settings("time_format"), $comment->comment_date);
+	$comment_date = mysql2date(get_option("date_format") . " @ " . get_option("time_format"), $comment->comment_date);
 	$post = get_post($comment->comment_post_ID);
 	$post_title = $post->post_title;
 	if ($i % 2) $class = 'class="alternate"';
@@ -391,7 +391,7 @@ function widget_akismet_register() {
 }
 
 #akismetwrap #akismetstats{
-	background: url(<?php echo get_settings('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;
+	background: url(<?php echo get_option('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;
 	border: none;
 	color: #fff;
 	font: 11px 'Trebuchet MS','Myriad Pro',sans-serif;
