@@ -2,9 +2,8 @@
 /*
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
-Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. Hat tip: <a href="http://ioerror.us/">Michael Hampton</a> and <a href="http://chrisjdavis.org/">Chris J. Davis</a> for help with the plugin.
-Author: Matt Mullenweg
-Version: 1.15
+Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
+Version: 1.2
 Author URI: http://photomatt.net/
 */
 
@@ -432,5 +431,25 @@ function widget_akismet_register() {
 	endif;
 }
 add_action('init', 'widget_akismet_register');
+
+// Counter for non-widget users
+function akismet_counter() {
+?>
+<style type="text/css">
+#akismetwrap #aka,#aka:link,#aka:hover,#aka:visited,#aka:active{color:#fff;text-decoration:none}
+#aka:hover{border:none;text-decoration:none}
+#aka:hover #akismet1{display:none}
+#aka:hover #akismet2,#akismet1{display:block}
+#akismet2{display:none;padding-top:2px}
+#akismeta{font-size:16px;font-weight:bold;line-height:18px;text-decoration:none}
+#akismetcount{display:block;font:15px Verdana,Arial,Sans-Serif;font-weight:bold;text-decoration:none}
+#akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
+</style>
+<?php
+$count = number_format(get_option('akismet_spam_count'));
+?>
+<div id="akismetwrap"><div id="akismetstats"><a id="aka" href="http://akismet.com" title=""><div id="akismet1"><span id="akismetcount"><?php echo $count; ?></span> <span id="akismetsc"><?php _e('spam comments') ?></span></div> <div id="akismet2"><span id="akismetbb"><?php _e('blocked by') ?></span><br /><span id="akismeta">Akismet</span></div></a></div></div>
+<?php
+}
 
 ?>
