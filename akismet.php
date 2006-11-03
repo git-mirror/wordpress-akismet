@@ -89,6 +89,13 @@ $ksd_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
 $ksd_api_port = 80;
 $ksd_user_agent = "WordPress/$wp_version | Akismet/1.2.1";
 
+function a_write_log( $text, $file = 'akismet.log' ) {
+	$fp = fopen('/tmp/'.$file, 'a+');
+	$date = gmdate("Y-m-d H:i:s ");
+	fwrite($fp, "\n================\n".$date.$text);
+	fclose($fp);
+}
+
 // Returns array with headers in $response[0] and entity in $response[1]
 function ksd_http_post($request, $host, $path, $port = 80) {
 	global $ksd_user_agent;
@@ -109,12 +116,16 @@ function ksd_http_post($request, $host, $path, $port = 80) {
 			$response .= fgets($fs, 1160); // One TCP-IP packet
 		fclose($fs);
 		$response = explode("\r\n\r\n", $response, 2);
+	} else {
+		// Debugging
+		a_write_log( 'Plugin was unable to contact Akismet' );
 	}
 	return $response;
 }
 
 function ksd_auto_check_comment( $comment ) {
 	global $auto_comment_approved, $ksd_api_host, $ksd_api_port;
+	timer_start();
 	$comment['user_ip']    = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
@@ -135,6 +146,23 @@ function ksd_auto_check_comment( $comment ) {
 		$auto_comment_approved = 'spam';
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
 	}
+
+	// Debugging
+	$author = $comment['comment_author'];
+	$url = $comment['comment_author_url'];
+	$email = $comment['comment_author_email'];
+	$content = $comment['comment_content'];
+	$type = $comment['comment_type'];
+	$time = timer_stop();
+	$server_ip = preg_replace( '|.*X-akismet-server: ([0-9.]+).*|is', "$1", $response[0]);
+$log = "
+author: $author | e: $email | u: $url | t: $type
+---
+$content
+---
+akismet said: {$response[1]} in $time seconds from $server_ip
+";
+	a_write_log( $log );
 	akismet_delete_old();
 	return $comment;
 }
