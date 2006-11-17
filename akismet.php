@@ -4,6 +4,7 @@ Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web serivce to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use this service. You can review the spam it catches under "Manage" and it automatically deletes old spam after 15 days. To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
 Version: 1.2.1
+Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
 
@@ -46,9 +47,10 @@ function akismet_conf() {
 
 <div class="wrap">
 <h2><?php _e('Akismet Configuration'); ?></h2>
+<div class="narrow">
 	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have a WordPress.com account yet, you can get one at <a href="%2$s">WordPress.com</a>.'), 'http://akismet.com/', 'http://wordpress.com/api-keys/'); ?></p>
 
-<form action="" method="post" id="akismet-conf" style="margin: auto; width: 25em; ">
+<form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
 <?php akismet_nonce_field($akismet_nonce) ?>
 <h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
 <?php if ( $invalid_key ) { ?>
@@ -57,6 +59,7 @@ function akismet_conf() {
 <p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
 	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update API Key &raquo;'); ?>" /></p>
 </form>
+</div>
 </div>
 <?php
 }
@@ -197,9 +200,11 @@ function ksd_spam_count() {
 }
 
 function ksd_manage_page() {
-	global $wpdb;
+	global $wpdb, $submenu;
 	$count = sprintf(__('Akismet Spam (%s)'), ksd_spam_count());
-	if ( function_exists('add_management_page') )
+	if ( isset( $submenu['edit-comments.php'] ) )
+		add_submenu_page('edit-comments.php', __('Akismet Spam'), $count, 'moderate_comments', 'akismet-admin', 'ksd_caught' );
+	elseif ( function_exists('add_management_page') )
 		add_management_page(__('Akismet Spam'), $count, 'moderate_comments', 'akismet-admin', 'ksd_caught');
 }
 
