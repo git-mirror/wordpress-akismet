@@ -210,7 +210,7 @@ function ksd_manage_page() {
 
 function ksd_caught() {
 	global $wpdb, $comment;
-	
+	akismet_recheck_queue();
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
@@ -500,7 +500,12 @@ $count = number_format(get_option('akismet_spam_count'));
 
 if ( 'moderation.php' == $pagenow ) {
 	function akismet_recheck_button( $page ) {
-		$button = "<a href='edit.php?page=akismet-admin&amp;recheckqueue=true' style='display: block; width: 100px; position: absolute; right: 7%; padding: 5px; font-size: 14px; text-decoration: underline; background: #fff; border: 1px solid #ccc;'>Recheck Queue for Spam</a>";
+		global $submenu;
+		if ( isset( $submenu['edit-comments.php'] ) )
+			$link = 'edit-comments.php';
+		else
+			$link = 'edit.php';
+		$button = "<a href='$link?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true' style='display: block; width: 100px; position: absolute; right: 7%; padding: 5px; font-size: 14px; text-decoration: underline; background: #fff; border: 1px solid #ccc;'>Recheck Queue for Spam</a>";
 		$page = str_replace( '<div class="wrap">', '<div class="wrap">' . $button, $page );
 		return $page;
 	}
@@ -535,6 +540,5 @@ function akismet_recheck_queue() {
 	wp_redirect( $_SERVER['HTTP_REFERER'] );
 	exit;
 }
-add_action( 'load-manage_page_akismet-admin', 'akismet_recheck_queue' );
 
 ?>
