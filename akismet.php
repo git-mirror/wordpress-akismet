@@ -371,7 +371,12 @@ function akismet_stats() {
 		return;
 	$path = plugin_basename(__FILE__);
 	echo '<h3>'.__('Spam').'</h3>';
-	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', "edit.php?page=akismet-admin", number_format($count) ).'</p>';
+	global $submenu;
+	if ( isset( $submenu['edit-comments.php'] ) )
+		$link = 'edit-comments.php';
+	else
+		$link = 'edit.php';
+	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', "$link?page=akismet-admin", number_format($count) ).'</p>';
 }
 
 add_action('activity_box_end', 'akismet_stats');
