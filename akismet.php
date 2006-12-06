@@ -146,8 +146,8 @@ function akismet_delete_old() {
 	global $wpdb;
 	$now_gmt = current_time('mysql', 1);
 	$wpdb->query("DELETE FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
-	$n = mt_rand(1, 5);
-	if ( $n % 5 )
+	$n = mt_rand(1, 1000);
+	if ( $n == 11 ) // lucky number
 		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
 }
 
