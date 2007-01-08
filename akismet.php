@@ -448,6 +448,10 @@ function akismet_check_db_comment( $id ) {
 	return $response[1];
 }
 
+// This option causes tons of FPs, was removed in 2.1
+function kill_proxy_check( $option ) { return 0; }
+add_filter('option_open_proxy_check', 'kill_proxy_check');
+
 // Widget stuff
 function widget_akismet_register() {
 	if ( function_exists('register_sidebar_widget') ) :
