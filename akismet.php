@@ -226,7 +226,9 @@ function akismet_caught() {
 			akismet_submit_nonspam_comment($comment);
 			++$i;
 		endforeach;
-		echo '<div class="updated"><p>' . sprintf(__('%1$s comments recovered.'), $i) . "</p></div>";
+		$to = add_query_arg( 'recovered', $i, $_SERVER['HTTP_REFERER'] );
+		wp_redirect( $to );
+		exit;
 	}
 	if ('delete' == $_POST['action']) {
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
@@ -234,14 +236,18 @@ function akismet_caught() {
 
 		$delete_time = addslashes( $_POST['display_time'] );
 		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
-		if (isset($nuked)) {
-			echo '<div class="updated"><p>';
-			if ($nuked) {
-				_e('All spam deleted.');
-			}
-			echo "</p></div>";
-		}
+		$to = add_query_arg( 'deleted', 'all', $_SERVER['HTTP_REFERER'] );
+		wp_redirect( $to );
+		exit;
 	}
+
+if ( isset( $_GET['recovered'] ) ) {
+	$i = (int) $_GET['recovered'];
+	echo '<div class="updated"><p>' . sprintf(__('%1$s comments recovered.'), $i) . "</p></div>";
+}
+
+if (isset( $_GET['deleted'] ) )
+	echo '<div class="updated"><p>' . __('All spam deleted.') . '</p></div>';
 ?>
 <div class="wrap">
 <h2><?php _e('Caught Spam') ?></h2>
@@ -259,7 +265,7 @@ if (0 == $spam_count) {
 } else {
 	echo '<p>'.__('You can delete all of the spam from your database with a single click. This operation cannot be undone, so you may wish to check to ensure that no legitimate comments got through first. Spam is automatically deleted after 15 days, so don&#8217;t sweat it.').'</p>';
 ?>
-<form method="post" action="">
+<form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
@@ -314,7 +320,7 @@ echo "<p>$r</p>";
 
 <?php } ?>
 
-<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+<form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="recover" />
 <ul id="spam-list" class="commentlist" style="list-style: none; margin: 0; padding: 0;">
 <?php
