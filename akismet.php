@@ -263,6 +263,11 @@ if ( isset( $_GET['recovered'] ) ) {
 
 if (isset( $_GET['deleted'] ) )
 	echo '<div class="updated"><p>' . __('All spam deleted.') . '</p></div>';
+
+if ( isset( $GLOBALS['submenu']['edit-comments.php'] ) )
+	$link = 'edit-comments.php';
+else
+	$link = 'edit.php';
 ?>
 <div class="wrap">
 <h2><?php _e('Caught Spam') ?></h2>
@@ -280,24 +285,43 @@ if (0 == $spam_count) {
 } else {
 	echo '<p>'.__('You can delete all of the spam from your database with a single click. This operation cannot be undone, so you may wish to check to ensure that no legitimate comments got through first. Spam is automatically deleted after 15 days, so don&#8217;t sweat it.').'</p>';
 ?>
+<?php if ( !isset( $_POST['s'] ) ) { ?>
 <form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
 </form>
+<?php } ?>
 </div>
 <div class="wrap">
+<?php if ( isset( $_POST['s'] ) ) { ?>
+<h2><?php _e('Search'); ?></h2>
+<?php } else { ?>
 <h2><?php _e('Latest Spam'); ?></h2>
 <?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simply mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
+<? } ?>
 <?php
-if ( isset( $_GET['apage'] ) )
-	$page = (int) $_GET['apage'];
-else
-	$page = 1;
-$start = ( $page - 1 ) * 50;
-$end = $start + 50;
-$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' ORDER BY comment_date DESC LIMIT $start, $end");
-$total = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam'" );
+if ( isset( $_POST['s'] ) ) {
+	$s = $wpdb->escape($_POST['s']);
+	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments  WHERE
+		(comment_author LIKE '%$s%' OR
+		comment_author_email LIKE '%$s%' OR
+		comment_author_url LIKE ('%$s%') OR
+		comment_author_IP LIKE ('%$s%') OR
+		comment_content LIKE ('%$s%') ) AND
+		comment_approved = 'spam'
+		ORDER BY comment_date DESC");
+} else {
+	if ( isset( $_GET['apage'] ) )
+		$page = (int) $_GET['apage'];
+	else
+		$page = 1;
+	$start = ( $page - 1 ) * 50;
+	$end = $start + 50;
+
+	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' ORDER BY comment_date DESC LIMIT $start, $end");
+	$total = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam'" );
+}
 
 if ($comments) {
 ?>
@@ -334,7 +358,10 @@ echo "<p>$r</p>";
 ?>
 
 <?php } ?>
-
+<form method="post" action="<?php echo "$link?page=akismet-admin"; ?>" id="akismetsearch">
+<p>  <input type="text" name="s" value="<?php if (isset($_POST['s'])) echo attribute_escape($_POST['s']); ?>" size="17" /> 
+  <input type="submit" name="submit" value="<?php _e('Search') ?>"  />  </p>
+</form>
 <form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="recover" />
 <ul id="spam-list" class="commentlist" style="list-style: none; margin: 0; padding: 0;">
@@ -367,7 +394,6 @@ $post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
 
 <?php
 }
-}
 ?>
 </ul>
 <p class="submit"> 
@@ -375,11 +401,19 @@ $post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
 </p>
 <p><?php _e('Comments you de-spam will be submitted to Akismet as mistakes so it can learn and get better.'); ?></p>
 </form>
+<?php
+} else {
+?>
+<p><?php _e('No results found.'); ?></p>
+<?php } ?>
+
+<?php if ( !isset( $_POST['s'] ) ) { ?>
 <form method="post" action="">
 <p><input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" /></p>
 </form>
+<?php } ?>
 </div>
 <?php
 	}
