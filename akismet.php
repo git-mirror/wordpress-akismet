@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
-Version: 1.7
+Version: 1.8
 Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
@@ -11,7 +11,19 @@ Author URI: http://photomatt.net/
 // If you hardcode a WP.com API key here, all key config screens will be hidden
 $wpcom_api_key = '';
 
-add_action('admin_menu', 'akismet_config_page');
+function akismet_init() {
+	global $wpcom_api_key, $akismet_api_host, $akismet_api_port;
+
+	if ( $wpcom_api_key ) {
+		$akismet_api_host = $wpcom_api_key . '.rest.akismet.com';
+	} else {
+		$akismet_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
+	}
+
+	$akismet_api_port = 80;
+	add_action('admin_menu', 'akismet_config_page');
+}
+add_action('init', 'akismet_init');
 
 if ( !function_exists('wp_nonce_field') ) {
 	function akismet_nonce_field($action = -1) { return; }
@@ -28,16 +40,30 @@ function akismet_config_page() {
 
 function akismet_conf() {
 	global $akismet_nonce, $wpcom_api_key;
+
 	if ( isset($_POST['submit']) ) {
 		if ( function_exists('current_user_can') && !current_user_can('manage_options') )
 			die(__('Cheatin&#8217; uh?'));
 
 		check_admin_referer( $akismet_nonce );
 		$key = preg_replace( '/[^a-h0-9]/i', '', $_POST['key'] );
-		if ( akismet_verify_key( $key ) )
+
+		if ( empty($key) ) {
+			$key_status = 'empty';
+			$ms[] = 'new_key_empty';
+			delete_option('wordpress_api_key');
+		} else {
+			$key_status = akismet_verify_key( $key );
+		}
+
+		if ( $key_status == 'valid' ) {
 			update_option('wordpress_api_key', $key);
-		else
-			$invalid_key = true;
+			$ms[] = 'new_key_valid';
+		} else if ( $key_status == 'invalid' ) {
+			$ms[] = 'new_key_invalid';
+		} else if ( $key_status == 'failed' ) {
+			$ms[] = 'new_key_failed';
+		}
 
 		if ( isset( $_POST['akismet_discard_month'] ) )
 			update_option( 'akismet_discard_month', 'true' );
@@ -45,10 +71,40 @@ function akismet_conf() {
 			update_option( 'akismet_discard_month', 'false' );
 	}
 
-	if ( !akismet_verify_key( get_option('wordpress_api_key') ) )
-		$invalid_key = true;
+	if ( $key_status != 'valid' ) {
+		$key = get_option('wordpress_api_key');
+		if ( empty( $key ) ) {
+			if ( $key_status != 'failed' ) {
+				if ( akismet_verify_key( '1234567890ab' ) == 'failed' )
+					$ms[] = 'no_connection';
+				else
+					$ms[] = 'key_empty';
+			}
+			$key_status = 'empty';
+		} else {
+			$key_status = akismet_verify_key( $key );
+		}
+		if ( $key_status == 'valid' ) {
+			$ms[] = 'key_valid';
+		} else if ( $key_status == 'invalid' ) {
+			delete_option('wordpress_api_key');
+			$ms[] = 'key_empty';
+		} else if ( !empty($key) && $key_status == 'failed' ) {
+			$ms[] = 'key_failed';
+		}
+	}
+
+	$messages = array(
+		'new_key_empty' => array('color' => 'aa0', 'text' => __('Your key has been cleared.')),
+		'new_key_valid' => array('color' => '2d2', 'text' => __('Your key has been verified. Happy blogging!')),
+		'new_key_invalid' => array('color' => 'd22', 'text' => __('The key you entered is invalid. Please double-check it.')),
+		'new_key_failed' => array('color' => 'd22', 'text' => __('The key you entered could not be verified because a connection to akismet.com could not be established. Please check your server configuration.')),
+		'no_connection' => array('color' => 'd22', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
+		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://wordpress.com/profile/')),
+		'key_valid' => array('color' => '2d2', 'text' => __('This key is valid.')),
+		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')));
 ?>
-<?php if ( isset ($_POST ) ) : ?>
+<?php if ( !empty($_POST ) ) : ?>
 <div id="message" class="updated fade"><p><strong><?php _e('Options saved.') ?></strong></p></div>
 <?php endif; ?>
 <div class="wrap">
@@ -60,9 +116,9 @@ function akismet_conf() {
 
 <?php akismet_nonce_field($akismet_nonce) ?>
 <h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
-<?php if ( $invalid_key ) { ?>
-	<p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;"><?php _e('Your key appears invalid. Double-check it.'); ?></p>
-<?php } ?>
+<?php foreach ( $ms as $m ) : ?>
+	<p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
+<?php endforeach; ?>
 <p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
 <?php if ( $invalid_key ) { ?>
 <h3><? _e('Why might my key be invalid?'); ?></h3>
@@ -83,10 +139,9 @@ function akismet_verify_key( $key ) {
 	if ( $wpcom_api_key )
 		$key = $wpcom_api_key;
 	$response = akismet_http_post("key=$key&blog=$blog", 'rest.akismet.com', '/1.1/verify-key', $akismet_api_port);
-	if ( 'valid' == $response[1] )
-		return true;
-	else
-		return false;
+	if ( !is_array($response) || !isset($response[1]) || $response[1] != 'valid' && $response[1] != 'invalid' )
+		return 'failed';
+	return $response[1];
 }
 
 if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
@@ -102,11 +157,6 @@ if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submi
 	add_action('admin_footer', 'akismet_warning');
 	return;
 }
-
-$akismet_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
-if ( $wpcom_api_key )
-	$akismet_api_host = $wpcom_api_key . '.rest.akismet.com';
-$akismet_api_port = 80;
 
 // Returns array with headers in $response[0] and body in $response[1]
 function akismet_http_post($request, $host, $path, $port = 80) {
