@@ -121,11 +121,11 @@ function akismet_conf() {
 <?php endforeach; ?>
 <p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
 <?php if ( $invalid_key ) { ?>
-<h3><? _e('Why might my key be invalid?'); ?></h3>
-<p><? _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
+<h3><?php _e('Why might my key be invalid?'); ?></h3>
+<p><?php _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
 <?php } ?>
 <?php } ?>
-<p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <? _e('Automatically discard spam comments on posts older than a month.'); ?></label></p>
+<p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Automatically discard spam comments on posts older than a month.'); ?></label></p>
 	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
 </form>
 </div>
@@ -349,7 +349,7 @@ if (0 == $spam_count) {
 <?php } else { ?>
 <h2><?php _e('Latest Spam'); ?></h2>
 <?php echo '<p>'.__('These are the latest comments identified as spam by Akismet. If you see any mistakes, simply mark the comment as "not spam" and Akismet will learn from the submission. If you wish to recover a comment from spam, simply select the comment, and click Not Spam. After 15 days we clean out the junk for you.').'</p>'; ?>
-<? } ?>
+<?php } ?>
 <?php
 if ( isset( $_POST['s'] ) ) {
 	$s = $wpdb->escape($_POST['s']);
