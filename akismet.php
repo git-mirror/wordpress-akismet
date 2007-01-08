@@ -64,14 +64,14 @@ function akismet_conf() {
 <p><? _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
 <?php } ?>
 <?php } ?>
-<p><label><input name="ignore_old_spam" id="ignore_old_spam" value="true" /> <? _e('Automatically delete spam comments on posts older than a month.'); ?></label></p>
+<p><label><input name="ignore_old_spam" id="ignore_old_spam" value="true" type="checkbox" /> <? _e('Automatically delete spam comments on posts older than a month.'); ?></label></p>
 </div>
 </div>
 <?php
 }
 
 function akismet_verify_key( $key ) {
-	global $auto_comment_approved, $akismet_api_host, $akismet_api_port, $wpcom_api_key;
+	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
 	$blog = urlencode( get_option('home') );
 	if ( $wpcom_api_key )
 		$key = $wpcom_api_key;
@@ -126,7 +126,7 @@ function akismet_http_post($request, $host, $path, $port = 80) {
 }
 
 function akismet_auto_check_comment( $comment ) {
-	global $auto_comment_approved, $akismet_api_host, $akismet_api_port;
+	global $akismet_api_host, $akismet_api_port;
 
 	$comment['user_ip']    = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
@@ -145,7 +145,7 @@ function akismet_auto_check_comment( $comment ) {
 
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 	if ( 'true' == $response[1] ) {
-		$auto_comment_approved = 'spam';
+		add_filter('pre_comment_approved', create_function('$a', 'return \'spam\';'));
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
 	}
 	akismet_delete_old();
@@ -159,13 +159,6 @@ function akismet_delete_old() {
 	$n = mt_rand(1, 5000);
 	if ( $n == 11 ) // lucky number
 		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
-}
-
-function akismet_auto_approved( $approved ) {
-	global $auto_comment_approved;
-	if ( 'spam' == $auto_comment_approved )
-		$approved = $auto_comment_approved;
-	return $approved;
 }
 
 function akismet_submit_nonspam_comment ( $comment_id ) {
@@ -200,8 +193,6 @@ function akismet_submit_spam_comment ( $comment_id ) {
 add_action('wp_set_comment_status', 'akismet_submit_spam_comment');
 add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
-add_filter('pre_comment_approved', 'akismet_auto_approved');
-
 
 function akismet_spam_count() {
 	global $wpdb, $comments;
