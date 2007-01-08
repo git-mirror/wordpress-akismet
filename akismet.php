@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
-Version: 1.6
+Version: 1.7
 Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
@@ -38,33 +38,40 @@ function akismet_conf() {
 			update_option('wordpress_api_key', $key);
 		else
 			$invalid_key = true;
-		
+
+		if ( isset( $_POST['akismet_discard_month'] ) )
+			update_option( 'akismet_discard_month', 'true' );
+		else
+			update_option( 'akismet_discard_month', 'false' );
 	}
+
 	if ( !akismet_verify_key( get_option('wordpress_api_key') ) )
 		$invalid_key = true;
 ?>
-
+<?php if ( isset ($_POST ) ) : ?>
+<div id="message" class="updated fade"><p><strong><?php _e('Options saved.') ?></strong></p></div>
+<?php endif; ?>
 <div class="wrap">
 <h2><?php _e('Akismet Configuration'); ?></h2>
-<?php if ( !$wpcom_api_key ) { ?>
 <div class="narrow">
+<form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
+<?php if ( !$wpcom_api_key ) { ?>
 	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have a WordPress.com account yet, you can get one at <a href="%2$s">WordPress.com</a>.'), 'http://akismet.com/', 'http://wordpress.com/api-keys/'); ?></p>
 
-<form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
 <?php akismet_nonce_field($akismet_nonce) ?>
 <h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
 <?php if ( $invalid_key ) { ?>
 	<p style="padding: .5em; background-color: #f33; color: #fff; font-weight: bold;"><?php _e('Your key appears invalid. Double-check it.'); ?></p>
 <?php } ?>
 <p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
-	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update API Key &raquo;'); ?>" /></p>
-</form>
 <?php if ( $invalid_key ) { ?>
 <h3><? _e('Why might my key be invalid?'); ?></h3>
 <p><? _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
 <?php } ?>
 <?php } ?>
-<p><label><input name="ignore_old_spam" id="ignore_old_spam" value="true" type="checkbox" /> <? _e('Automatically delete spam comments on posts older than a month.'); ?></label></p>
+<p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <? _e('Automatically discard spam comments on posts older than a month.'); ?></label></p>
+	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
+</form>
 </div>
 </div>
 <?php
@@ -109,7 +116,7 @@ function akismet_http_post($request, $host, $path, $port = 80) {
 	$http_request .= "Host: $host\r\n";
 	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
 	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
-	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/1.5\r\n";
+	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/1.7\r\n";
 	$http_request .= "\r\n";
 	$http_request .= $request;
 
@@ -147,6 +154,14 @@ function akismet_auto_check_comment( $comment ) {
 	if ( 'true' == $response[1] ) {
 		add_filter('pre_comment_approved', create_function('$a', 'return \'spam\';'));
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
+
+		$post = get_post( $comment['comment_post_ID'] );
+		$last_updated = strtotime( $post->post_modified_gmt );
+		$diff = time() - $last_updated;
+		$diff = $diff / 86400;
+
+		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' )
+			die;
 	}
 	akismet_delete_old();
 	return $comment;
