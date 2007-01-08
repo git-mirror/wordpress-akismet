@@ -611,6 +611,7 @@ function widget_akismet_register() {
 		add_action('wp_head', 'widget_akismet_style');
 	endif;
 }
+
 add_action('init', 'widget_akismet_register');
 
 // Counter for non-widget users
