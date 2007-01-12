@@ -554,8 +554,8 @@ function akismet_check_db_comment( $id ) {
 }
 
 // This option causes tons of FPs, was removed in 2.1
-function kill_proxy_check( $option ) { return 0; }
-add_filter('option_open_proxy_check', 'kill_proxy_check');
+function akismet_kill_proxy_check( $option ) { return 0; }
+add_filter('option_open_proxy_check', 'akismet_kill_proxy_check');
 
 // Widget stuff
 function widget_akismet_register() {
