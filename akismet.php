@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
-Version: 1.8.1
+Version: 2.0
 Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
@@ -166,7 +166,7 @@ function akismet_http_post($request, $host, $path, $port = 80) {
 	$http_request .= "Host: $host\r\n";
 	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
 	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
-	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/1.7\r\n";
+	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/2.0\r\n";
 	$http_request .= "\r\n";
 	$http_request .= $request;
 
@@ -386,7 +386,7 @@ if ( 1 < $page ) {
 if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
 		if ( $page == $page_num ) :
-			$r .=  "<span>$page_num</span>\n";
+			$r .=  "<strong>$page_num</strong>\n";
 		else :
 			$p = false;
 			if ( $page_num < 3 || ( $page_num >= $page - 3 && $page_num <= $page + 3 ) || $page_num > $total_pages - 3 ) :
@@ -446,6 +446,37 @@ $post_title = ('' == $post_title) ? "# $comment->comment_post_ID" : $post_title;
 }
 ?>
 </ul>
+<?php if ( $total > 50 ) {
+$total_pages = ceil( $total / 50 );
+$r = '';
+if ( 1 < $page ) {
+	$args['apage'] = ( 1 == $page - 1 ) ? '' : $page - 1;
+	$r .=  '<a class="prev" href="' . add_query_arg( $args ) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
+}
+if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
+	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
+		if ( $page == $page_num ) :
+			$r .=  "<strong>$page_num</strong>\n";
+		else :
+			$p = false;
+			if ( $page_num < 3 || ( $page_num >= $page - 3 && $page_num <= $page + 3 ) || $page_num > $total_pages - 3 ) :
+				$args['apage'] = ( 1 == $page_num ) ? '' : $page_num;
+				$r .= '<a class="page-numbers" href="' . add_query_arg($args) . '">' . ( $page_num ) . "</a>\n";
+				$in = true;
+			elseif ( $in == true ) :
+				$r .= "...\n";
+				$in = false;
+			endif;
+		endif;
+	endfor;
+}
+if ( ( $page ) * 50 < $total || -1 == $total ) {
+	$args['apage'] = $page + 1;
+	$r .=  '<a class="next" href="' . add_query_arg($args) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
+}
+echo "<p>$r</p>";
+}
+?>
 <p class="submit"> 
 <input type="submit" name="submit" value="<?php _e('De-spam marked comments &raquo;'); ?>" />
 </p>
