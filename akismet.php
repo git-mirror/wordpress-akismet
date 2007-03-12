@@ -261,7 +261,11 @@ add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
 function akismet_spam_count() {
 	global $wpdb, $comments;
-	$count = $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
+	$count = wp_cache_get( 'akismet_spam_count', 'widget' );
+	if ( false === $count ) {
+		$count = $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
+		wp_cache_set( 'akismet_spam_count', $count, 'widget', 3600 );
+	}
 	return $count;
 }
 
@@ -301,6 +305,7 @@ function akismet_caught() {
 
 		$delete_time = addslashes( $_POST['display_time'] );
 		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
+		wp_cache_delete( 'ksd_spam_count','widget' );
 		$to = add_query_arg( 'deleted', 'all', $_SERVER['HTTP_REFERER'] );
 		wp_redirect( $to );
 		exit;
