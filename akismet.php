@@ -371,6 +371,10 @@ if ( isset( $_POST['s'] ) ) {
 		$page = (int) $_GET['apage'];
 	else
 		$page = 1;
+
+	if ( $page < 2 )
+		$page = 1;
+
 	$start = ( $page - 1 ) * 50;
 	$end = $start + 50;
 
