@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template.
-Version: 2.0
+Version: 2.0.1
 Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
@@ -14,11 +14,10 @@ $wpcom_api_key = '';
 function akismet_init() {
 	global $wpcom_api_key, $akismet_api_host, $akismet_api_port;
 
-	if ( $wpcom_api_key ) {
+	if ( $wpcom_api_key )
 		$akismet_api_host = $wpcom_api_key . '.rest.akismet.com';
-	} else {
+	else
 		$akismet_api_host = get_option('wordpress_api_key') . '.rest.akismet.com';
-	}
 
 	$akismet_api_port = 80;
 	add_action('admin_menu', 'akismet_config_page');
@@ -305,7 +304,7 @@ function akismet_caught() {
 
 		$delete_time = addslashes( $_POST['display_time'] );
 		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
-		wp_cache_delete( 'ksd_spam_count','widget' );
+		wp_cache_delete( 'akismet_spam_count', 'widget' );
 		$to = add_query_arg( 'deleted', 'all', $_SERVER['HTTP_REFERER'] );
 		wp_redirect( $to );
 		exit;
