@@ -340,7 +340,7 @@ if (0 == $spam_count) {
 	echo '<p>'.__('You can delete all of the spam from your database with a single click. This operation cannot be undone, so you may wish to check to ensure that no legitimate comments got through first. Spam is automatically deleted after 15 days, so don&#8217;t sweat it.').'</p>';
 ?>
 <?php if ( !isset( $_POST['s'] ) ) { ?>
-<form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
+<form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
@@ -389,7 +389,7 @@ $total_pages = ceil( $total / 50 );
 $r = '';
 if ( 1 < $page ) {
 	$args['apage'] = ( 1 == $page - 1 ) ? '' : $page - 1;
-	$r .=  '<a class="prev" href="' . add_query_arg( $args ) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
+	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
 }
 if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
@@ -399,7 +399,7 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 			$p = false;
 			if ( $page_num < 3 || ( $page_num >= $page - 3 && $page_num <= $page + 3 ) || $page_num > $total_pages - 3 ) :
 				$args['apage'] = ( 1 == $page_num ) ? '' : $page_num;
-				$r .= '<a class="page-numbers" href="' . add_query_arg($args) . '">' . ( $page_num ) . "</a>\n";
+				$r .= '<a class="page-numbers" href="' . clean_url(add_query_arg($args)) . '">' . ( $page_num ) . "</a>\n";
 				$in = true;
 			elseif ( $in == true ) :
 				$r .= "...\n";
@@ -410,17 +410,17 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 }
 if ( ( $page ) * 50 < $total || -1 == $total ) {
 	$args['apage'] = $page + 1;
-	$r .=  '<a class="next" href="' . add_query_arg($args) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
+	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
 }
 echo "<p>$r</p>";
 ?>
 
 <?php } ?>
-<form method="post" action="<?php echo "$link?page=akismet-admin"; ?>" id="akismetsearch">
+<form method="post" action="<?php echo attribute_escape("$link?page=akismet-admin"); ?>" id="akismetsearch">
 <p>  <input type="text" name="s" value="<?php if (isset($_POST['s'])) echo attribute_escape($_POST['s']); ?>" size="17" /> 
-  <input type="submit" name="submit" value="<?php _e('Search') ?>"  />  </p>
+  <input type="submit" name="submit" value="<?php echo attribute_escape(__('Search')) ?>"  />  </p>
 </form>
-<form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
+<form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
 <input type="hidden" name="action" value="recover" />
 <ul id="spam-list" class="commentlist" style="list-style: none; margin: 0; padding: 0;">
 <?php
@@ -459,7 +459,7 @@ $total_pages = ceil( $total / 50 );
 $r = '';
 if ( 1 < $page ) {
 	$args['apage'] = ( 1 == $page - 1 ) ? '' : $page - 1;
-	$r .=  '<a class="prev" href="' . add_query_arg( $args ) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
+	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
 }
 if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
@@ -469,7 +469,7 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 			$p = false;
 			if ( $page_num < 3 || ( $page_num >= $page - 3 && $page_num <= $page + 3 ) || $page_num > $total_pages - 3 ) :
 				$args['apage'] = ( 1 == $page_num ) ? '' : $page_num;
-				$r .= '<a class="page-numbers" href="' . add_query_arg($args) . '">' . ( $page_num ) . "</a>\n";
+				$r .= '<a class="page-numbers" href="' . clean_url(add_query_arg($args)) . '">' . ( $page_num ) . "</a>\n";
 				$in = true;
 			elseif ( $in == true ) :
 				$r .= "...\n";
@@ -480,13 +480,13 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 }
 if ( ( $page ) * 50 < $total || -1 == $total ) {
 	$args['apage'] = $page + 1;
-	$r .=  '<a class="next" href="' . add_query_arg($args) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
+	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
 }
 echo "<p>$r</p>";
 }
 ?>
 <p class="submit"> 
-<input type="submit" name="submit" value="<?php _e('De-spam marked comments &raquo;'); ?>" />
+<input type="submit" name="submit" value="<?php echo attribute_escape(__('De-spam marked comments &raquo;')); ?>" />
 </p>
 <p><?php _e('Comments you de-spam will be submitted to Akismet as mistakes so it can learn and get better.'); ?></p>
 </form>
@@ -497,9 +497,9 @@ echo "<p>$r</p>";
 <?php } ?>
 
 <?php if ( !isset( $_POST['s'] ) ) { ?>
-<form method="post" action="<?php echo htmlspecialchars( add_query_arg( 'noheader', 'true' ) ); ?>">
+<form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
 <p><input type="hidden" name="action" value="delete" />
-<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
+<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php echo attribute_escape(__('Delete all')); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" /></p>
 </form>
 <?php } ?>
@@ -521,7 +521,7 @@ function akismet_stats() {
 		$link = 'edit-comments.php';
 	else
 		$link = 'edit.php';
-	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', "$link?page=akismet-admin", number_format($count) ).'</p>';
+	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format($count) ).'</p>';
 }
 
 add_action('activity_box_end', 'akismet_stats');
@@ -534,7 +534,7 @@ if ( 'moderation.php' == $pagenow ) {
 			$link = 'edit-comments.php';
 		else
 			$link = 'edit.php';
-		$button = "<a href='$link?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true' style='display: block; width: 100px; position: absolute; right: 7%; padding: 5px; font-size: 14px; text-decoration: underline; background: #fff; border: 1px solid #ccc;'>Recheck Queue for Spam</a>";
+		$button = "<a href='$link?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true' style='display: block; width: 100px; position: absolute; right: 7%; padding: 5px; font-size: 14px; text-decoration: underline; background: #fff; border: 1px solid #ccc;'>" . __('Recheck Queue for Spam') . "</a>";
 		$page = str_replace( '<div class="wrap">', '<div class="wrap">' . $button, $page );
 		return $page;
 	}
