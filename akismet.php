@@ -278,9 +278,10 @@ function akismet_manage_page() {
 }
 
 function akismet_caught() {
-	global $wpdb, $comment;
+	global $wpdb, $comment, $akismet_caught;
 	akismet_recheck_queue();
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
+		check_admin_referer( $akismet_nonce );
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
 		
@@ -299,6 +300,7 @@ function akismet_caught() {
 		exit;
 	}
 	if ('delete' == $_POST['action']) {
+		check_admin_referer( $akismet_nonce );
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
 
@@ -341,6 +343,7 @@ if (0 == $spam_count) {
 ?>
 <?php if ( !isset( $_POST['s'] ) ) { ?>
 <form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
+<?php akismet_nonce_field($akismet_nonce) ?>
 <input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
@@ -421,6 +424,7 @@ echo "<p>$r</p>";
   <input type="submit" name="submit" value="<?php echo attribute_escape(__('Search')) ?>"  />  </p>
 </form>
 <form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
+<?php akismet_nonce_field($akismet_nonce) ?>
 <input type="hidden" name="action" value="recover" />
 <ul id="spam-list" class="commentlist" style="list-style: none; margin: 0; padding: 0;">
 <?php
@@ -498,6 +502,7 @@ echo "<p>$r</p>";
 
 <?php if ( !isset( $_POST['s'] ) ) { ?>
 <form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
+<?php akismet_nonce_field($akismet_nonce) ?>
 <p><input type="hidden" name="action" value="delete" />
 <?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" name="Submit" value="<?php echo attribute_escape(__('Delete all')); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" /></p>
