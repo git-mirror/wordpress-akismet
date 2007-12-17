@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
-Version: 2.1.1
+Version: 2.1.2
 Author: Matt Mullenweg
 Author URI: http://photomatt.net/
 */
@@ -279,48 +279,6 @@ function akismet_manage_page() {
 }
 
 function akismet_caught() {
-?>
-<style type="text/css">
-.akismet-tabs {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	clear: both;
-	border-bottom: 1px solid #ccc;
-	height: 31px;
-	margin-bottom: 20px;
-	background: #ddd;
-	border-top: 1px solid #bdbdbd;
-}
-.akismet-tabs li {
-	float: left;
-	margin: 5px 0 0 20px;
-}
-.akismet-tabs a {
-	display: block;
-	padding: 4px .5em 3px;
-	border-bottom: none;
-	color: #036;
-}
-.akismet-tabs .active a {
-	background: #fff;
-	border: 1px solid #ccc;
-	border-bottom: none;
-	color: #000;
-	font-weight: bold;
-	padding-bottom: 4px;
-}
-#akismetsearch {
-	float: right;
-	margin-top: -.5em;
-}
-
-#akismetsearch p {
-	margin: 0;
-	padding: 0;
-}
-</style>
-<?php
 	global $wpdb, $comment, $akismet_caught, $akismet_nonce;
 	akismet_recheck_queue();
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
@@ -368,6 +326,46 @@ if ( isset( $GLOBALS['submenu']['edit-comments.php'] ) )
 else
 	$link = 'edit.php';
 ?>
+<style type="text/css">
+.akismet-tabs {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	clear: both;
+	border-bottom: 1px solid #ccc;
+	height: 31px;
+	margin-bottom: 20px;
+	background: #ddd;
+	border-top: 1px solid #bdbdbd;
+}
+.akismet-tabs li {
+	float: left;
+	margin: 5px 0 0 20px;
+}
+.akismet-tabs a {
+	display: block;
+	padding: 4px .5em 3px;
+	border-bottom: none;
+	color: #036;
+}
+.akismet-tabs .active a {
+	background: #fff;
+	border: 1px solid #ccc;
+	border-bottom: none;
+	color: #000;
+	font-weight: bold;
+	padding-bottom: 4px;
+}
+#akismetsearch {
+	float: right;
+	margin-top: -.5em;
+}
+
+#akismetsearch p {
+	margin: 0;
+	padding: 0;
+}
+</style>
 <div class="wrap">
 <h2><?php _e('Caught Spam') ?></h2>
 <?php
