@@ -201,6 +201,8 @@ function akismet_auto_check_comment( $comment ) {
 		add_filter('pre_comment_approved', create_function('$a', 'return \'spam\';'));
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
 
+		do_action( 'akismet_spam_caught' );
+
 		$post = get_post( $comment['comment_post_ID'] );
 		$last_updated = strtotime( $post->post_modified_gmt );
 		$diff = time() - $last_updated;
