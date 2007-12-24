@@ -459,7 +459,7 @@ $total_pages = ceil( $total / 50 );
 $r = '';
 if ( 1 < $page ) {
 	$args['apage'] = ( 1 == $page - 1 ) ? '' : $page - 1;
-	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
+	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">'. __('&laquo; Previous Page') .'</a>' . "\n";
 }
 if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
@@ -480,7 +480,7 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 }
 if ( ( $page ) * 50 < $total || -1 == $total ) {
 	$args['apage'] = $page + 1;
-	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
+	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page &raquo;') .'</a>' . "\n";
 }
 echo "<p>$r</p>";
 ?>
@@ -526,7 +526,7 @@ $total_pages = ceil( $total / 50 );
 $r = '';
 if ( 1 < $page ) {
 	$args['apage'] = ( 1 == $page - 1 ) ? '' : $page - 1;
-	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">&laquo; '. __('Previous Page') .'</a>' . "\n";
+	$r .=  '<a class="prev" href="' . clean_url(add_query_arg( $args )) . '">'. __('&laquo; Previous Page') .'</a>' . "\n";
 }
 if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 	for ( $page_num = 1; $page_num <= $total_pages; $page_num++ ) :
@@ -547,7 +547,7 @@ if ( ( $total_pages = ceil( $total / 50 ) ) > 1 ) {
 }
 if ( ( $page ) * 50 < $total || -1 == $total ) {
 	$args['apage'] = $page + 1;
-	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page') .' &raquo;</a>' . "\n";
+	$r .=  '<a class="next" href="' . clean_url(add_query_arg($args)) . '">'. __('Next Page &raquo;') .'</a>' . "\n";
 }
 echo "<p>$r</p>";
 }
