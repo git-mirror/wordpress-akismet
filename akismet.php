@@ -35,7 +35,7 @@ if ( !function_exists('wp_nonce_field') ) {
 function akismet_config_page() {
 	if ( function_exists('add_submenu_page') )
 		add_submenu_page('plugins.php', __('Akismet Configuration'), __('Akismet Configuration'), 'manage_options', 'akismet-key-config', 'akismet_conf');
-	
+
 }
 
 function akismet_conf() {
@@ -283,7 +283,7 @@ function akismet_caught() {
 		check_admin_referer( $akismet_nonce );
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
-		
+
 		$i = 0;
 		foreach ($_POST['not_spam'] as $comment):
 			$comment = (int) $comment;
@@ -426,7 +426,7 @@ if ( isset( $_POST['s'] ) ) {
 		$type = preg_replace( '|[^a-z]|', '', $_GET['ctype'] );
 		if ( 'comments' == $type )
 			$type = '';
-		$where = " AND comment_type = '$type' "; 
+		$where = " AND comment_type = '$type' ";
 	}
 
 	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' $where ORDER BY comment_date DESC LIMIT $start, $end");
@@ -445,7 +445,7 @@ foreach ( $totals as $type ) {
 	echo "<li $extra><a href='edit-comments.php?page=akismet-admin&amp;ctype=$type->comment_type'>$show ($type->cc)</a></li>";
 }
 do_action( 'akismet_tabs' ); // so plugins can add more tabs easily
-?>	
+?>
 </ul>
 <?php
 }
@@ -453,7 +453,7 @@ do_action( 'akismet_tabs' ); // so plugins can add more tabs easily
 if ($comments) {
 ?>
 <form method="post" action="<?php echo attribute_escape("$link?page=akismet-admin"); ?>" id="akismetsearch">
-<p>  <input type="text" name="s" value="<?php if (isset($_POST['s'])) echo attribute_escape($_POST['s']); ?>" size="17" /> 
+<p>  <input type="text" name="s" value="<?php if (isset($_POST['s'])) echo attribute_escape($_POST['s']); ?>" size="17" />
   <input type="submit" class="button" name="submit" value="<?php echo attribute_escape(__('Search Spam &raquo;')) ?>"  />  </p>
 </form>
 <?php if ( $total > 50 ) {
@@ -501,7 +501,7 @@ foreach($comments as $comment) {
 	$post_title = $post->post_title;
 	if ($i % 2) $class = 'class="alternate"';
 	else $class = '';
-	echo "\n\t<li id='comment-$comment->comment_ID' $class>"; 
+	echo "\n\t<li id='comment-$comment->comment_ID' $class>";
 	?>
 
 <p><strong><?php comment_author() ?></strong> <?php if ($comment->comment_author_email) { ?>| <?php comment_author_email_link() ?> <?php } if ($comment->comment_author_url && 'http://' != $comment->comment_author_url) { ?> | <?php comment_author_url_link() ?> <?php } ?>| <?php _e('IP:') ?> <a href="http://ws.arin.net/cgi-bin/whois.pl?queryinput=<?php comment_author_IP() ?>"><?php comment_author_IP() ?></a></p>
@@ -510,7 +510,7 @@ foreach($comments as $comment) {
 
 <p><label for="spam-<?php echo $comment->comment_ID; ?>">
 <input type="checkbox" id="spam-<?php echo $comment->comment_ID; ?>" name="not_spam[]" value="<?php echo $comment->comment_ID; ?>" />
-<?php _e('Not Spam') ?></label> &#8212; <?php comment_date('M j, g:i A');  ?> &#8212; [ 
+<?php _e('Not Spam') ?></label> &#8212; <?php comment_date('M j, g:i A');  ?> &#8212; [
 <?php
 $post = get_post($comment->comment_post_ID);
 $post_title = wp_specialchars( $post->post_title, 'double' );
@@ -554,7 +554,7 @@ if ( ( $page ) * 50 < $total || -1 == $total ) {
 echo "<p>$r</p>";
 }
 ?>
-<p class="submit"> 
+<p class="submit">
 <input type="submit" name="submit" value="<?php echo attribute_escape(__('De-spam marked comments &raquo;')); ?>" />
 </p>
 <p><?php _e('Comments you de-spam will be submitted to Akismet as mistakes so it can learn and get better.'); ?></p>
@@ -626,11 +626,11 @@ function akismet_recheck_queue() {
 		$c['referrer']   = '';
 		$c['blog']       = get_option('home');
 		$id = $c['comment_ID'];
-		
+
 		$query_string = '';
 		foreach ( $c as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
-		
+
 		$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 		if ( 'true' == $response[1] ) {
 			$wpdb->query( "UPDATE $wpdb->comments SET comment_approved = 'spam' WHERE comment_ID = $id" );
@@ -653,11 +653,11 @@ function akismet_check_db_comment( $id ) {
 	$c['referrer']   = '';
 	$c['blog']       = get_option('home');
 	$id = $c['comment_ID'];
-	
+
 	$query_string = '';
 	foreach ( $c as $key => $data )
 	$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
-	
+
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 	return $response[1];
 }
@@ -681,7 +681,7 @@ function widget_akismet_register() {
 			<?php echo $after_widget; ?>
 	<?php
 	}
-	
+
 	function widget_akismet_style() {
 		?>
 <style type="text/css">
