@@ -226,6 +226,7 @@ function akismet_delete_old() {
 
 function akismet_submit_nonspam_comment ( $comment_id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
+	$comment_id = (int) $comment_id;
 
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
@@ -239,6 +240,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 
 function akismet_submit_spam_comment ( $comment_id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
+	$comment_id = (int) $comment_id;
 
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
@@ -257,14 +259,62 @@ add_action('wp_set_comment_status', 'akismet_submit_spam_comment');
 add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
-function akismet_spam_count() {
-	global $wpdb, $comments;
-	$count = wp_cache_get( 'akismet_spam_count', 'widget' );
-	if ( false === $count ) {
-		$count = $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
-		wp_cache_set( 'akismet_spam_count', $count, 'widget', 3600 );
+// Total spam in queue
+// get_option( 'akismet_spam_count' ) is the total caught ever
+function akismet_spam_count( $type = false ) {
+	global $wpdb;
+
+	if ( !$type ) { // total
+		$count = wp_cache_get( 'akismet_spam_count', 'widget' );
+		if ( false === $count ) {
+			$count = (int) $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
+			wp_cache_set( 'akismet_spam_count', $count, 'widget', 3600 );
+		}
+		return $count;
+	} elseif ( 'comments' == $type || 'comment' == $type ) { // comments
+		$type = '';
+	} else { // pingback, trackback, ...
+		$type  = $wpdb->escape( $type );
 	}
-	return $count;
+
+	return (int) $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam' AND comment_type='$type'");
+}
+
+function akismet_spam_comments( $type = false, $page = 1, $per_page = 50 ) {
+	global $wpdb;
+
+	$page = (int) $page;
+	if ( $page < 2 )
+		$page = 1;
+
+	$per_page = (int) $per_page;
+	if ( $per_page < 1 )
+		$per_page = 50;
+
+	$start = ( $page - 1 ) * $per_page;
+	$end = $start + $per_page;
+
+	if ( $type ) {
+		if ( 'comments' == $type || 'comment' == $type )
+			$type = '';
+		else
+			$type = $wpdb->escape( $type );
+		return $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' AND comment_type='$type' ORDER BY comment_date DESC LIMIT $start, $end");
+	}
+
+	// All
+	return $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' ORDER BY comment_date DESC LIMIT $start, $end");
+}
+
+// Totals for each comment type
+// returns array( type => count, ... )
+function akismet_spam_totals() {
+	global $wpdb;
+	$totals = $wpdb->get_results( "SELECT comment_type, COUNT(*) AS cc FROM $wpdb->comments WHERE comment_approved = 'spam' GROUP BY comment_type" );
+	$return = array();
+	foreach ( $totals as $total )
+		$return[$total->comment_type ? $total->comment_type : 'comment'] = $total->cc;
+	return $return;
 }
 
 function akismet_manage_page() {
@@ -303,7 +353,7 @@ function akismet_caught() {
 		if ( function_exists('current_user_can') && !current_user_can('moderate_comments') )
 			die(__('You do not have sufficient permission to moderate comments.'));
 
-		$delete_time = addslashes( $_POST['display_time'] );
+		$delete_time = $wpdb->escape( $_POST['display_time'] );
 		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
 		wp_cache_delete( 'akismet_spam_count', 'widget' );
 		$to = add_query_arg( 'deleted', 'all', $_SERVER['HTTP_REFERER'] );
@@ -370,14 +420,13 @@ else
 $count = get_option( 'akismet_spam_count' );
 if ( $count ) {
 ?>
-<p><?php printf(__('Akismet has caught <strong>%1$s spam</strong> for you since you first installed it.'), number_format($count) ); ?></p>
+<p><?php printf(__('Akismet has caught <strong>%1$s spam</strong> for you since you first installed it.'), number_format_i18n($count) ); ?></p>
 <?php
 }
 
-$gotspam = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam'" );
+$spam_count = akismet_spam_count();
 
-
-if ( 0 == $gotspam ) {
+if ( 0 == $spam_count ) {
 	echo '<p>'.__('You have no spam currently in the queue. Must be your lucky day. :)').'</p>';
 	echo '</div>';
 } else {
@@ -418,31 +467,27 @@ if ( isset( $_POST['s'] ) ) {
 	if ( $page < 2 )
 		$page = 1;
 
-	$start = ( $page - 1 ) * 50;
-	$end = $start + 50;
+	$current_type = false;
+	if ( isset( $_GET['ctype'] ) )
+		$current_type = preg_replace( '|[^a-z]|', '', $_GET['ctype'] );
 
-	$where = '';
-	if ( isset( $_GET['ctype'] ) ) {
-		$type = preg_replace( '|[^a-z]|', '', $_GET['ctype'] );
-		if ( 'comments' == $type )
-			$type = '';
-		$where = " AND comment_type = '$type' ";
-	}
-
-	$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_approved = 'spam' $where ORDER BY comment_date DESC LIMIT $start, $end");
-	$total = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam' $where" );
-
-	$totals = $wpdb->get_results( "SELECT comment_type, COUNT(*) AS cc FROM $wpdb->comments WHERE comment_approved = 'spam' GROUP BY comment_type" );
+	$comments = akismet_spam_comments( $current_type );
+	$total = akismet_spam_count( $current_type );
+	$totals = akismet_spam_totals();
 ?>
 <ul class="akismet-tabs">
 <li <?php if ( !isset( $_GET['ctype'] ) ) echo ' class="active"'; ?>><a href="edit-comments.php?page=akismet-admin"><?php _e('All'); ?></a></li>
 <?php
-foreach ( $totals as $type ) {
-	if ( '' == $type->comment_type ) $type->comment_type = 'comments';
-	$show = ucwords( $type->comment_type );
-	$type->cc = number_format( $type->cc );
-	$extra = ( $_GET['ctype'] == $type->comment_type ) ? ' class="active"' : '';
-	echo "<li $extra><a href='edit-comments.php?page=akismet-admin&amp;ctype=$type->comment_type'>$show ($type->cc)</a></li>";
+foreach ( $totals as $type => $type_count ) {
+	if ( 'comment' == $type ) {
+		$type = 'comments';
+		$show = __('Comments');
+	} else {
+		$show = ucwords( $type );
+	}
+	$type_count = number_format_i18n( $type_count );
+	$extra = $current_type === $type ? ' class="active"' : '';
+	echo "<li $extra><a href='edit-comments.php?page=akismet-admin&amp;ctype=$type'>$show ($type_count)</a></li>";
 }
 do_action( 'akismet_tabs' ); // so plugins can add more tabs easily
 ?>
@@ -580,9 +625,11 @@ echo "<p>$r</p>";
 
 add_action('admin_menu', 'akismet_manage_page');
 
+// WP < 2.5
 function akismet_stats() {
-	$count = get_option('akismet_spam_count');
-	if ( !$count )
+	if ( !function_exists('did_action') || did_action( 'rightnow_end' ) )
+		return;
+	if ( !$count = get_option('akismet_spam_count') )
 		return;
 	$path = plugin_basename(__FILE__);
 	echo '<h3>'.__('Spam').'</h3>';
@@ -591,11 +638,45 @@ function akismet_stats() {
 		$link = 'edit-comments.php';
 	else
 		$link = 'edit.php';
-	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format($count) ).'</p>';
+	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
 }
 
 add_action('activity_box_end', 'akismet_stats');
 
+// WP 2.5+
+function akismet_rightnow() {
+	global $submenu;
+	if ( isset( $submenu['edit-comments.php'] ) )
+		$link = 'edit-comments.php';
+	else
+		$link = 'edit.php';
+
+	if ( $count = get_option('akismet_spam_count') ) {
+		$intro = sprintf( __ngettext(
+			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already,',
+			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already,',
+			$count
+		), 'http://akismet.com/', number_format_i18n( $count ) );
+	} else {
+		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog,'), 'http://akismet.com/' );
+	}
+
+	if ( $queue_count = akismet_spam_count() ) {
+		$queue_text = sprintf( __ngettext(
+			'and there\'s <a href="%2$s">%1$s comment in your spam queue</a> right now.',
+			'and there are <a href="%2$s">%1$s comments in your spam queue</a> right now.',
+			$queue_count
+		), number_format_i18n( $queue_count ), clean_url("$link?page=akismet-admin") );
+	} else {
+		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at them moment." ), clean_url("$link?page=akismet-admin") );
+	}
+
+	$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
+
+	echo "<p class='akismet-right-now'>$text</p>\n";
+}
+	
+add_action('rightnow_end', 'akismet_rightnow');
 
 if ( 'moderation.php' == $pagenow ) {
 	function akismet_recheck_button( $page ) {
@@ -625,7 +706,7 @@ function akismet_recheck_queue() {
 		$c['user_agent'] = $c['comment_agent'];
 		$c['referrer']   = '';
 		$c['blog']       = get_option('home');
-		$id = $c['comment_ID'];
+		$id = (int) $c['comment_ID'];
 
 		$query_string = '';
 		foreach ( $c as $key => $data )
@@ -672,8 +753,7 @@ function widget_akismet_register() {
 	function widget_akismet($args) {
 		extract($args);
 		$options = get_option('widget_akismet');
-		$count = number_format(get_option('akismet_spam_count'));
-		$text = __('%d spam comments have been blocked by <a href="http://akismet.com">Akismet</a>.');
+		$count = number_format_i18n(get_option('akismet_spam_count'));
 		?>
 			<?php echo $before_widget; ?>
 				<?php echo $before_title . $options['title'] . $after_title; ?>
@@ -737,7 +817,7 @@ function akismet_counter() {
 #akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
 </style>
 <?php
-$count = number_format(get_option('akismet_spam_count'));
+$count = number_format_i18n(get_option('akismet_spam_count'));
 ?>
 <div id="akismetwrap"><div id="akismetstats"><a id="aka" href="http://akismet.com" title=""><div id="akismet1"><span id="akismetcount"><?php echo $count; ?></span> <span id="akismetsc"><?php _e('spam comments') ?></span></div> <div id="akismet2"><span id="akismetbb"><?php _e('blocked by') ?></span><br /><span id="akismeta">Akismet</span></div></a></div></div>
 <?php
