@@ -631,7 +631,7 @@ add_action('admin_menu', 'akismet_manage_page');
 
 // WP < 2.5
 function akismet_stats() {
-	if ( !function_exists('did_action') || did_action( 'rightnow_end' ) )
+	if ( !function_exists('did_action') || did_action( 'rightnow_end' ) ) // We already displayed this info in the "Right Now" section
 		return;
 	if ( !$count = get_option('akismet_spam_count') )
 		return;
