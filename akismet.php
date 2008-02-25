@@ -682,6 +682,7 @@ function akismet_rightnow() {
 	
 add_action('rightnow_end', 'akismet_rightnow');
 
+// For WP <= 2.3.x
 if ( 'moderation.php' == $pagenow ) {
 	function akismet_recheck_button( $page ) {
 		global $submenu;
@@ -697,6 +698,14 @@ if ( 'moderation.php' == $pagenow ) {
 	if ( $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '0'" ) )
 		ob_start( 'akismet_recheck_button' );
 }
+
+// For WP >= 2.5
+function akismet_check_for_spam_button($comment_status) {
+	if ( 'moderated' != $comment_status )
+		return;
+	echo "<a href='edit-comments.php?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true'>" . __('Check for Spam') . "</a>";
+}
+add_action('manage_comments_nav', 'akismet_check_for_spam_button');
 
 function akismet_recheck_queue() {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
