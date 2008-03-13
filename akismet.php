@@ -808,7 +808,7 @@ function widget_akismet_register() {
 	}
 
 	register_sidebar_widget('Akismet', 'widget_akismet', null, 'akismet');
-	register_widget_control('Akismet', 'widget_akismet_control', 300, 75, 'akismet');
+	register_widget_control('Akismet', 'widget_akismet_control', null, 75, 'akismet');
 	if ( is_active_widget('widget_akismet') )
 		add_action('wp_head', 'widget_akismet_style');
 	endif;
