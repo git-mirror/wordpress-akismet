@@ -672,7 +672,7 @@ function akismet_rightnow() {
 			$queue_count
 		), number_format_i18n( $queue_count ), clean_url("$link?page=akismet-admin") );
 	} else {
-		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at them moment." ), clean_url("$link?page=akismet-admin") );
+		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), clean_url("$link?page=akismet-admin") );
 	}
 
 	$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
