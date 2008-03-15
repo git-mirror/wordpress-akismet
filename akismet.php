@@ -440,7 +440,7 @@ if ( 0 == $spam_count ) {
 <form method="post" action="<?php echo attribute_escape( add_query_arg( 'noheader', 'true' ) ); ?>">
 <?php akismet_nonce_field($akismet_nonce) ?>
 <input type="hidden" name="action" value="delete" />
-<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" class="button" name="Submit" value="<?php _e('Delete all'); ?>" />
+<?php printf(__('There are currently %1$s comments identified as spam.'), $spam_count); ?>&nbsp; &nbsp; <input type="submit" class="button delete" name="Submit" value="<?php _e('Delete all'); ?>" />
 <input type="hidden" name="display_time" value="<?php echo current_time('mysql', 1); ?>" />
 </form>
 <?php } ?>
@@ -667,8 +667,8 @@ function akismet_rightnow() {
 
 	if ( $queue_count = akismet_spam_count() ) {
 		$queue_text = sprintf( __ngettext(
-			'and there\'s <a href="%2$s">%1$s comment in your spam queue</a> right now.',
-			'and there are <a href="%2$s">%1$s comments in your spam queue</a> right now.',
+			'and there\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
+			'and there are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
 		), number_format_i18n( $queue_count ), clean_url("$link?page=akismet-admin") );
 	} else {
