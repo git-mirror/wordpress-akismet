@@ -703,7 +703,9 @@ if ( 'moderation.php' == $pagenow ) {
 function akismet_check_for_spam_button($comment_status) {
 	if ( 'moderated' != $comment_status )
 		return;
-	echo "<a href='edit-comments.php?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true'>" . __('Check for Spam') . "</a>";
+	$count = wp_count_comments();
+	if ( !empty($count->moderated ) )
+		echo "<a href='edit-comments.php?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true'>" . __('Check for Spam') . "</a>";
 }
 add_action('manage_comments_nav', 'akismet_check_for_spam_button');
 
