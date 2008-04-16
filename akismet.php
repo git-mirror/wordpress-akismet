@@ -271,7 +271,12 @@ function akismet_spam_count( $type = false ) {
 	if ( !$type ) { // total
 		$count = wp_cache_get( 'akismet_spam_count', 'widget' );
 		if ( false === $count ) {
-			$count = (int) $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
+			if ( function_exists('wp_count_comments') ) {
+				$count = wp_count_comments();
+				$count = $count->spam;
+			} else {
+				$count = (int) $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam'");
+			}
 			wp_cache_set( 'akismet_spam_count', $count, 'widget', 3600 );
 		}
 		return $count;
