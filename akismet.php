@@ -480,7 +480,7 @@ if ( isset( $_POST['s'] ) ) {
 	if ( isset( $_GET['ctype'] ) )
 		$current_type = preg_replace( '|[^a-z]|', '', $_GET['ctype'] );
 
-	$comments = akismet_spam_comments( $current_type );
+	$comments = akismet_spam_comments( $current_type, $page );
 	$total = akismet_spam_count( $current_type );
 	$totals = akismet_spam_totals();
 ?>
