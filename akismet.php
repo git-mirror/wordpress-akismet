@@ -327,7 +327,12 @@ function akismet_spam_totals() {
 }
 
 function akismet_manage_page() {
-	global $wpdb, $submenu;
+	global $wpdb, $submenu, $wp_db_version;
+
+	// WP 2.7 has its own spam management page
+	if ( 8645 <= $wp_db_version )
+		return;
+
 	$count = sprintf(__('Akismet Spam (%s)'), akismet_spam_count());
 	if ( isset( $submenu['edit-comments.php'] ) )
 		add_submenu_page('edit-comments.php', __('Akismet Spam'), $count, 'moderate_comments', 'akismet-admin', 'akismet_caught' );
@@ -708,14 +713,18 @@ if ( 'moderation.php' == $pagenow ) {
 function akismet_check_for_spam_button($comment_status) {
 	if ( 'approved' == $comment_status )
 		return;
-	echo "</div><div class='alignleft'><a class='button-secondary checkforspam' href='edit-comments.php?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true'>" . __('Check for Spam') . "</a>";
+	if ( function_exists('plugins_url') )
+		$link = 'admin.php?action=akismet_recheck_queue';
+	else
+		$link = 'edit-comments.php?page=akismet-admin&amp;recheckqueue=true&amp;noheader=true';
+	echo "</div><div class='alignleft'><a class='button-secondary checkforspam' href='$link'>" . __('Check for Spam') . "</a>";
 }
 add_action('manage_comments_nav', 'akismet_check_for_spam_button');
 
 function akismet_recheck_queue() {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
 
-	if ( !isset( $_GET['recheckqueue'] ) )
+	if ( ! ( isset( $_GET['recheckqueue'] ) || isset( $_REQUEST['action'] ) ) )
 		return;
 
 	$moderation = $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = '0'", ARRAY_A );
@@ -738,6 +747,8 @@ function akismet_recheck_queue() {
 	wp_redirect( $_SERVER['HTTP_REFERER'] );
 	exit;
 }
+
+add_action('admin_action_akismet_recheck_queue', 'akismet_recheck_queue');
 
 function akismet_check_db_comment( $id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
