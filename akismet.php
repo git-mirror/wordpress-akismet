@@ -728,7 +728,7 @@ function akismet_recheck_queue() {
 		return;
 
 	$moderation = $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = '0'", ARRAY_A );
-	foreach ( $moderation as $c ) {
+	foreach ( (array) $moderation as $c ) {
 		$c['user_ip']    = $c['comment_author_IP'];
 		$c['user_agent'] = $c['comment_agent'];
 		$c['referrer']   = '';
