@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
-Version: 2.1.7
+Version: 2.1.8
 Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
@@ -342,6 +342,7 @@ function akismet_manage_page() {
 
 function akismet_caught() {
 	global $wpdb, $comment, $akismet_caught, $akismet_nonce;
+
 	akismet_recheck_queue();
 	if (isset($_POST['submit']) && 'recover' == $_POST['action'] && ! empty($_POST['not_spam'])) {
 		check_admin_referer( $akismet_nonce );
@@ -724,7 +725,7 @@ add_action('manage_comments_nav', 'akismet_check_for_spam_button');
 function akismet_recheck_queue() {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
 
-	if ( ! ( isset( $_GET['recheckqueue'] ) || isset( $_REQUEST['action'] ) ) )
+	if ( ! ( isset( $_GET['recheckqueue'] ) || ( isset( $_REQUEST['action'] ) && 'akismet_recheck_queue' == $_REQUEST['action'] ) ) )
 		return;
 
 	$moderation = $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = '0'", ARRAY_A );
