@@ -2,8 +2,8 @@
 /*
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
-Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?></code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
-Version: 2.1.8
+Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?&gt;</code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
+Version: 2.1.9
 Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
@@ -262,6 +262,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 add_action('wp_set_comment_status', 'akismet_submit_spam_comment');
 add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
+
+function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
+add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
 
 // Total spam in queue
 // get_option( 'akismet_spam_count' ) is the total caught ever
