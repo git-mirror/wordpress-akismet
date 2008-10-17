@@ -3,7 +3,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://wordpress.com/api-keys/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?&gt;</code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
-Version: 2.1.9
+Version: 2.2
 Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
@@ -21,6 +21,7 @@ function akismet_init() {
 
 	$akismet_api_port = 80;
 	add_action('admin_menu', 'akismet_config_page');
+	add_action('admin_menu', 'akismet_stats_page');
 }
 add_action('init', 'akismet_init');
 
@@ -135,6 +136,44 @@ function akismet_conf() {
 </div>
 </div>
 <?php
+}
+
+function akismet_stats_page() {
+	if ( function_exists('add_submenu_page') )
+		add_submenu_page('plugins.php', __('Akismet Stats'), __('Akismet Stats'), 'manage_options', 'akismet-stats-display', 'akismet_stats_display');
+
+}
+
+function akismet_stats_css() {
+	?>
+<script type="text/javascript">
+function resizeIframe() {
+    var height = document.documentElement.clientHeight;
+    height -= document.getElementById('akismet-stats-frame').offsetTop;
+    height += 100; // magic padding
+    
+    document.getElementById('akismet-stats-frame').style.height = height +"px";
+    
+};
+function resizeIframeInit() {
+	document.getElementById('akismet-stats-frame').onload = resizeIframe;
+	window.onresize = resizeIframe;
+}
+addLoadEvent(resizeIframeInit);
+</script><?php
+}
+
+add_action('admin_head', 'akismet_stats_css');
+
+function akismet_stats_display() {
+	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
+	$blog = urlencode( get_option('home') );
+	$url = "http://".get_option('wordpress_api_key').".web.akismet.com/1.0/user-stats.php?blog={$blog}";
+	?>
+	<div class="wrap">
+	<iframe src="<?php echo $url; ?>" width="100%" height="100%" frameborder="0" id="akismet-stats-frame"></iframe>
+	</div>
+	<?php
 }
 
 function akismet_verify_key( $key ) {
