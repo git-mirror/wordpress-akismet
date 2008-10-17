@@ -140,7 +140,7 @@ function akismet_conf() {
 
 function akismet_stats_page() {
 	if ( function_exists('add_submenu_page') )
-		add_submenu_page('plugins.php', __('Akismet Stats'), __('Akismet Stats'), 'manage_options', 'akismet-stats-display', 'akismet_stats_display');
+		add_submenu_page('index.php', __('Akismet Stats'), __('Akismet Stats'), 'manage_options', 'akismet-stats-display', 'akismet_stats_display');
 
 }
 
