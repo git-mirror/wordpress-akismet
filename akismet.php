@@ -702,11 +702,14 @@ add_action('activity_box_end', 'akismet_stats');
 
 // WP 2.5+
 function akismet_rightnow() {
-	global $submenu;
-	if ( isset( $submenu['edit-comments.php'] ) )
-		$link = 'edit-comments.php';
+	global $submenu, $wp_db_version;
+
+	if ( 8645 < $wp_db_version  ) // 2.7
+		$link = 'edit-comments.php?comment_status=spam';
+	elseif ( isset( $submenu['edit-comments.php'] ) )
+		$link = 'edit-comments.php?page=akismet-admin';
 	else
-		$link = 'edit.php';
+		$link = 'edit.php?page=akismet-admin';
 
 	if ( $count = get_option('akismet_spam_count') ) {
 		$intro = sprintf( __ngettext(
@@ -725,7 +728,7 @@ function akismet_rightnow() {
 			$queue_count
 		), number_format_i18n( $queue_count ), clean_url("$link?page=akismet-admin") );
 	} else {
-		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), clean_url("$link?page=akismet-admin") );
+		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), clean_url($link) );
 	}
 
 	$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
