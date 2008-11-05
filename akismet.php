@@ -726,7 +726,7 @@ function akismet_rightnow() {
 			'and there\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
 			'and there are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
-		), number_format_i18n( $queue_count ), clean_url("$link?page=akismet-admin") );
+		), number_format_i18n( $queue_count ), clean_url($link) );
 	} else {
 		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), clean_url($link) );
 	}
