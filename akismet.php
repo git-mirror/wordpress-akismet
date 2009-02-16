@@ -176,12 +176,19 @@ addLoadEvent(resizeIframeInit);
 function akismet_stats_display() {
 	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
 	$blog = urlencode( get_option('home') );
-	$url = "http://".get_option('wordpress_api_key').".web.akismet.com/1.0/user-stats.php?blog={$blog}";
+	$url = "http://".akismet_get_key().".web.akismet.com/1.0/user-stats.php?blog={$blog}";
 	?>
 	<div class="wrap">
 	<iframe src="<?php echo $url; ?>" width="100%" height="100%" frameborder="0" id="akismet-stats-frame"></iframe>
 	</div>
 	<?php
+}
+
+function akismet_get_key() {
+	global $wpcom_api_key;
+	if ( !empty($wpcom_api_key) )
+		return $wpcom_api_key;
+	return get_option('wordpress_api_key');
 }
 
 function akismet_verify_key( $key ) {
