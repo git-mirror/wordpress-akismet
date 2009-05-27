@@ -243,6 +243,9 @@ function akismet_auto_check_comment( $comment ) {
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
 	$comment['blog']       = get_option('home');
+	$comment['blog_lang']  = get_locale();
+	$comment['blog_charset'] = get_option('blog_charset');
+	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
 
 	$ignore = array( 'HTTP_COOKIE' );
 
@@ -290,9 +293,13 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( !$comment ) // it was deleted
 		return;
 	$comment->blog = get_option('home');
+	$comment->blog_lang = get_locale();
+	$comment->blog_charset = get_option('blog_charset');
+	$comment->permalink = get_permalink($comment->comment_post_ID);
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
+
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-ham", $akismet_api_port);
 }
 
@@ -306,6 +313,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	if ( 'spam' != $comment->comment_approved )
 		return;
 	$comment->blog = get_option('home');
+	$comment->blog_lang = get_locale();
+	$comment->blog_charset = get_option('blog_charset');
+	$comment->permalink = get_permalink($comment->comment_post_ID);
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -794,6 +804,9 @@ function akismet_recheck_queue() {
 		$c['user_agent'] = $c['comment_agent'];
 		$c['referrer']   = '';
 		$c['blog']       = get_option('home');
+		$c['blog_lang']  = get_locale();
+		$c['blog_charset'] = get_option('blog_charset');
+		$c['permalink']  = get_permalink($c['comment_post_ID']);
 		$id = (int) $c['comment_ID'];
 
 		$query_string = '';
@@ -823,6 +836,9 @@ function akismet_check_db_comment( $id ) {
 	$c['user_agent'] = $c['comment_agent'];
 	$c['referrer']   = '';
 	$c['blog']       = get_option('home');
+	$c['blog_lang']  = get_locale();
+	$c['blog_charset'] = get_option('blog_charset');
+	$c['permalink']  = get_permalink($c['comment_post_ID']);
 	$id = $c['comment_ID'];
 
 	$query_string = '';
