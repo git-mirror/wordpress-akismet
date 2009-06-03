@@ -286,9 +286,9 @@ function akismet_delete_old() {
 }
 
 function akismet_submit_nonspam_comment ( $comment_id ) {
-	global $wpdb, $akismet_api_host, $akismet_api_port;
+	global $wpdb, $akismet_api_host, $akismet_api_port, $current_user, $current_site;
 	$comment_id = (int) $comment_id;
-
+	
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
 		return;
@@ -296,6 +296,12 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
+	if ( is_object($current_user) ) {
+	    $comment->reporter = $current_user->user_login;
+	}
+	if ( is_object($current_site) ) {
+		$comment->site_domain = $current_site->domain;
+	}
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -304,7 +310,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 }
 
 function akismet_submit_spam_comment ( $comment_id ) {
-	global $wpdb, $akismet_api_host, $akismet_api_port;
+	global $wpdb, $akismet_api_host, $akismet_api_port, $current_user, $current_site;
 	$comment_id = (int) $comment_id;
 
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
@@ -316,6 +322,12 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
+	if ( is_object($current_user) ) {
+	    $comment->reporter = $current_user->user_login;
+	}
+	if ( is_object($current_site) ) {
+		$comment->site_domain = $current_site->domain;
+	}
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
