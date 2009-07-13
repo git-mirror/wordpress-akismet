@@ -165,7 +165,7 @@ function akismet_conf() {
 		<?php
 		// all connections work
 		} else { ?>
-			<p style="padding: .5em; background-color: #2d2; color: #fff; font-weight:bold;">All Akismet servers are available.</p>
+			<p style="padding: .5em; background-color: #2d2; color: #fff; font-weight:bold;"><?php  _e('All Akismet servers are available.'); ?></p>
 			<p><?php _e('Akismet is working correctly.  All servers are accessible.'); ?></p>
 		<?php
 		}
@@ -184,16 +184,16 @@ function akismet_conf() {
 	if ( !empty($servers) ) {
 ?>
 <table style="width: 100%;">
-<thead><th>Akismet server</th><th>Network Status</th></thead>
+<thead><th><?php _e('Akismet server'); ?></th><th><?php _e('Network Status'); ?></th></thead>
 <tbody>
 <?php
 		asort($servers);
-		foreach ( $servers as $ip => $status ) { 
+		foreach ( $servers as $ip => $status ) {
 			$color = ( $status ? '#2d2' : '#d22');
 	?>
 		<tr>
 		<td><?php echo htmlspecialchars($ip); ?></td>
-		<td style="font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('Clear') : __('Obstructed') ); ?></td>
+		<td style="padding: 0 .5em; font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('No problems') : __('Obstructed') ); ?></td>
 		
 	<?php
 		}
