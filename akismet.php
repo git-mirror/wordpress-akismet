@@ -381,7 +381,7 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	}
 
 	$response = '';
-	if( false != ( $fs = fsockopen($http_host, $port, $errno, $errstr, 10) ) ) {
+	if( false != ( $fs = @fsockopen($http_host, $port, $errno, $errstr, 10) ) ) {
 		fwrite($fs, $http_request);
 
 		while ( !feof($fs) )
