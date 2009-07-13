@@ -22,6 +22,7 @@ function akismet_init() {
 	$akismet_api_port = 80;
 	add_action('admin_menu', 'akismet_config_page');
 	add_action('admin_menu', 'akismet_stats_page');
+	akismet_admin_warnings();
 }
 add_action('init', 'akismet_init');
 
@@ -313,22 +314,24 @@ function akismet_server_connectivity_ok() {
 	return !( empty($servers) || !count($servers) || count( array_filter($servers) ) < count($servers) );
 }
 
-if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
-	function akismet_warning() {
-		echo "
-		<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
-		";
+function akismet_admin_warnings() {
+	if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
+		function akismet_warning() {
+			echo "
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
+			";
+		}
+		add_action('admin_notices', 'akismet_warning');
+		return;
+	} elseif ( get_option('akismet_connectivity_time') && empty($_POST) && is_admin() && !akismet_server_connectivity_ok() ) {
+		function akismet_warning() {
+			echo "
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(__('A server or network problem is preventing Akismet from working correctly.  <a href="%1$s">Click here for more information</a> about how to fix the problem.'), "plugins.php?page=akismet-key-config")."</p></div>
+			";
+		}
+		add_action('admin_notices', 'akismet_warning');
+		return;
 	}
-	add_action('admin_notices', 'akismet_warning');
-	return;
-} elseif ( get_option('akismet_connectivity_time') && empty($_POST) && is_admin() && !akismet_server_connectivity_ok() ) {
-	function akismet_warning() {
-		echo "
-		<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(__('A server or network problem is preventing Akismet from working correctly.  <a href="%1$s">Click here for more information</a> about how to fix the problem.'), "plugins.php?page=akismet-key-config")."</p></div>
-		";
-	}
-	add_action('admin_notices', 'akismet_warning');
-	return;
 }
 
 function akismet_get_host($host) {
@@ -378,7 +381,7 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	}
 
 	$response = '';
-	if( false != ( $fs = @fsockopen($http_host, $port, $errno, $errstr, 10) ) ) {
+	if( false != ( $fs = fsockopen($http_host, $port, $errno, $errstr, 10) ) ) {
 		fwrite($fs, $http_request);
 
 		while ( !feof($fs) )
