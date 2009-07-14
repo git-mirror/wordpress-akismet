@@ -315,6 +315,7 @@ function akismet_server_connectivity_ok() {
 }
 
 function akismet_admin_warnings() {
+	global $wpcom_api_key;
 	if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
 		function akismet_warning() {
 			echo "
