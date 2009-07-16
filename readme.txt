@@ -1,6 +1,9 @@
 === Akismet ===
 Contributors: matt, ryan, andy, mdawaffe
 Tags: akismet, comments, spam
+Requires at least: 2.0
+Tested up to: 2.8.1
+Stable tag: 2.2.5
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
 
@@ -20,3 +23,14 @@ PS: You'll need a [WordPress.com API key](http://wordpress.com/api-keys/) to use
 Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.com API key](http://wordpress.com/api-keys/).
 
 1, 2, 3: You're done!
+
+== Changelog ==
+
+= 2.2.5 =
+
+* Include a new Server Connectivity diagnostic check, to detect problems caused by firewalls
+
+= 2.2.4 =
+
+* Fixed a key problem affecting the stats feature in WordPress MU
+* Provide additional blog information in Akismet API calls
