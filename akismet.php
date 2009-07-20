@@ -407,7 +407,7 @@ function akismet_auto_check_comment( $comment ) {
 	$ignore = array( 'HTTP_COOKIE' );
 
 	foreach ( $_SERVER as $key => $value )
-		if ( !in_array( $key, $ignore ) )
+		if ( !in_array( $key, $ignore ) && is_string($value) )
 			$comment["$key"] = $value;
 
 	$query_string = '';
