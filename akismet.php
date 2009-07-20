@@ -9,7 +9,10 @@ Author URI: http://ma.tt/
 */
 
 // If you hardcode a WP.com API key here, all key config screens will be hidden
-$wpcom_api_key = '';
+if ( defined('WPCOM_API_KEY') )
+	$wpcom_api_key = constant('WPCOM_API_KEY');
+else
+	$wpcom_api_key = '';
 
 function akismet_init() {
 	global $wpcom_api_key, $akismet_api_host, $akismet_api_port;
