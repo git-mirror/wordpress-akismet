@@ -8,6 +8,8 @@ Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
 
+define('AKISMET_VERSION', '2.2.6');
+
 // If you hardcode a WP.com API key here, all key config screens will be hidden
 if ( defined('WPCOM_API_KEY') )
 	$wpcom_api_key = constant('WPCOM_API_KEY');
@@ -367,12 +369,14 @@ function akismet_get_host($host) {
 // Returns array with headers in $response[0] and body in $response[1]
 function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	global $wp_version;
+	
+	$akismet_version = constant('AKISMET_VERSION');
 
 	$http_request  = "POST $path HTTP/1.0\r\n";
 	$http_request .= "Host: $host\r\n";
 	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
 	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
-	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/2.0\r\n";
+	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/$akismet_version\r\n";
 	$http_request .= "\r\n";
 	$http_request .= $request;
 	

@@ -25,6 +25,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 
 == Changelog ==
 
+= 2.2.7 =
+
+* Add a new AKISMET_VERSION constant
+
 = 2.2.6 =
 
 * Fix a global warning introduced in 2.2.5
