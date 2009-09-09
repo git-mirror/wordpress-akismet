@@ -2,7 +2,7 @@
 Contributors: matt, ryan, andy, mdawaffe, tellyworth
 Tags: akismet, comments, spam
 Requires at least: 2.0
-Tested up to: 2.8.2
+Tested up to: 2.8.4
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
 
