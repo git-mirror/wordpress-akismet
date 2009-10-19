@@ -400,6 +400,13 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	return $response;
 }
 
+// filter handler used to return a spam result to pre_comment_approved
+function akismet_result_spam( $approved ) {
+	// bump the counter here instead of when the filter is added to reduce the possibility of overcounting
+	update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
+	return 'spam';
+}
+
 function akismet_auto_check_comment( $comment ) {
 	global $akismet_api_host, $akismet_api_port;
 
@@ -423,8 +430,8 @@ function akismet_auto_check_comment( $comment ) {
 
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 	if ( 'true' == $response[1] ) {
-		add_filter('pre_comment_approved', create_function('$a', 'return \'spam\';'));
-		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
+		// akismet_spam_count will be incremented later by akismet_result_spam()
+		add_filter('pre_comment_approved', 'akismet_result_spam');
 
 		do_action( 'akismet_spam_caught' );
 
@@ -432,9 +439,12 @@ function akismet_auto_check_comment( $comment ) {
 		$last_updated = strtotime( $post->post_modified_gmt );
 		$diff = time() - $last_updated;
 		$diff = $diff / 86400;
-
-		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' )
+		
+		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' ) {
+			// akismet_result_spam() won't be called so bump the counter here
+			update_option( 'akismet_spam_count', get_option('akismet_spam_count') + 1 );
 			die;
+		}
 	}
 	akismet_delete_old();
 	return $comment;
