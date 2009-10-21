@@ -316,7 +316,8 @@ function akismet_get_server_connectivity( $cache_timeout = 86400 ) {
 // Returns true if server connectivity was OK at the last check, false if there was a problem that needs to be fixed.
 function akismet_server_connectivity_ok() {
 	// skip the check on WPMU because the status page is hidden
-	if ( defined('WPCOM_API_KEY') )
+	global $wpcom_api_key;
+	if ( $wpcom_api_key )
 		return true;
 	$servers = akismet_get_server_connectivity();
 	return !( empty($servers) || !count($servers) || count( array_filter($servers) ) < count($servers) );
