@@ -2,7 +2,7 @@
 Contributors: matt, ryan, andy, mdawaffe, tellyworth
 Tags: akismet, comments, spam
 Requires at least: 2.0
-Tested up to: 2.8.4
+Tested up to: 2.8.5
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
 
@@ -28,6 +28,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 = 2.2.7 =
 
 * Add a new AKISMET_VERSION constant
+* Reduce the possibility of over-counting spam when another spam filter plugin is in use
+* Disable the connectivity check when the API key is hard-coded for WPMU
 
 = 2.2.6 =
 
