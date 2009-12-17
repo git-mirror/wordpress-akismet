@@ -8,7 +8,7 @@ Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
 
-define('AKISMET_VERSION', '2.2.6');
+define('AKISMET_VERSION', '2.2.7');
 
 // If you hardcode a WP.com API key here, all key config screens will be hidden
 if ( defined('WPCOM_API_KEY') )
