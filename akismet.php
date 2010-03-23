@@ -956,6 +956,8 @@ function akismet_rightnow() {
 add_action('rightnow_end', 'akismet_rightnow');
 
 // For WP <= 2.3.x
+global $pagenow;
+
 if ( 'moderation.php' == $pagenow ) {
 	function akismet_recheck_button( $page ) {
 		global $submenu;
