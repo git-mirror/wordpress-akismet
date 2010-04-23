@@ -521,6 +521,7 @@ add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
 function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
 add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
+add_filter( 'comment_spam_to_unapproved', 'akismet_spamtoham' );
 
 // Total spam in queue
 // get_option( 'akismet_spam_count' ) is the total caught ever
