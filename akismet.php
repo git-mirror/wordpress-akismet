@@ -468,7 +468,7 @@ function akismet_delete_old() {
 function akismet_submit_nonspam_comment ( $comment_id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port, $current_user, $current_site;
 	$comment_id = (int) $comment_id;
-	
+
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
 		return;
@@ -515,9 +515,17 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
 }
 
-add_action('wp_set_comment_status', 'akismet_submit_spam_comment');
+add_action('wp_set_comment_status', 'akismet_set_comment_status', 10, 2);
 add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
+
+function akismet_set_comment_status( $comment_id, $status ) {
+	if ( $status == 'spam' ) {
+		akismet_submit_spam_comment( $comment_id );
+	} elseif ( $status == 'approve' ) {
+		akismet_submit_nonspam_comment( $comment_id );
+	}
+}
 
 function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
 add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
