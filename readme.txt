@@ -25,6 +25,9 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 
 == Changelog ==
 
+* Report comments as ham when they are moved from spam to moderation
+* Report comments as ham when clicking undo after spam
+
 = 2.2.7 =
 
 * Add a new AKISMET_VERSION constant
