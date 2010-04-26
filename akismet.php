@@ -415,7 +415,7 @@ function akismet_result_spam( $approved ) {
 function akismet_auto_check_comment( $comment ) {
 	global $akismet_api_host, $akismet_api_port;
 
-	$comment['user_ip']    = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
+	$comment['user_ip']    = $_SERVER['REMOTE_ADDR'];
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
 	$comment['blog']       = get_option('home');
