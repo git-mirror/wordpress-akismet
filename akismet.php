@@ -528,7 +528,6 @@ function akismet_set_comment_status( $comment_id, $status ) {
 
 // For WP 2.7+
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
-	wp_debug_log( "transition $new_status from $old_status for $comment->comment_ID" );
 	if ( $new_status == $old_status )
 		return;
 
