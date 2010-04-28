@@ -515,10 +515,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
 }
 
-add_action('wp_set_comment_status', 'akismet_set_comment_status', 10, 2);
-add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
+// For old versions of WP only
 function akismet_set_comment_status( $comment_id, $status ) {
 	if ( $status == 'spam' ) {
 		akismet_submit_spam_comment( $comment_id );
@@ -527,10 +526,29 @@ function akismet_set_comment_status( $comment_id, $status ) {
 	}
 }
 
-function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
-add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
-add_filter( 'comment_spam_to_unapproved', 'akismet_spamtoham' );
+// For WP 2.7+
+function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
+	wp_debug_log( "transition $new_status from $old_status for $comment->comment_ID" );
+	if ( $new_status == $old_status )
+		return;
 
+	if ( $new_status == 'spam' ) {
+		akismet_submit_spam_comment( $comment->comment_ID );
+	} elseif ( $old_status == 'spam' ) {
+		akismet_submit_nonspam_comment( $comment->comment_ID );
+	}
+}
+
+function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
+
+if ( function_exists( 'wp_transition_comment_status' ) ) {
+	add_action( 'transition_comment_status', 'akismet_transition_comment_status', 10, 3 );
+} else {
+	add_action('wp_set_comment_status', 'akismet_set_comment_status', 10, 2);
+	add_action('edit_comment', 'akismet_submit_spam_comment');
+	add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
+	add_filter( 'comment_spam_to_unapproved', 'akismet_spamtoham' );
+}
 // Total spam in queue
 // get_option( 'akismet_spam_count' ) is the total caught ever
 function akismet_spam_count( $type = false ) {
