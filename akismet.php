@@ -280,7 +280,7 @@ function akismet_check_server_connectivity() {
 	$test_host = 'rest.akismet.com';
 	
 	// Some web hosts may disable one or both functions
-	if ( !is_callable('fsockopen') || !is_callable('gethostbynamel') )
+	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') )
 		return array();
 	
 	$ips = gethostbynamel($test_host);
