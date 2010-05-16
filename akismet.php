@@ -465,7 +465,7 @@ function akismet_auto_check_comment( $comment ) {
 		$diff = time() - $last_updated;
 		$diff = $diff / 86400;
 		
-		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' ) {
+		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' && empty($comment['user_ID']) ) {
 			// akismet_result_spam() won't be called so bump the counter here
 			if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
