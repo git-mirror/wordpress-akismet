@@ -30,6 +30,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 * Report comments as ham when clicking undo after spam
 * Use transition_comment_status action when available instead of older actions for spam/ham submissions
 * Better diagnostic messages when PHP network functions are unavailable
+* Better handling of comments by logged-in users
 
 = 2.2.7 =
 
