@@ -372,6 +372,22 @@ function akismet_get_host($host) {
 	return $host;
 }
 
+// return a comma-separated list of role names for the given user
+function akismet_get_user_roles($user_id ) {
+	$roles = false;
+	
+	if ( !class_exists('WP_User') )
+		return false;
+	
+	if ( $user_id > 0 ) {
+		$comment_user = new WP_User($user_id);
+		if ( isset($comment_user->roles) )
+			$roles = join(',', $comment_user->roles);
+	}
+	
+	return $roles;
+}
+
 // Returns array with headers in $response[0] and body in $response[1]
 function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	global $wp_version;
@@ -424,6 +440,8 @@ function akismet_auto_check_comment( $comment ) {
 	$comment['blog_lang']  = get_locale();
 	$comment['blog_charset'] = get_option('blog_charset');
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
+	
+	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
 
 	$ignore = array( 'HTTP_COOKIE' );
 
@@ -484,6 +502,8 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
+	$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -510,6 +530,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
+	$comment->user_role = akismet_get_user_roles($comment->user_ID);
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -1029,6 +1050,7 @@ function akismet_recheck_queue() {
 		$c['blog_lang']  = get_locale();
 		$c['blog_charset'] = get_option('blog_charset');
 		$c['permalink']  = get_permalink($c['comment_post_ID']);
+		$c['user_role']  = akismet_get_user_roles($c['user_ID']);
 		$id = (int) $c['comment_ID'];
 
 		$query_string = '';
