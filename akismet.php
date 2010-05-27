@@ -155,35 +155,37 @@ function akismet_conf() {
 
 <h3><?php _e('Server Connectivity'); ?></h3>
 <?php
-	$servers = akismet_get_server_connectivity();
-	$fail_count = count($servers) - count( array_filter($servers) );
-	if ( is_array($servers) && count($servers) > 0 ) {
-		// some connections work, some fail
-		if ( $fail_count > 0 && $fail_count < count($servers) ) { ?>
-			<p style="padding: .5em; background-color: #aa0; color: #fff; font-weight:bold;"><?php _e('Unable to reach some Akismet servers.'); ?></p>
-			<p><?php echo sprintf( __('A network problem or firewall is blocking some connections from your web server to Akismet.com.  Akismet is working but this may cause problems during times of network congestion.  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
-		<?php
-		// all connections fail
-		} elseif ( $fail_count > 0 ) { ?>
-			<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to reach any Akismet servers.'); ?></p>
-			<p><?php echo sprintf( __('A network problem or firewall is blocking all connections from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
-		<?php
-		// all connections work
-		} else { ?>
-			<p style="padding: .5em; background-color: #2d2; color: #fff; font-weight:bold;"><?php  _e('All Akismet servers are available.'); ?></p>
-			<p><?php _e('Akismet is working correctly.  All servers are accessible.'); ?></p>
-		<?php
-		}
-	} elseif ( !is_callable('fsockopen') ) {
+	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') ) {
 		?>
 			<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Network functions are disabled.'); ?></p>
-			<p><?php echo sprintf( __('Your web host or server administrator has disabled PHP\'s <code>fsockopen</code> function.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet\'s system requirements</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
+			<p><?php echo sprintf( __('Your web host or server administrator has disabled PHP\'s <code>fsockopen</code> or <code>gethostbynamel</code> functions.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet\'s system requirements</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
 		<?php
 	} else {
-		?>
-			<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to find Akismet servers.'); ?></p>
-			<p><?php echo sprintf( __('A DNS problem or firewall is preventing all access from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
-		<?php
+		$servers = akismet_get_server_connectivity();
+		$fail_count = count($servers) - count( array_filter($servers) );
+		if ( is_array($servers) && count($servers) > 0 ) {
+			// some connections work, some fail
+			if ( $fail_count > 0 && $fail_count < count($servers) ) { ?>
+				<p style="padding: .5em; background-color: #aa0; color: #fff; font-weight:bold;"><?php _e('Unable to reach some Akismet servers.'); ?></p>
+				<p><?php echo sprintf( __('A network problem or firewall is blocking some connections from your web server to Akismet.com.  Akismet is working but this may cause problems during times of network congestion.  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
+			<?php
+			// all connections fail
+			} elseif ( $fail_count > 0 ) { ?>
+				<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to reach any Akismet servers.'); ?></p>
+				<p><?php echo sprintf( __('A network problem or firewall is blocking all connections from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
+			<?php
+			// all connections work
+			} else { ?>
+				<p style="padding: .5em; background-color: #2d2; color: #fff; font-weight:bold;"><?php  _e('All Akismet servers are available.'); ?></p>
+				<p><?php _e('Akismet is working correctly.  All servers are accessible.'); ?></p>
+			<?php
+			}
+		} else {
+			?>
+				<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to find Akismet servers.'); ?></p>
+				<p><?php echo sprintf( __('A DNS problem or firewall is preventing all access from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
+			<?php
+		}
 	}
 	
 	if ( !empty($servers) ) {
@@ -278,7 +280,7 @@ function akismet_check_server_connectivity() {
 	$test_host = 'rest.akismet.com';
 	
 	// Some web hosts may disable one or both functions
-	if ( !is_callable('fsockopen') || !is_callable('gethostbynamel') )
+	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') )
 		return array();
 	
 	$ips = gethostbynamel($test_host);
@@ -370,6 +372,22 @@ function akismet_get_host($host) {
 	return $host;
 }
 
+// return a comma-separated list of role names for the given user
+function akismet_get_user_roles($user_id ) {
+	$roles = false;
+	
+	if ( !class_exists('WP_User') )
+		return false;
+	
+	if ( $user_id > 0 ) {
+		$comment_user = new WP_User($user_id);
+		if ( isset($comment_user->roles) )
+			$roles = join(',', $comment_user->roles);
+	}
+	
+	return $roles;
+}
+
 // Returns array with headers in $response[0] and body in $response[1]
 function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	global $wp_version;
@@ -415,13 +433,15 @@ function akismet_result_spam( $approved ) {
 function akismet_auto_check_comment( $comment ) {
 	global $akismet_api_host, $akismet_api_port;
 
-	$comment['user_ip']    = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
+	$comment['user_ip']    = $_SERVER['REMOTE_ADDR'];
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
 	$comment['blog']       = get_option('home');
 	$comment['blog_lang']  = get_locale();
 	$comment['blog_charset'] = get_option('blog_charset');
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
+	
+	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
 
 	$ignore = array( 'HTTP_COOKIE' );
 
@@ -445,7 +465,7 @@ function akismet_auto_check_comment( $comment ) {
 		$diff = time() - $last_updated;
 		$diff = $diff / 86400;
 		
-		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' ) {
+		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' && empty($comment['user_ID']) ) {
 			// akismet_result_spam() won't be called so bump the counter here
 			if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
@@ -468,7 +488,7 @@ function akismet_delete_old() {
 function akismet_submit_nonspam_comment ( $comment_id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port, $current_user, $current_site;
 	$comment_id = (int) $comment_id;
-	
+
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
 		return;
@@ -482,6 +502,8 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
+	$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -508,6 +530,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
+	$comment->user_role = akismet_get_user_roles($comment->user_ID);
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -515,13 +538,39 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
 }
 
-add_action('wp_set_comment_status', 'akismet_submit_spam_comment');
-add_action('edit_comment', 'akismet_submit_spam_comment');
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
-function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
-add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
+// For old versions of WP only
+function akismet_set_comment_status( $comment_id, $status ) {
+	if ( $status == 'spam' ) {
+		akismet_submit_spam_comment( $comment_id );
+	} elseif ( $status == 'approve' ) {
+		akismet_submit_nonspam_comment( $comment_id );
+	}
+}
 
+// For WP 2.7+
+function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
+	if ( $new_status == $old_status )
+		return;
+
+	if ( $new_status == 'spam' ) {
+		akismet_submit_spam_comment( $comment->comment_ID );
+	} elseif ( $old_status == 'spam' ) {
+		akismet_submit_nonspam_comment( $comment->comment_ID );
+	}
+}
+
+function akismet_spamtoham( $comment ) { akismet_submit_nonspam_comment( $comment->comment_ID ); }
+
+if ( function_exists( 'wp_transition_comment_status' ) ) {
+	add_action( 'transition_comment_status', 'akismet_transition_comment_status', 10, 3 );
+} else {
+	add_action('wp_set_comment_status', 'akismet_set_comment_status', 10, 2);
+	add_action('edit_comment', 'akismet_submit_spam_comment');
+	add_filter( 'comment_spam_to_approved', 'akismet_spamtoham' );
+	add_filter( 'comment_spam_to_unapproved', 'akismet_spamtoham' );
+}
 // Total spam in queue
 // get_option( 'akismet_spam_count' ) is the total caught ever
 function akismet_spam_count( $type = false ) {
@@ -1001,6 +1050,7 @@ function akismet_recheck_queue() {
 		$c['blog_lang']  = get_locale();
 		$c['blog_charset'] = get_option('blog_charset');
 		$c['permalink']  = get_permalink($c['comment_post_ID']);
+		$c['user_role']  = akismet_get_user_roles($c['user_ID']);
 		$id = (int) $c['comment_ID'];
 
 		$query_string = '';
