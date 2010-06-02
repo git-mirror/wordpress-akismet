@@ -3,12 +3,12 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://akismet.com/get/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?&gt;</code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
-Version: 2.2.8
+Version: 2.2.9
 Author: Matt Mullenweg
 Author URI: http://ma.tt/
 */
 
-define('AKISMET_VERSION', '2.2.8');
+define('AKISMET_VERSION', '2.2.9');
 
 // If you hardcode a WP.com API key here, all key config screens will be hidden
 if ( defined('WPCOM_API_KEY') )
@@ -556,7 +556,7 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 
 	if ( $new_status == 'spam' ) {
 		akismet_submit_spam_comment( $comment->comment_ID );
-	} elseif ( $old_status == 'spam' ) {
+	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
 		akismet_submit_nonspam_comment( $comment->comment_ID );
 	}
 }
