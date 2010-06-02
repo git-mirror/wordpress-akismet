@@ -556,7 +556,7 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 
 	if ( $new_status == 'spam' ) {
 		akismet_submit_spam_comment( $comment->comment_ID );
-	} elseif ( $old_status == 'spam' ) {
+	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
 		akismet_submit_nonspam_comment( $comment->comment_ID );
 	}
 }
