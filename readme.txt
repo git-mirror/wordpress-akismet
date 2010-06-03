@@ -27,6 +27,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 == Changelog ==
 
 * Fix "Are you sure" nonce message on config screen in WPMU
+* Fix XHTML compliance issue in sidebar widget
 
 = 2.2.9 =
 
