@@ -26,6 +26,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.
 
 == Changelog ==
 
+* Fix "Are you sure" nonce message on config screen in WPMU
+
 = 2.2.9 =
 
 * Eliminate a potential conflict with some plugins that may cause spurious reports
