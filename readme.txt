@@ -16,15 +16,19 @@ Want to show off how much spam Akismet has caught for you? Just put `<?php akism
 
 See also: [WP Stats plugin](http://wordpress.org/extend/plugins/stats/).
 
-PS: You'll need a [WordPress.com API key](http://wordpress.com/api-keys/) to use it.
+PS: You'll need an [Akismet.com API key](http://akismet.com/get/) to use it.
 
 == Installation ==
 
-Upload the Akismet plugin to your blog, Activate it, then enter your [WordPress.com API key](http://wordpress.com/api-keys/).
+Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.com API key](http://akismet.com/get/).
 
 1, 2, 3: You're done!
 
 == Changelog ==
+
+* Fix "Are you sure" nonce message on config screen in WPMU
+* Fix XHTML compliance issue in sidebar widget
+* Change author link; remove some old references to WordPress.com accounts
 
 = 2.2.9 =
 

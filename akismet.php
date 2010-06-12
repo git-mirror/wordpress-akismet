@@ -2,10 +2,10 @@
 /*
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
-Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need a <a href="http://akismet.com/get/">WordPress.com API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?&gt;</code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
+Description: Akismet checks your comments against the Akismet web service to see if they look like spam or not. You need an <a href="http://akismet.com/get/">API key</a> to use it. You can review the spam it catches under "Comments." To show off your Akismet stats just put <code>&lt;?php akismet_counter(); ?&gt;</code> in your template. See also: <a href="http://wordpress.org/extend/plugins/stats/">WP Stats plugin</a>.
 Version: 2.2.9
-Author: Matt Mullenweg
-Author URI: http://ma.tt/
+Author: Automattic
+Author URI: http://automattic.com/wordpress-plugins/
 */
 
 define('AKISMET_VERSION', '2.2.9');
@@ -134,19 +134,19 @@ function akismet_conf() {
 <div class="narrow">
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
 <?php if ( !$wpcom_api_key ) { ?>
-	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have a WordPress.com account yet, you can get one at <a href="%2$s">Akismet.com</a>.'), 'http://akismet.com/', 'http://akismet.com/get/'); ?></p>
+	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have an API key yet, you can get one at <a href="%2$s">Akismet.com</a>.'), 'http://akismet.com/', 'http://akismet.com/get/'); ?></p>
 
-<?php akismet_nonce_field($akismet_nonce) ?>
-<h3><label for="key"><?php _e('WordPress.com API Key'); ?></label></h3>
+<h3><label for="key"><?php _e('Akismet API Key'); ?></label></h3>
 <?php foreach ( $ms as $m ) : ?>
 	<p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
 <?php endforeach; ?>
-<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://faq.wordpress.com/2005/10/19/api-key/">What is this?</a>'); ?>)</p>
+<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://akismet.com/get/">What is this?</a>'); ?>)</p>
 <?php if ( $invalid_key ) { ?>
 <h3><?php _e('Why might my key be invalid?'); ?></h3>
 <p><?php _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
 <?php } ?>
 <?php } ?>
+<?php akismet_nonce_field($akismet_nonce) ?>
 <p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Automatically discard spam comments on posts older than a month.'); ?></label></p>
 	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
 </form>
@@ -330,7 +330,7 @@ function akismet_admin_warnings() {
 	if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
 		function akismet_warning() {
 			echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your Akismet API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'akismet_warning');
@@ -1107,7 +1107,7 @@ function widget_akismet_register() {
 		?>
 			<?php echo $before_widget; ?>
 				<?php echo $before_title . $options['title'] . $after_title; ?>
-				<div id="akismetwrap"><div id="akismetstats"><a id="aka" href="http://akismet.com" title=""><?php printf( __( '%1$s %2$sspam comments%3$s %4$sblocked by%5$s<br />%6$sAkismet%7$s' ), '<div id="akismet1"><span id="akismetcount">' . $count . '</span>', '<span id="akismetsc">', '</span></div>', '<div id="akismet2"><span id="akismetbb">', '</span>', '<span id="akismeta">', '</span></div>' ); ?></a></div></div>
+				<div id="akismetwrap"><div id="akismetstats"><a id="aka" href="http://akismet.com" title=""><?php printf( __( '%1$s %2$sspam comments%3$s %4$sblocked by%5$s<br />%6$sAkismet%7$s' ), '<span id="akismet1"><span id="akismetcount">' . $count . '</span>', '<span id="akismetsc">', '</span></span>', '<span id="akismet2"><span id="akismetbb">', '</span>', '<span id="akismeta">', '</span></span>' ); ?></a></div></div>
 			<?php echo $after_widget; ?>
 	<?php
 	}
