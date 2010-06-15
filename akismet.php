@@ -1131,7 +1131,7 @@ function widget_akismet_register() {
 		$options = $newoptions = get_option('widget_akismet');
 		if ( $_POST["akismet-submit"] ) {
 			$newoptions['title'] = strip_tags(stripslashes($_POST["akismet-title"]));
-			if ( empty($newoptions['title']) ) $newoptions['title'] = 'Spam Blocked';
+			if ( empty($newoptions['title']) ) $newoptions['title'] = __('Spam Blocked');
 		}
 		if ( $options != $newoptions ) {
 			$options = $newoptions;
