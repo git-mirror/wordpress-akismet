@@ -472,7 +472,15 @@ function akismet_auto_check_comment( $comment ) {
 			die;
 		}
 	}
-	akismet_delete_old();
+	
+	if ( function_exists('wp_next_scheduled') && function_exists('wp_schedule_event') ) {
+		// WP 2.1+: delete old comments daily
+		if ( !wp_next_scheduled('akismet_scheduled_delete') )
+			wp_schedule_event(time(), 'daily', 'akismet_scheduled_delete');
+	} elseif ( (mt_rand(1, 10) == 3) ) {
+		// WP 2.0: run this one time in ten
+		akismet_delete_old();
+	}
 	return $comment;
 }
 
@@ -481,9 +489,11 @@ function akismet_delete_old() {
 	$now_gmt = current_time('mysql', 1);
 	$wpdb->query("DELETE FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
 	$n = mt_rand(1, 5000);
-	if ( $n == 11 ) // lucky number
+	if ( apply_filters('akismet_optimize_table', ($n == 11)) ) // lucky number
 		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
 }
+
+add_action('akismet_scheduled_delete', 'akismet_delete_old');
 
 function akismet_submit_nonspam_comment ( $comment_id ) {
 	global $wpdb, $akismet_api_host, $akismet_api_port, $current_user, $current_site;
