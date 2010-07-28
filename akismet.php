@@ -980,6 +980,11 @@ add_action('activity_box_end', 'akismet_stats');
 function akismet_rightnow() {
 	global $submenu, $wp_db_version;
 
+	// clean_url was deprecated in WP 3.0
+	$esc_url = 'clean_url';
+	if ( function_exists( 'esc_url' ) )
+		$esc_url = 'esc_url';
+
 	if ( 8645 < $wp_db_version  ) // 2.7
 		$link = 'edit-comments.php?comment_status=spam';
 	elseif ( isset( $submenu['edit-comments.php'] ) )
@@ -1004,10 +1009,14 @@ function akismet_rightnow() {
 			$queue_count
 		), number_format_i18n( $queue_count ), clean_url($link) );
 	} else {
-		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), clean_url($link) );
+		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
 	}
 
-	$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
+	// _c was deprecated in WP 2.9.0
+	if ( function_exists( '_x' ) )
+		$text = sprintf( _x( '%1$s %2$s', 'akismet_rightnow' ), $intro, $queue_text );
+	else 
+		$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
 
 	echo "<p class='akismet-right-now'>$text</p>\n";
 }
@@ -1139,7 +1148,7 @@ function widget_akismet_register() {
 
 	function widget_akismet_control() {
 		$options = $newoptions = get_option('widget_akismet');
-		if ( $_POST["akismet-submit"] ) {
+		if ( isset( $_POST['akismet-submit'] ) && $_POST["akismet-submit"] ) {
 			$newoptions['title'] = strip_tags(stripslashes($_POST["akismet-title"]));
 			if ( empty($newoptions['title']) ) $newoptions['title'] = __('Spam Blocked');
 		}
@@ -1154,8 +1163,13 @@ function widget_akismet_register() {
 	<?php
 	}
 
-	register_sidebar_widget('Akismet', 'widget_akismet', null, 'akismet');
-	register_widget_control('Akismet', 'widget_akismet_control', null, 75, 'akismet');
+	if ( function_exists( 'wp_register_sidebar_widget' ) ) {
+		wp_register_sidebar_widget( 'akismet', 'Akismet', 'widget_akismet', null, 'akismet');
+		wp_register_widget_control( 'akismet', 'Akismet', 'widget_akismet_control', null, 75, 'akismet');
+	} else {
+		register_sidebar_widget('Akismet', 'widget_akismet', null, 'akismet');
+		register_widget_control('Akismet', 'widget_akismet_control', null, 75, 'akismet');
+	}
 	if ( is_active_widget('widget_akismet') )
 		add_action('wp_head', 'widget_akismet_style');
 	endif;
