@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package Akismet
+ */
 /*
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
@@ -10,7 +13,7 @@ Author URI: http://automattic.com/wordpress-plugins/
 
 define('AKISMET_VERSION', '2.3.0');
 
-// If you hardcode a WP.com API key here, all key config screens will be hidden
+/** If you hardcode a WP.com API key here, all key config screens will be hidden */
 if ( defined('WPCOM_API_KEY') )
 	$wpcom_api_key = constant('WPCOM_API_KEY');
 else
