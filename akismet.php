@@ -443,11 +443,13 @@ function akismet_auto_check_comment( $comment ) {
 	
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
 
-	$ignore = array( 'HTTP_COOKIE' );
+	$ignore = array( 'HTTP_COOKIE', 'HTTP_COOKIE2', 'PHP_AUTH_PW' );
 
 	foreach ( $_SERVER as $key => $value )
 		if ( !in_array( $key, $ignore ) && is_string($value) )
 			$comment["$key"] = $value;
+		else
+			$comment["$key"] = '';
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
