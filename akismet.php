@@ -27,7 +27,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
 */
 
-define('AKISMET_VERSION', '2.3.0');
+define('AKISMET_VERSION', '2.4.0');
 
 /** If you hardcode a WP.com API key here, all key config screens will be hidden */
 if ( defined('WPCOM_API_KEY') )

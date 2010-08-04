@@ -29,6 +29,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 = 2.4.0 =
 
+* Spell out that the license is GPLv2
+
 = 2.3.0 =
 
 * Fix "Are you sure" nonce message on config screen in WPMU
