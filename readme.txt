@@ -3,7 +3,7 @@ Contributors: matt, ryan, andy, mdawaffe, tellyworth, automattic
 Tags: akismet, comments, spam
 Requires at least: 2.0
 Tested up to: 3.0
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
 
@@ -25,6 +25,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 1, 2, 3: You're done!
 
 == Changelog ==
+
+= 2.4.0 =
+
+= 2.3.0 =
 
 * Fix "Are you sure" nonce message on config screen in WPMU
 * Fix XHTML compliance issue in sidebar widget
