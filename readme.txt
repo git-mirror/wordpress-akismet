@@ -4,6 +4,7 @@ Tags: akismet, comments, spam
 Requires at least: 2.0
 Tested up to: 3.0
 Stable tag: 2.4.0
+License: GPLv2
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
 
