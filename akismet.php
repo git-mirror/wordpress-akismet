@@ -1153,6 +1153,10 @@ function widget_akismet_register() {
 	}
 
 	function widget_akismet_style() {
+		$plugin_dir = '/wp-content/plugins';
+		if ( defined( 'PLUGINDIR' ) )
+			$plugin_dir = '/' . PLUGINDIR;
+
 		?>
 <style type="text/css">
 #aka,#aka:link,#aka:hover,#aka:visited,#aka:active{color:#fff;text-decoration:none}
@@ -1162,7 +1166,7 @@ function widget_akismet_register() {
 #akismet2{display:none;padding-top:2px}
 #akismeta{font-size:16px;font-weight:bold;line-height:18px;text-decoration:none}
 #akismetcount{display:block;font:15px Verdana,Arial,Sans-Serif;font-weight:bold;text-decoration:none}
-#akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
+#akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'), $plugin_dir; ?>/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
 </style>
 		<?php
 	}
@@ -1200,6 +1204,10 @@ add_action('init', 'widget_akismet_register');
 
 // Counter for non-widget users
 function akismet_counter() {
+	$plugin_dir = '/wp-content/plugins';
+	if ( defined( 'PLUGINDIR' ) )
+		$plugin_dir = '/' . PLUGINDIR;
+
 ?>
 <style type="text/css">
 #akismetwrap #aka,#aka:link,#aka:hover,#aka:visited,#aka:active{color:#fff;text-decoration:none}
@@ -1209,7 +1217,7 @@ function akismet_counter() {
 #akismet2{display:none;padding-top:2px}
 #akismeta{font-size:16px;font-weight:bold;line-height:18px;text-decoration:none}
 #akismetcount{display:block;font:15px Verdana,Arial,Sans-Serif;font-weight:bold;text-decoration:none}
-#akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'); ?>/wp-content/plugins/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
+#akismetwrap #akismetstats{background:url(<?php echo get_option('siteurl'), $plugin_dir; ?>/akismet/akismet.gif) no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
 </style>
 <?php
 $count = number_format_i18n(get_option('akismet_spam_count'));
