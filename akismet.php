@@ -35,6 +35,12 @@ if ( defined('WPCOM_API_KEY') )
 else
 	$wpcom_api_key = '';
 
+// Make sure we don't expose any info if called directly
+if ( !function_exists( 'add_action' ) ) {
+	echo "Hi there!  I'm just a plugin, not much I can do when called directly.";
+	exit;
+}
+
 function akismet_init() {
 	global $wpcom_api_key, $akismet_api_host, $akismet_api_port;
 
