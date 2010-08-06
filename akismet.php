@@ -118,7 +118,7 @@ function akismet_conf() {
 		akismet_get_server_connectivity(0);
 	}
 
-	if ( $key_status != 'valid' ) {
+	if ( empty( $key_status) ||  $key_status != 'valid' ) {
 		$key = get_option('wordpress_api_key');
 		if ( empty( $key ) ) {
 			if ( $key_status != 'failed' ) {
@@ -166,7 +166,7 @@ function akismet_conf() {
 	<p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
 <?php endforeach; ?>
 <p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://akismet.com/get/">What is this?</a>'); ?>)</p>
-<?php if ( $invalid_key ) { ?>
+<?php if ( isset( $invalid_key) && $invalid_key ) { ?>
 <h3><?php _e('Why might my key be invalid?'); ?></h3>
 <p><?php _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
 <?php } ?>
