@@ -455,9 +455,10 @@ function akismet_result_spam( $approved ) {
 	return 'spam';
 }
 
-function akismet_auto_check_comment( $comment ) {
+function akismet_auto_check_comment( $commentdata ) {
 	global $akismet_api_host, $akismet_api_port;
 
+	$comment = $commentdata;
 	$comment['user_ip']    = $_SERVER['REMOTE_ADDR'];
 	$comment['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$comment['referrer']   = $_SERVER['HTTP_REFERER'];
@@ -508,7 +509,7 @@ function akismet_auto_check_comment( $comment ) {
 		// WP 2.0: run this one time in ten
 		akismet_delete_old();
 	}
-	return $comment;
+	return $commentdata;
 }
 
 function akismet_delete_old() {
