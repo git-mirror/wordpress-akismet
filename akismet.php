@@ -985,6 +985,19 @@ echo "<p>$r</p>";
 
 add_action('admin_menu', 'akismet_manage_page');
 
+function redirect_old_akismet_urls( ) {
+	global $wp_db_version;
+	$script_name = array_pop( split( '/', $_SERVER['PHP_SELF'] ) );
+
+	// 2.7 redirect for people who might have bookmarked the old page
+	if ( 8204 < $wp_db_version && ( 'edit-comments.php' == $script_name || 'edit.php' == $script_name ) && 'akismet-admin' == $_GET['page'] ) {
+		$new_url = clean_url( 'edit-comments.php?comment_status=spam' );
+		wp_redirect( $new_url, 301 );
+		exit;
+	}
+}
+add_action( 'admin_init', 'redirect_old_akismet_urls' );
+
 // WP < 2.5
 function akismet_stats() {
 	if ( !function_exists('did_action') || did_action( 'rightnow_end' ) ) // We already displayed this info in the "Right Now" section
