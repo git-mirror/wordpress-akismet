@@ -121,7 +121,7 @@ function akismet_conf() {
 	if ( empty( $key_status) ||  $key_status != 'valid' ) {
 		$key = get_option('wordpress_api_key');
 		if ( empty( $key ) ) {
-			if ( $key_status != 'failed' ) {
+			if ( empty( $key_status ) || $key_status != 'failed' ) {
 				if ( akismet_verify_key( '1234567890ab' ) == 'failed' )
 					$ms[] = 'no_connection';
 				else
