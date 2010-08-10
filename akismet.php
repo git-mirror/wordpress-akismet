@@ -989,9 +989,13 @@ function redirect_old_akismet_urls( ) {
 	global $wp_db_version;
 	$script_name = array_pop( split( '/', $_SERVER['PHP_SELF'] ) );
 
+	$page = '';
+	if ( !empty( $_GET['page'] ) )
+		$page = $_GET['page'];
+
 	// 2.7 redirect for people who might have bookmarked the old page
-	if ( 8204 < $wp_db_version && ( 'edit-comments.php' == $script_name || 'edit.php' == $script_name ) && 'akismet-admin' == $_GET['page'] ) {
-		$new_url = clean_url( 'edit-comments.php?comment_status=spam' );
+	if ( 8204 < $wp_db_version && ( 'edit-comments.php' == $script_name || 'edit.php' == $script_name ) && 'akismet-admin' == $page ) {
+		$new_url = esc_url( 'edit-comments.php?comment_status=spam' );
 		wp_redirect( $new_url, 301 );
 		exit;
 	}
