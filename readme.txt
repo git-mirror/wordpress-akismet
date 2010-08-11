@@ -30,6 +30,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 = 2.4.0 =
 
 * Spell out that the license is GPLv2
+* Fix PHP warnings
+* Fix WordPress deprecated function calls
+* Use the trash status when deleting spam comments on old posts
+* General code clean up
 
 = 2.3.0 =
 
