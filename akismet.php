@@ -1138,7 +1138,11 @@ function akismet_recheck_queue() {
 
 		$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 		if ( 'true' == $response[1] ) {
-			$wpdb->query( "UPDATE $wpdb->comments SET comment_approved = 'spam' WHERE comment_ID = $id" );
+			if ( function_exists('wp_set_comment_status') )
+				wp_set_comment_status($id, 'spam');
+			else
+				$wpdb->query("UPDATE $wpdb->comments SET comment_approved = 'spam' WHERE comment_ID = $id");
+
 		}
 	}
 	wp_redirect( $_SERVER['HTTP_REFERER'] );
