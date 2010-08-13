@@ -33,6 +33,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Fix PHP warnings
 * Fix WordPress deprecated function calls
 * Use the trash status when deleting spam comments on old posts
+* Fire the delete_comment action when deleting comments
 * General code clean up
 
 = 2.3.0 =
