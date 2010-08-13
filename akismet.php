@@ -530,10 +530,16 @@ function akismet_auto_check_comment( $commentdata ) {
 function akismet_delete_old() {
 	global $wpdb;
 	$now_gmt = current_time('mysql', 1);
-	$wpdb->query("DELETE FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
+	$comment_ids = $wpdb->col("SELECT comment_id FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
+	if ( empty( $comment_ids ) )
+		return;
+
+	do_action( 'delete_comment', $comment_ids );
+	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_id IN ( " . implode( ', ', $comment_ids ) . " )");
 	$n = mt_rand(1, 5000);
 	if ( apply_filters('akismet_optimize_table', ($n == 11)) ) // lucky number
 		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
+
 }
 
 add_action('akismet_scheduled_delete', 'akismet_delete_old');
@@ -730,8 +736,12 @@ function akismet_caught() {
 			die(__('You do not have sufficient permission to moderate comments.'));
 
 		$delete_time = $wpdb->escape( $_POST['display_time'] );
-		$nuked = $wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
-		wp_cache_delete( 'akismet_spam_count', 'widget' );
+		$comment_ids = $wpdb->col( "SELECT comment_id FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
+		if ( !empty( $comment_ids ) ) {
+			do_action( 'delete_comment', $comment_ids );
+			$wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_id IN ( " . implode( ', ', $comment_ids ) . " )");
+			wp_cache_delete( 'akismet_spam_count', 'widget' );
+		}
 		$to = add_query_arg( 'deleted', 'all', $_SERVER['HTTP_REFERER'] );
 		wp_redirect( $to );
 		exit;
