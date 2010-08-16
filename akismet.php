@@ -561,7 +561,10 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
-	$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
+	$comment->user_role = '';
+	if ( isset( $comment->user_ID ) )
+		$comment->user_role = akismet_get_user_roles($comment->user_ID);
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
@@ -589,7 +592,11 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	if ( is_object($current_site) ) {
 		$comment->site_domain = $current_site->domain;
 	}
-	$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
+	$comment->user_role = '';
+	if ( !isset( $comment->user_id ) )
+		$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -1139,7 +1146,11 @@ function akismet_recheck_queue() {
 		$c['blog_lang']  = get_locale();
 		$c['blog_charset'] = get_option('blog_charset');
 		$c['permalink']  = get_permalink($c['comment_post_ID']);
-		$c['user_role']  = akismet_get_user_roles($c['user_ID']);
+
+		$c['user_role'] = '';
+		if ( isset( $c['user_ID'] ) )
+			$c['user_role']  = akismet_get_user_roles($c['user_ID']);
+
 		$id = (int) $c['comment_ID'];
 
 		$query_string = '';
