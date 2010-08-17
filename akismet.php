@@ -491,6 +491,7 @@ function akismet_auto_check_comment( $commentdata ) {
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
+	$commentdata['akismet_result'] = $response[1];
 	if ( 'true' == $response[1] ) {
 		do_action( 'akismet_spam_caught' );
 
@@ -571,6 +572,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-ham", $akismet_api_port);
+	do_action('akismet_submit_nonspam_comment', $comment_id, $response[1]);
 }
 
 function akismet_submit_spam_comment ( $comment_id ) {
@@ -602,6 +604,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
+	do_action('akismet_submit_spam_comment', $comment_id, $response[1]);
 }
 
 add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
