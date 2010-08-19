@@ -28,7 +28,7 @@ function akismet_debug_message( $comment, $message ) {
 
 // use comment_meta to record the result of the comment auto_check 
 function akismet_debug_check_result( $comment ) { 
-        if ( isset( $comment->akismet_result ) ) { 
+	if ( isset( $comment['akismet_result'] ) ) {
 				akismet_debug_message( $comment, "Akismet comment-check response: ".$comment['akismet_result'] );
         } 
 
