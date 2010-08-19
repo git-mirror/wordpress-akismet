@@ -32,7 +32,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Spell out that the license is GPLv2
 * Fix PHP warnings
 * Fix WordPress deprecated function calls
-* Use the trash status when deleting spam comments on old posts
+* When 'Automatically discard spam comments on posts older than a month.' is enabled Akismet will now put the comment in the trash instead of vaporizing it immediately
 * Fire the delete_comment action when deleting comments
 * Move code specific for older WP versions to legacy.php
 * General code clean up
