@@ -474,15 +474,6 @@ function akismet_result_spam( $approved ) {
 	return 'spam';
 }
 
-// filter handler used to return a trash result to pre_comment_approved 
-function akismet_result_trash( $approved ) { 
-	// bump the counter here instead of when the filter is added to reduce the possibility of overcounting 
-	if ( $incr = apply_filters('akismet_spam_count_incr', 1) ) 
-		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr ); 
-
-	return 'trash'; 
-} 
-
 function akismet_auto_check_comment( $commentdata ) {
 	global $akismet_api_host, $akismet_api_port;
 
@@ -512,6 +503,9 @@ function akismet_auto_check_comment( $commentdata ) {
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 	$commentdata['akismet_result'] = $response[1];
 	if ( 'true' == $response[1] ) {
+		// akismet_spam_count will be incremented later by akismet_result_spam()
+		add_filter('pre_comment_approved', 'akismet_result_spam');
+
 		do_action( 'akismet_spam_caught' );
 
 		$post = get_post( $comment['comment_post_ID'] );
@@ -520,19 +514,10 @@ function akismet_auto_check_comment( $commentdata ) {
 		$diff = $diff / 86400;
 		
 		if ( $post->post_type == 'post' && $diff > 30 && get_option( 'akismet_discard_month' ) == 'true' && empty($comment['user_ID']) ) {
-			if ( function_exists( 'wp_trash_comment' ) ) { 
-				// akismet_spam_count will be incremented later by akismet_result_trash() 
-				add_filter('pre_comment_approved', 'akismet_result_trash'); 
-			} else { 
-				// akismet_result_spam() won't be called so bump the counter here 
-				if ( $incr = apply_filters('akismet_spam_count_incr', 1) ) 
-					update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr ); 
-
-				die; 
-			} 
-		} else { 
-			// akismet_spam_count will be incremented later by akismet_result_spam() 
-			add_filter('pre_comment_approved', 'akismet_result_spam'); 
+			// akismet_result_spam() won't be called so bump the counter here
+			if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
+				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
+			die;
 		}
 	}
 	
