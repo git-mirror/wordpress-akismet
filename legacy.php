@@ -80,7 +80,7 @@ function akismet_caught() {
 			die(__('You do not have sufficient permission to moderate comments.'));
 
 		$delete_time = $wpdb->escape( $_POST['display_time'] );
-		$comment_ids = $wpdb->col( "SELECT comment_id FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
+		$comment_ids = $wpdb->get_col( "SELECT comment_id FROM $wpdb->comments WHERE comment_approved = 'spam' AND '$delete_time' > comment_date_gmt" );
 		if ( !empty( $comment_ids ) ) {
 			do_action( 'delete_comment', $comment_ids );
 			$wpdb->query( "DELETE FROM $wpdb->comments WHERE comment_id IN ( " . implode( ', ', $comment_ids ) . " )");

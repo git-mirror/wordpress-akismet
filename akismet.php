@@ -534,7 +534,7 @@ function akismet_auto_check_comment( $commentdata ) {
 function akismet_delete_old() {
 	global $wpdb;
 	$now_gmt = current_time('mysql', 1);
-	$comment_ids = $wpdb->col("SELECT comment_id FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
+	$comment_ids = $wpdb->get_col("SELECT comment_id FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
 	if ( empty( $comment_ids ) )
 		return;
 
