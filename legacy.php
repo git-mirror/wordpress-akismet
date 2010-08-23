@@ -372,24 +372,6 @@ function redirect_old_akismet_urls( ) {
 }
 add_action( 'admin_init', 'redirect_old_akismet_urls' );
 
-// WP < 2.5
-function akismet_stats() {
-	if ( !function_exists('did_action') || did_action( 'rightnow_end' ) ) // We already displayed this info in the "Right Now" section
-		return;
-	if ( !$count = get_option('akismet_spam_count') )
-		return;
-	$path = plugin_basename(__FILE__);
-	echo '<h3>'.__('Spam').'</h3>';
-	global $submenu;
-	if ( isset( $submenu['edit-comments.php'] ) )
-		$link = 'edit-comments.php';
-	else
-		$link = 'edit.php';
-	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
-}
-
-add_action('activity_box_end', 'akismet_stats');
-
 // For WP <= 2.3.x
 global $pagenow;
 
