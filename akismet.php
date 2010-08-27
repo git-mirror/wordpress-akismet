@@ -65,6 +65,7 @@ function akismet_admin_init() {
 	else
 		$hook = 'dashboard_page_akismet-stats-display';
 	add_action('admin_head-'.$hook, 'akismet_stats_script');
+	add_meta_box('akismet-status', __('Akismet Status'), 'akismet_comment_status_meta_box', 'comment', 'normal');
 }
 add_action('admin_init', 'akismet_admin_init');
 
@@ -474,8 +475,146 @@ function akismet_result_spam( $approved ) {
 	return 'spam';
 }
 
+// log an event for a given comment, storing it in comment_meta
+function akismet_update_comment_history( $comment_id, $message, $event=null ) {
+	global $current_user;
+	
+	$user = '';
+	if ( is_object($current_user) )
+		$user = $current_user->user_login;
+
+	$event = array(
+		'time' => time(),
+		'message' => $message,
+		'event' => $event,
+		'user' => $user,
+	);
+	
+	// $unique = false so as to allow multiple values per comment
+	$r = add_comment_meta( $comment_id, 'akismet_history', $event, false );
+}
+
+// get the full comment history for a given comment, as an array in reverse chronological order
+function akismet_get_comment_history( $comment_id ) {
+	
+	$history = get_comment_meta( $comment_id, 'akismet_history', false );
+	usort( $history, 'akismet_cmp_time' );
+	return $history;
+}
+
+function akismet_cmp_time( $a, $b ) {
+	return $a['time'] > $b['time'] ? -1 : 1;
+}
+
+// this fires on wp_insert_comment.  we can't update comment_meta when akismet_auto_check_comment() runs
+// because we don't know the comment ID at that point.
+function akismet_auto_check_update_meta( $id, $comment ) {
+	global $akismet_last_comment;
+
+
+	// wp_insert_comment() might be called in other contexts, so make sure this is the same comment
+	// as was checked by akismet_auto_check_comment
+	if ( is_object($comment) && !empty($akismet_last_comment) && is_array($akismet_last_comment) ) {
+		if ( intval($akismet_last_comment['comment_post_ID']) == intval($comment->comment_post_ID)
+			&& $akismet_last_comment['comment_author'] == $comment->comment_author
+			&& $akismet_last_comment['comment_author_email'] == $comment->comment_author_email ) {
+				// normal result: true or false
+				if ( $akismet_last_comment['akismet_result'] == 'true' ) {
+					update_comment_meta( $comment->comment_ID, 'akismet_result', 'true' );
+					akismet_update_comment_history( $comment->comment_ID, __('Akismet caught this comment as spam'), 'check-spam' );
+				} elseif ( $akismet_last_comment['akismet_result'] == 'false' ) {
+					update_comment_meta( $comment->comment_ID, 'akismet_result', 'false' );
+					akismet_update_comment_history( $comment->comment_ID, __('Akismet cleared this comment'), 'check-ham' );
+				// abnormal result: error
+				} else {
+					update_comment_meta( $comment->comment_ID, 'akismet_result', 'error' );
+					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s)'), $akismet_last_comment['akismet_result']), 'check-error' );
+				}
+				
+		}
+	}
+}
+
+add_action( 'wp_insert_comment', 'akismet_auto_check_update_meta', 10, 2 );
+
+// FIXME placeholder
+
+function akismet_comment_row_action( $a, $comment ) {
+	
+	
+	$akismet_result = get_comment_meta( $comment->comment_ID, 'akismet_result', true );
+	$user_result = get_comment_meta( $comment->comment_ID, 'akismet_user_result', true);
+	$desc = null;
+	if ( !$user_result || $user_result == $akismet_result ) {
+		// Show the original Akismet result if the user hasn't overridden it, or if their decision was the same
+		if ( $akismet_result == 'true' )
+			$desc = 'Flagged as spam by Akismet';
+		elseif ( $akismet_result == 'false' )
+			$desc = 'Cleared by Akismet';
+	} else {
+		$who = get_comment_meta( $comment->comment_ID, 'akismet_user', true );
+		if ( $user_result == 'true' )
+			$desc = sprintf( __('Flagged as spam by %s'), $who );
+		else
+			$desc = sprintf( __('Un-spammed by %s'), $who );
+	}
+	
+	if ( $desc )
+		echo '<span style="background: #EEE; border: 1px solid #E4E4E4; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em;"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
+	
+	return $a;
+}
+
+add_filter( 'comment_row_actions', 'akismet_comment_row_action', 10, 2 );
+
+
+function akismet_comment_status_meta_box($comment) {
+	$history = akismet_get_comment_history( $comment->comment_ID );
+	
+	if ( $history ) {
+		echo '<dl class="akismet-history">';
+		foreach ( $history as $row ) {
+			echo '<dt>' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</dt>';
+			echo '<dd>' . htmlspecialchars( $row['message'] ) . '</dd>';
+		}
+		
+		echo '</dl>';
+	}
+}
+
+
+// add an extra column header to the comments screen
+function akismet_comments_columns( $columns ) {
+	$columns[ 'akismet' ] = __( 'Akismet' );
+	return $columns;
+}
+
+#add_filter( 'manage_edit-comments_columns', 'akismet_comments_columns' );
+
+// Show stuff in the extra column
+function akismet_comment_column_row( $column, $comment_id ) {
+	if ( $column != 'akismet' )
+		return;
+		
+	$history = akismet_get_comment_history( $comment_id );
+	
+	if ( $history ) {
+		echo '<dl class="akismet-history">';
+		foreach ( $history as $row ) {
+			echo '<dt>' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</dt>';
+			echo '<dd>' . htmlspecialchars( $row['message'] ) . '</dd>';
+		}
+		
+		echo '</dl>';
+	}
+}
+
+#add_action( 'manage_comments_custom_column', 'akismet_comment_column_row', 10, 2 );
+
+// END FIXME
+
 function akismet_auto_check_comment( $commentdata ) {
-	global $akismet_api_host, $akismet_api_port;
+	global $akismet_api_host, $akismet_api_port, $akismet_last_comment;
 
 	$comment = $commentdata;
 	$comment['user_ip']    = $_SERVER['REMOTE_ADDR'];
@@ -529,6 +668,7 @@ function akismet_auto_check_comment( $commentdata ) {
 		// WP 2.0: run this one time in ten
 		akismet_delete_old();
 	}
+	$akismet_last_comment = $commentdata;
 	return $commentdata;
 }
 
@@ -576,6 +716,14 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-ham", $akismet_api_port);
+	if ( $comment->reporter ) {
+		akismet_update_comment_history( $comment_id, sprintf( __('%s un-spammed this comment'), $comment->reporter ), 'report-ham' );
+		update_comment_meta( $comment_id, 'akismet_user_result', 'false' );
+		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
+	} else {
+		akismet_update_comment_history( $comment_id, 'A plugin un-spammed this comment', 'report-ham' );
+	}
+	
 	do_action('akismet_submit_nonspam_comment', $comment_id, $response[1]);
 }
 
@@ -608,6 +756,12 @@ function akismet_submit_spam_comment ( $comment_id ) {
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
+	if ( $comment->reporter ) {
+		akismet_update_comment_history( $comment_id, sprintf( __('%s spammed this comment'), $comment->reporter ), 'report-spam' );
+		update_comment_meta( $comment_id, 'akismet_user_result', 'true' );
+		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
+	} else
+		akismet_update_comment_history( $comment_id, 'A plugin spammed this comment', 'report-ham' );
 	do_action('akismet_submit_spam_comment', $comment_id, $response[1]);
 }
 
