@@ -560,7 +560,7 @@ function akismet_comment_row_action( $a, $comment ) {
 	}
 	
 	if ( $desc )
-		echo '<span style="background: #EEE; border: 1px solid #E4E4E4; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em;"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
+		echo '<span style="background: #EEE; border: 1px solid #E4E4E4; margin-top: 3px; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em;"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
 	
 	return $a;
 }
@@ -572,13 +572,14 @@ function akismet_comment_status_meta_box($comment) {
 	$history = akismet_get_comment_history( $comment->comment_ID );
 	
 	if ( $history ) {
-		echo '<dl class="akismet-history">';
+		echo '<div class="akismet-history" style="margin: 13px;">';
 		foreach ( $history as $row ) {
-			echo '<dt>' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</dt>';
-			echo '<dd>' . htmlspecialchars( $row['message'] ) . '</dd>';
+			echo '<div style="margin-bottom: 13px;"><span style="color: #999;">' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</span> - ';
+			echo htmlspecialchars( $row['message'] ) . '</div>';
 		}
 		
-		echo '</dl>';
+		echo '</div>';
+
 	}
 }
 
