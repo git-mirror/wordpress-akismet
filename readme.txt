@@ -28,7 +28,9 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 == Changelog ==
 
 = 2.5.0 =
+
 * Track comment actions under 'Akismet Status' on the edit comment screen
+* Fix a few remaining deprecated function calls ( props Mike Glendinning ) 
 
 = 2.4.0 =
 

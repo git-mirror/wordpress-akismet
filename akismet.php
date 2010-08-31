@@ -830,6 +830,10 @@ function akismet_spam_count( $type = false ) {
 function akismet_rightnow() {
 	global $submenu, $wp_db_version;
 
+	$plural_func = '__ngettext';
+	if ( function_exists( '_n' ) )
+		$plural_func = '_n';
+
 	// clean_url was deprecated in WP 3.0
 	$esc_url = 'clean_url';
 	if ( function_exists( 'esc_url' ) )
@@ -843,7 +847,7 @@ function akismet_rightnow() {
 		$link = 'edit.php?page=akismet-admin';
 
 	if ( $count = get_option('akismet_spam_count') ) {
-		$intro = sprintf( __ngettext(
+		$intro = sprintf( $plural_func(
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already,',
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already,',
 			$count
@@ -853,11 +857,11 @@ function akismet_rightnow() {
 	}
 
 	if ( $queue_count = akismet_spam_count() ) {
-		$queue_text = sprintf( __ngettext(
+		$queue_text = sprintf( $plural_func(
 			'and there\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
 			'and there are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
-		), number_format_i18n( $queue_count ), clean_url($link) );
+		), number_format_i18n( $queue_count ), $esc_url($link) );
 	} else {
 		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
 	}
