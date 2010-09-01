@@ -275,7 +275,13 @@ addLoadEvent(resizeIframeInit);
 function akismet_stats_display() {
 	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
 	$blog = urlencode( get_option('home') );
-	$url = "http://".akismet_get_key().".web.akismet.com/1.0/user-stats.php?blog={$blog}";
+
+	$url = 'http://';
+	if ( is_ssl() )
+		$url = 'https://';
+
+	$url .= 'akismet.com/1.0/user-stats.php';
+	$url .= "?blog={$blog}&api_key=" . akismet_get_key();
 	?>
 	<div class="wrap">
 	<iframe src="<?php echo $url; ?>" width="100%" height="100%" frameborder="0" id="akismet-stats-frame"></iframe>
