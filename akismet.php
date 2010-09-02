@@ -280,7 +280,7 @@ function akismet_stats_display() {
 	if ( is_ssl() )
 		$url = 'https://';
 
-	$url .= 'akismet.com/1.0/user-stats.php';
+	$url .= 'akismet.com/web/1.0/user-stats.php';
 	$url .= "?blog={$blog}&api_key=" . akismet_get_key();
 	?>
 	<div class="wrap">
