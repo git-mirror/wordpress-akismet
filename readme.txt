@@ -31,6 +31,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 * Track comment actions under 'Akismet Status' on the edit comment screen
 * Fix a few remaining deprecated function calls ( props Mike Glendinning ) 
+* Use HTTPS for the stats IFRAME when wp-admin is using HTTPS
+* Use the WordPress HTTP class if available
 
 = 2.4.0 =
 

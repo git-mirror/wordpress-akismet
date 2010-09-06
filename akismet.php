@@ -442,35 +442,58 @@ function akismet_get_user_roles($user_id ) {
 // Returns array with headers in $response[0] and body in $response[1]
 function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	global $wp_version;
-	
-	$akismet_version = constant('AKISMET_VERSION');
 
-	$http_request  = "POST $path HTTP/1.0\r\n";
-	$http_request .= "Host: $host\r\n";
-	$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=" . get_option('blog_charset') . "\r\n";
-	$http_request .= "Content-Length: " . strlen($request) . "\r\n";
-	$http_request .= "User-Agent: WordPress/$wp_version | Akismet/$akismet_version\r\n";
-	$http_request .= "\r\n";
-	$http_request .= $request;
-	
+	$akismet_ua = "WordPress/{$wp_version} | ";
+	$akismet_ua .= 'Akismet/' . constant( 'AKISMET_VERSION' );
+
+	$content_length = strlen( $request );
+
 	$http_host = $host;
-	// use a specific IP if provided - needed by akismet_check_server_connectivity()
-	if ( $ip && long2ip(ip2long($ip)) ) {
+	// use a specific IP if provided
+	// needed by akismet_check_server_connectivity()
+	if ( $ip && long2ip( ip2long( $ip ) ) ) {
 		$http_host = $ip;
 	} else {
-		$http_host = akismet_get_host($host);
+		$http_host = akismet_get_host( $host );
 	}
 
-	$response = '';
-	if( false != ( $fs = @fsockopen($http_host, $port, $errno, $errstr, 10) ) ) {
-		fwrite($fs, $http_request);
+	// use the WP HTTP class if it is available
+	if ( function_exists( 'wp_remote_post' ) ) {
+		$http_args = array(
+			'body'			=> $request,
+			'headers'		=> array(
+				'Content-Type'	=> 'application/x-www-form-urlencoded; ' .
+									'charset=' . get_option( 'blog_charset' ),
+				'Host'			=> $host,
+				'User-Agent'	=> $akismet_ua
+			)
+		);
+		$akismet_url = "http://{$http_host}{$path}";
+		$response = wp_remote_post( $akismet_url, $http_args );
+		if ( is_wp_error( $response ) )
+			return '';
 
-		while ( !feof($fs) )
-			$response .= fgets($fs, 1160); // One TCP-IP packet
-		fclose($fs);
-		$response = explode("\r\n\r\n", $response, 2);
+		return array( $response['headers'], $response['body'] );
+	} else {
+		$http_request  = "POST $path HTTP/1.0\r\n";
+		$http_request .= "Host: $host\r\n";
+		$http_request .= 'Content-Type: application/x-www-form-urlencoded; charset=' . get_option('blog_charset') . "\r\n";
+		$http_request .= "Content-Length: {$content_length}\r\n";
+		$http_request .= "User-Agent: {$akismet_ua}\r\n";
+		$http_request .= "\r\n";
+		$http_request .= $request;
+		
+		$response = '';
+		if( false != ( $fs = @fsockopen( $http_host, $port, $errno, $errstr, 10 ) ) ) {
+			fwrite( $fs, $http_request );
+
+			while ( !feof( $fs ) )
+				$response .= fgets( $fs, 1160 ); // One TCP-IP packet
+			fclose( $fs );
+			$response = explode( "\r\n\r\n", $response, 2 );
+		}
+		return $response;
 	}
-	return $response;
 }
 
 // filter handler used to return a spam result to pre_comment_approved
