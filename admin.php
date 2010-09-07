@@ -494,8 +494,6 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	do_action('akismet_submit_spam_comment', $comment_id, $response[1]);
 }
 
-add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
-
 // For WP 2.7+
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
 	if ( $new_status == $old_status )

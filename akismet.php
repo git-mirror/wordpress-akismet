@@ -275,7 +275,6 @@ function akismet_cmp_time( $a, $b ) {
 function akismet_auto_check_update_meta( $id, $comment ) {
 	global $akismet_last_comment;
 
-
 	// wp_insert_comment() might be called in other contexts, so make sure this is the same comment
 	// as was checked by akismet_auto_check_comment
 	if ( is_object($comment) && !empty($akismet_last_comment) && is_array($akismet_last_comment) ) {
@@ -291,7 +290,7 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 					akismet_update_comment_history( $comment->comment_ID, __('Akismet cleared this comment'), 'check-ham' );
 				// abnormal result: error
 				} else {
-					update_comment_meta( $comment->comment_ID, 'akismet_result', 'error' );
+					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
 					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s)'), $akismet_last_comment['akismet_result']), 'check-error' );
 				}
 				
@@ -360,6 +359,8 @@ function akismet_auto_check_comment( $commentdata ) {
 	$akismet_last_comment = $commentdata;
 	return $commentdata;
 }
+
+add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 
 function akismet_delete_old() {
 	global $wpdb;
