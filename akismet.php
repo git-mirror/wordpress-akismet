@@ -291,7 +291,7 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 				// abnormal result: error
 				} else {
 					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
-					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s)'), $akismet_last_comment['akismet_result']), 'check-error' );
+					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s), will automatically retry again later.'), $akismet_last_comment['akismet_result']), 'check-error' );
 					wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 				}
 				
@@ -408,5 +408,32 @@ function akismet_check_db_comment( $id ) {
 function akismet_cron_recheck( $data ) {
 	global $wpdb;
 
+	$comment_errors = $wpdb->get_col( "
+		SELECT comment_id
+		FROM {$wpdb->prefix}commentmeta
+		WHERE meta_key = 'akismet_error'
+	" );
+
+	foreach ( (array) $comment_errors as $comment_id ) {
+		$status = akismet_check_db_comment( $comment_id );
+
+		$msg = '';
+		if ( $status == 'true' ) {
+			$msg = __( 'Akismet caught this comment as spam during an automatic retry.' );
+		} elseif ( $status == 'false' ) {
+			$msg = __( 'Akismet cleared this comment during an automatic retry.' );
+		}
+		
+		// If we got back a legit response then update the comment history
+		// other wise just bail now and try again later.  No point in
+		// re-trying all the comments once we hit one failure.
+		if ( !empty( $msg ) ) {
+			delete_comment_meta( $comment_id, 'akismet_error' );
+			akismet_update_comment_history( $comment_id, $msg, 'cron-retry' );
+		} else {
+			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
+			return;
+		}
+	}
 }
 add_action( 'akismet_schedule_cron_recheck', 'akismet_cron_recheck' );
