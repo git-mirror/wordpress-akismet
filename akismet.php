@@ -292,6 +292,7 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 				} else {
 					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
 					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s)'), $akismet_last_comment['akismet_result']), 'check-error' );
+					wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 				}
 				
 		}
@@ -379,3 +380,33 @@ function akismet_delete_old() {
 
 add_action('akismet_scheduled_delete', 'akismet_delete_old');
 
+function akismet_check_db_comment( $id ) {
+    global $wpdb, $akismet_api_host, $akismet_api_port;
+
+    $id = (int) $id;
+    $c = $wpdb->get_row( "SELECT * FROM $wpdb->comments WHERE comment_ID = '$id'", ARRAY_A );
+    if ( !$c )
+        return;
+
+    $c['user_ip']    = $c['comment_author_IP'];
+    $c['user_agent'] = $c['comment_agent'];
+    $c['referrer']   = '';
+    $c['blog']       = get_option('home');
+    $c['blog_lang']  = get_locale();
+    $c['blog_charset'] = get_option('blog_charset');
+    $c['permalink']  = get_permalink($c['comment_post_ID']);
+    $id = $c['comment_ID'];
+
+    $query_string = '';
+    foreach ( $c as $key => $data )
+    $query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
+
+    $response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
+    return $response[1];
+}
+
+function akismet_cron_recheck( $data ) {
+	global $wpdb;
+
+}
+add_action( 'akismet_schedule_cron_recheck', 'akismet_cron_recheck' );
