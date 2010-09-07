@@ -309,11 +309,12 @@ add_filter( 'comment_row_actions', 'akismet_comment_row_action', 10, 2 );
 
 function akismet_comment_status_meta_box($comment) {
 	$history = akismet_get_comment_history( $comment->comment_ID );
-	
+
 	if ( $history ) {
 		echo '<div class="akismet-history" style="margin: 13px;">';
 		foreach ( $history as $row ) {
-			echo '<div style="margin-bottom: 13px;"><span style="color: #999;">' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</span> - ';
+			$time = date( 'D d M Y @ h:i:m a', $row['time'] ) . ' GMT';
+			echo '<div style="margin-bottom: 13px;"><span style="color: #999;" alt="' . $time . '" title="' . $time . '">' . sprintf( __('%s ago'), human_time_diff( $row['time'] ) ) . '</span> - ';
 			echo htmlspecialchars( $row['message'] ) . '</div>';
 		}
 		
