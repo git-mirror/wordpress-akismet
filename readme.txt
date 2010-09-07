@@ -33,6 +33,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Fix a few remaining deprecated function calls ( props Mike Glendinning ) 
 * Use HTTPS for the stats IFRAME when wp-admin is using HTTPS
 * Use the WordPress HTTP class if available
+* Move the admin UI code to a separate file, only loaded when needed
 
 = 2.4.0 =
 

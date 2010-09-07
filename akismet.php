@@ -46,6 +46,9 @@ if ( $wp_db_version <= 9872 )
 
 include_once dirname( __FILE__ ) . '/widget.php';
 
+if ( is_admin() )
+	require_once dirname( __FILE__ ) . '/admin.php';
+
 function akismet_init() {
 	global $wpcom_api_key, $akismet_api_host, $akismet_api_port;
 
@@ -57,37 +60,6 @@ function akismet_init() {
 	$akismet_api_port = 80;
 }
 add_action('init', 'akismet_init');
-
-function akismet_admin_init() {
-	global $wp_version;
-	
-	// all admin functions are disabled in old versions
-	if ( version_compare( $wp_version, '3.0', '<' ) ) {
-		
-		function akismet_version_warning() {
-			echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".sprintf( __('Akismet %s required WordPress 3.0 or higher.'), AKISMET_VERSION) ."</strong> ".sprintf(__('Please <a href="%s">upgrade WordPress</a> to a current version, or <a href="%s">downgrade to version 2.4 of the Akismet plugin</a>.'), 'http://codex.wordpress.org/Upgrading_WordPress', 'http://wordpress.org/extend/plugins/akismet/download/'). "</p></div>
-			";
-		}
-		add_action('admin_notices', 'akismet_version_warning');	
-		
-		return;	
-	}
-
-	require_once( dirname(__FILE__).'/admin.php' );
-	add_action('admin_menu', 'akismet_config_page');
-	add_action('admin_menu', 'akismet_stats_page');
-	akismet_admin_warnings();
-
-	if ( function_exists( 'get_plugin_page_hook' ) )
-		$hook = get_plugin_page_hook( 'akismet-stats-display', 'index.php' );
-	else
-		$hook = 'dashboard_page_akismet-stats-display';
-	add_action('admin_head-'.$hook, 'akismet_stats_script');
-	add_meta_box('akismet-status', __('Akismet Status'), 'akismet_comment_status_meta_box', 'comment', 'normal');
-}
-add_action('admin_init', 'akismet_admin_init');
-
 
 function akismet_get_key() {
 	global $wpcom_api_key;
