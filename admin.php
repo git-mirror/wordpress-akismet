@@ -473,9 +473,6 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 	if ( $new_status == $old_status )
 		return;
 		
-	if ( defined('AKISMET_RECHECK_QUEUE') )
-		return;
-
 	if ( $new_status == 'spam' ) {
 		akismet_submit_spam_comment( $comment->comment_ID );
 	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
@@ -518,8 +515,6 @@ function akismet_recheck_queue() {
 	if ( ! ( isset( $_GET['recheckqueue'] ) || ( isset( $_REQUEST['action'] ) && 'akismet_recheck_queue' == $_REQUEST['action'] ) ) )
 		return;
 		
-	define('AKISMET_RECHECK_QUEUE', true);
-
 	$moderation = $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = '0'", ARRAY_A );
 	foreach ( (array) $moderation as $c ) {
 		$c['user_ip']    = $c['comment_author_IP'];
