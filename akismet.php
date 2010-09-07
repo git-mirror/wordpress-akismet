@@ -62,6 +62,21 @@ function akismet_init() {
 add_action('init', 'akismet_init');
 
 function akismet_admin_init() {
+	global $wp_version;
+	
+	// all admin functions are disabled in old versions
+	if ( version_compare( $wp_version, '3.0', '<' ) ) {
+		
+		function akismet_version_warning() {
+			echo "
+			<div id='akismet-warning' class='updated fade'><p><strong>".sprintf( __('Akismet %s required WordPress 3.0 or higher.'), AKISMET_VERSION) ."</strong> ".sprintf(__('Please <a href="%s">upgrade WordPress</a> to 3.0 or higher, or <a href="%s">downgrade to version 2.4 of the Akismet plugin</a>.'), 'http://codex.wordpress.org/Upgrading_WordPress', 'http://wordpress.org/extend/plugins/akismet/download/'). "</p></div>
+			";
+		}
+		add_action('admin_notices', 'akismet_warning');	
+		
+		return;	
+	}
+	
 	if ( function_exists( 'get_plugin_page_hook' ) )
 		$hook = get_plugin_page_hook( 'akismet-stats-display', 'index.php' );
 	else
