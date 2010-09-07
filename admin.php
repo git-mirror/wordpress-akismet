@@ -472,6 +472,9 @@ add_action('preprocess_comment', 'akismet_auto_check_comment', 1);
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
 	if ( $new_status == $old_status )
 		return;
+		
+	if ( defined('AKISMET_RECHECK_QUEUE') )
+		return;
 
 	if ( $new_status == 'spam' ) {
 		akismet_submit_spam_comment( $comment->comment_ID );
@@ -514,6 +517,8 @@ function akismet_recheck_queue() {
 
 	if ( ! ( isset( $_GET['recheckqueue'] ) || ( isset( $_REQUEST['action'] ) && 'akismet_recheck_queue' == $_REQUEST['action'] ) ) )
 		return;
+		
+	define('AKISMET_RECHECK_QUEUE', true);
 
 	$moderation = $wpdb->get_results( "SELECT * FROM $wpdb->comments WHERE comment_approved = '0'", ARRAY_A );
 	foreach ( (array) $moderation as $c ) {
@@ -537,12 +542,19 @@ function akismet_recheck_queue() {
 
 		$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 		if ( 'true' == $response[1] ) {
-			if ( function_exists('wp_set_comment_status') )
-				wp_set_comment_status($id, 'spam');
-			else
-				$wpdb->query("UPDATE $wpdb->comments SET comment_approved = 'spam' WHERE comment_ID = $id");
-
+			wp_set_comment_status($c['comment_ID'], 'spam');
+			update_comment_meta( $c['comment_ID'], 'akismet_result', 'true' );
+			akismet_update_comment_history( $c['comment_ID'], __('Akismet re-checked and caught this comment as spam'), 'check-spam' );
+		
+		} elseif ( 'false' == $response[1] ) {
+			update_comment_meta( $c['comment_ID'], 'akismet_result', 'false' );
+			akismet_update_comment_history( $c['comment_ID'], __('Akismet re-checked and cleared this comment'), 'check-ham' );
+		// abnormal result: error
+		} else {
+			update_comment_meta( $c['comment_ID'], 'akismet_result', 'error' );
+			akismet_update_comment_history( $c['comment_ID'], sprintf( __('Akismet was unable to re-check this comment (response: %s)'), $response[1]), 'check-error' );
 		}
+
 	}
 	wp_redirect( $_SERVER['HTTP_REFERER'] );
 	exit;
