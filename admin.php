@@ -97,12 +97,12 @@ function akismet_conf() {
 
 	$messages = array(
 		'new_key_empty' => array('color' => 'aa0', 'text' => __('Your key has been cleared.')),
-		'new_key_valid' => array('color' => '2d2', 'text' => __('Your key has been verified. Happy blogging!')),
-		'new_key_invalid' => array('color' => 'd22', 'text' => __('The key you entered is invalid. Please double-check it.')),
-		'new_key_failed' => array('color' => 'd22', 'text' => __('The key you entered could not be verified because a connection to akismet.com could not be established. Please check your server configuration.')),
-		'no_connection' => array('color' => 'd22', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
+		'new_key_valid' => array('color' => '4AB915', 'text' => __('Your key has been verified. Happy blogging!')),
+		'new_key_invalid' => array('color' => '888', 'text' => __('The key you entered is invalid. Please double-check it.')),
+		'new_key_failed' => array('color' => '888', 'text' => __('The key you entered could not be verified because a connection to akismet.com could not be established. Please check your server configuration.')),
+		'no_connection' => array('color' => '888', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
 		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/')),
-		'key_valid' => array('color' => '2d2', 'text' => __('This key is valid.')),
+		'key_valid' => array('color' => '4AB915', 'text' => __('This key is valid.')),
 		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')));
 ?>
 <?php if ( !empty($_POST['submit'] ) ) : ?>
@@ -136,7 +136,7 @@ function akismet_conf() {
 <?php
 	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') ) {
 		?>
-			<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Network functions are disabled.'); ?></p>
+			<p style="padding: .5em; background-color: #888; color: #fff; font-weight:bold;"><?php _e('Network functions are disabled.'); ?></p>
 			<p><?php echo sprintf( __('Your web host or server administrator has disabled PHP\'s <code>fsockopen</code> or <code>gethostbynamel</code> functions.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet\'s system requirements</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
 		<?php
 	} else {
@@ -150,18 +150,18 @@ function akismet_conf() {
 			<?php
 			// all connections fail
 			} elseif ( $fail_count > 0 ) { ?>
-				<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to reach any Akismet servers.'); ?></p>
+				<p style="padding: .5em; background-color: #888; color: #fff; font-weight:bold;"><?php _e('Unable to reach any Akismet servers.'); ?></p>
 				<p><?php echo sprintf( __('A network problem or firewall is blocking all connections from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
 			<?php
 			// all connections work
 			} else { ?>
-				<p style="padding: .5em; background-color: #2d2; color: #fff; font-weight:bold;"><?php  _e('All Akismet servers are available.'); ?></p>
+				<p style="padding: .5em; background-color: #4AB915; color: #fff; font-weight:bold;"><?php  _e('All Akismet servers are available.'); ?></p>
 				<p><?php _e('Akismet is working correctly.  All servers are accessible.'); ?></p>
 			<?php
 			}
 		} else {
 			?>
-				<p style="padding: .5em; background-color: #d22; color: #fff; font-weight:bold;"><?php _e('Unable to find Akismet servers.'); ?></p>
+				<p style="padding: .5em; background-color: #888; color: #fff; font-weight:bold;"><?php _e('Unable to find Akismet servers.'); ?></p>
 				<p><?php echo sprintf( __('A DNS problem or firewall is preventing all access from your web server to Akismet.com.  <strong>Akismet cannot work correctly until this is fixed.</strong>  Please contact your web host or firewall administrator and give them <a href="%s" target="_blank">this information about Akismet and firewalls</a>.'), 'http://blog.akismet.com/akismet-hosting-faq/'); ?></p>
 			<?php
 		}
@@ -175,11 +175,11 @@ function akismet_conf() {
 <?php
 		asort($servers);
 		foreach ( $servers as $ip => $status ) {
-			$color = ( $status ? '#2d2' : '#d22');
+			$color = ( $status ? '#4AB915' : '#888');
 	?>
 		<tr>
 		<td><?php echo htmlspecialchars($ip); ?></td>
-		<td style="padding: 0 .5em; font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('No problems') : __('Obstructed') ); ?></td>
+		<td style="padding: 0 .5em; font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('No problems') : __('Re-trying') ); ?></td>
 		
 	<?php
 		}
