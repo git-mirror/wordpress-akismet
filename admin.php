@@ -277,17 +277,30 @@ function akismet_admin_warnings() {
 }
 
 // FIXME placeholder
-
-function akismet_comment_row_action( $a, $comment ) {
-	
-	echo "<style>
+function author_comment_alter() {
+    echo "<style>
 			#submitted-on { position: relative; }
 			.author { padding-bottom: 5px !important; white-space: nowrap; }
 			.author a { padding-left: 42px !important; }
 			.author img { position: absolute; top: 1px; left: 0; }
 			.author strong { padding-left: 42px; font-size: 14px; position: relative; }
 			.akismet-status { position: absolute; top: 2px; right: 0; background: #EEE; border: 1px solid #E4E4E4; margin-top: 3px; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em; }}
-		  </style>";
+		  </style>
+		  <script type='text/javascript'>
+			jQuery(document).ready(function () {
+				jQuery('.akismet-status').each(function () {
+					var thisId = jQuery(this).attr('commentid');
+					jQuery(this).prependTo('#comment-' + thisId + ' #submitted-on');
+				});
+			});
+		  </script>
+		  ";
+}
+
+add_action('admin_head', 'author_comment_alter');
+
+
+function akismet_comment_row_action( $a, $comment ) {
 	
 	$akismet_result = get_comment_meta( $comment->comment_ID, 'akismet_result', true );
 	$user_result = get_comment_meta( $comment->comment_ID, 'akismet_user_result', true);
@@ -307,11 +320,7 @@ function akismet_comment_row_action( $a, $comment ) {
 	}
 	
 	if ( $desc )
-		echo "<script type='text/javascript'>
-				jQuery(document).ready(function () {
-					jQuery('#comment-".$comment->comment_ID." #submitted-on').prepend('<span class=\"akismet-status\"><a href=\"comment.php?action=editcomment&amp;c=".$comment->comment_ID."#akismet-status\" title=\"" . esc_attr__( 'View comment history' ) . "\">" .htmlspecialchars($desc). "</a></span>');
-			  	});
-			  </script>";
+		echo '<span class="akismet-status" commentid="'.$comment->comment_ID.'"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
 	
 	return $a;
 }
