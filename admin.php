@@ -411,14 +411,14 @@ function akismet_rightnow() {
 			$queue_count
 		), number_format_i18n( $queue_count ), $esc_url($link) );
 	} else {
-		$queue_text = sprintf( __( "but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
+		$queue_text = sprintf( __( " but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
 	}
 
 	// _c was deprecated in WP 2.9.0
 	if ( function_exists( '_x' ) )
-		$text = sprintf( _x( '%1$s %2$s', 'akismet_rightnow' ), $intro, $queue_text );
+		$text = sprintf( _x( '%1$s%2$s', 'akismet_rightnow' ), $intro, $queue_text );
 	else 
-		$text = sprintf( _c( '%1$s %2$s|akismet_rightnow' ), $intro, $queue_text );
+		$text = sprintf( _c( '%1$s%2$s|akismet_rightnow' ), $intro, $queue_text );
 
 	echo "<p class='akismet-right-now'>$text</p>\n";
 }
