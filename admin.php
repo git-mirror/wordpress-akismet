@@ -25,6 +25,8 @@ function akismet_admin_init() {
         $hook = 'dashboard_page_akismet-stats-display';
     add_action('admin_head-'.$hook, 'akismet_stats_script');
     add_meta_box('akismet-status', __('Akismet Status'), 'akismet_comment_status_meta_box', 'comment', 'normal');
+	wp_register_style('akismet.css', WP_PLUGIN_URL . '/akismet/akismet.css');
+	wp_enqueue_style('akismet.css');
 }
 add_action('admin_init', 'akismet_admin_init');
 
@@ -373,6 +375,24 @@ function akismet_comment_column_row( $column, $comment_id ) {
 #add_action( 'manage_comments_custom_column', 'akismet_comment_column_row', 10, 2 );
 
 // END FIXME
+
+// call out URLS in comments
+function akismet_text_add_link_callback( $m ) {
+	
+		// bare link?
+        if ( $m[4] == $m[2] )
+                return '<a '.$m[1].' href="'.$m[2].'" '.$m[3].' class="comment-link">'.$m[4].'</a>';
+        else
+                return '<span title="'.$m[2].'" class="comment-link"><a '.$m[1].' href="'.$m[2].'" '.$m[3].' class="comment-link">'.$m[4].'</a></span>';
+}
+
+function akismet_text_add_link_class( $comment_text ) {
+
+        return preg_replace_callback( '#<a ([^>]*)href="([^"]+)"([^>]*)>(.*?)</a>#i', 'akismet_text_add_link_callback', $comment_text );
+}
+
+add_filter('comment_text', 'akismet_text_add_link_class');
+
 
 // WP 2.5+
 function akismet_rightnow() {
