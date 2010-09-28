@@ -489,8 +489,6 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 		akismet_update_comment_history( $comment_id, sprintf( __('%s un-spammed this comment'), $comment->reporter ), 'report-ham' );
 		update_comment_meta( $comment_id, 'akismet_user_result', 'false' );
 		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
-	} else {
-		akismet_update_comment_history( $comment_id, 'A plugin un-spammed this comment', 'report-ham' );
 	}
 	
 	do_action('akismet_submit_nonspam_comment', $comment_id, $response[1]);
@@ -529,8 +527,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 		akismet_update_comment_history( $comment_id, sprintf( __('%s spammed this comment'), $comment->reporter ), 'report-spam' );
 		update_comment_meta( $comment_id, 'akismet_user_result', 'true' );
 		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
-	} else
-		akismet_update_comment_history( $comment_id, 'A plugin spammed this comment', 'report-ham' );
+	}
 	do_action('akismet_submit_spam_comment', $comment_id, $response[1]);
 }
 
@@ -539,10 +536,21 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 	if ( $new_status == $old_status )
 		return;
 		
+	global $current_user;
+	$reporter = '';
+	if ( is_object( $current_user ) )
+		$reporter = $current_user->user_login;
+		
 	if ( $new_status == 'spam' ) {
-		akismet_submit_spam_comment( $comment->comment_ID );
+		if ( !empty( $_POST['spam'] ) || $_POST['action'] == 'spam' || $_GET['action'] == 'spam' || $_POST['action'] == 'editedcomment' )
+			akismet_submit_spam_comment( $comment->comment_ID );
+		else
+			akismet_update_comment_history( $comment_id, sprintf( __('%s changed the comment status to spam'), $reporter ), 'status-spam' );
 	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
-		akismet_submit_nonspam_comment( $comment->comment_ID );
+		if ( !empty( $_POST['unspam'] ) || $_POST['action'] == 'unspam' || $_GET['action'] == 'unspam' || $_POST['action'] == 'editedcomment' )
+			akismet_submit_nonspam_comment( $comment->comment_ID );
+		else
+			akismet_update_comment_history( $comment_id, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
 	}
 }
 
