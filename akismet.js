@@ -3,4 +3,8 @@ jQuery(document).ready(function () {
 		var thisId = jQuery(this).attr('commentid');
 		jQuery(this).prependTo('#comment-' + thisId + ' #submitted-on');
 	});
+	jQuery('.akismet-user-comment-count').each(function () {
+		var thisId = jQuery(this).attr('commentid');
+		jQuery(this).insertAfter('#comment-' + thisId + ' .author strong:first').show();
+	});
 });

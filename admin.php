@@ -303,6 +303,11 @@ function akismet_comment_row_action( $a, $comment ) {
 	
 	if ( $desc )
 		echo '<span class="akismet-status" commentid="'.$comment->comment_ID.'"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
+		
+	if ( get_option('comment_whitelist') || get_option('comment_moderation') ) {
+		$comment_count = akimset_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
+		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;">'.sprintf( __( '%s approved' ), intval($comment_count) ).'</span>';
+	}
 	
 	return $a;
 }

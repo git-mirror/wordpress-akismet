@@ -239,6 +239,19 @@ function akismet_result_spam( $approved ) {
 	return 'spam';
 }
 
+// how many approved comments does this author have?
+function akimset_get_user_comments_approved( $user_id, $comment_author_email, $comment_author, $comment_author_url ) {
+	global $wpdb;
+	
+	if ( !empty($user_id) )
+		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->comments WHERE user_id = %d AND comment_approved = 1", $user_id ) );
+		
+	if ( !empty($comment_author_email) )
+		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_author_email = %s AND comment_author = %s AND comment_author_url = %s AND comment_approved = 1", $comment_author_email, $comment_author, $comment_author_url ) );
+		
+	return 0;
+}
+
 // log an event for a given comment, storing it in comment_meta
 function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 	global $current_user;
