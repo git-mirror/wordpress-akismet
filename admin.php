@@ -486,7 +486,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-ham", $akismet_api_port);
 	if ( $comment->reporter ) {
-		akismet_update_comment_history( $comment_id, sprintf( __('%s un-spammed this comment'), $comment->reporter ), 'report-ham' );
+		akismet_update_comment_history( $comment_id, sprintf( __('%s reported this comment as not spam'), $comment->reporter ), 'report-ham' );
 		update_comment_meta( $comment_id, 'akismet_user_result', 'false' );
 		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
 	}
@@ -524,7 +524,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 
 	$response = akismet_http_post($query_string, $akismet_api_host, "/1.1/submit-spam", $akismet_api_port);
 	if ( $comment->reporter ) {
-		akismet_update_comment_history( $comment_id, sprintf( __('%s spammed this comment'), $comment->reporter ), 'report-spam' );
+		akismet_update_comment_history( $comment_id, sprintf( __('%s reported this comment as spam'), $comment->reporter ), 'report-spam' );
 		update_comment_meta( $comment_id, 'akismet_user_result', 'true' );
 		update_comment_meta( $comment_id, 'akismet_user', $comment->reporter );
 	}
