@@ -191,7 +191,7 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	} else {
 		$http_host = akismet_get_host( $host );
 	}
-
+	
 	// use the WP HTTP class if it is available
 	if ( function_exists( 'wp_remote_post' ) ) {
 		$http_args = array(
@@ -237,6 +237,10 @@ function akismet_result_spam( $approved ) {
 	if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
 	return 'spam';
+}
+
+function akismet_result_hold( $approved ) {
+	return '0';
 }
 
 // how many approved comments does this author have?
@@ -305,7 +309,6 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 				} else {
 					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
 					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s), will automatically retry again later.'), $akismet_last_comment['akismet_result']), 'check-error' );
-					wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 				}
 				
 		}
@@ -360,6 +363,12 @@ function akismet_auto_check_comment( $commentdata ) {
 				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
 			die;
 		}
+	}
+	
+	// if the response is neither true nor false, hold the comment for moderation and schedule a recheck
+	if ( 'true' != $response[1] && 'false' != $response[1] ) {
+		add_filter('pre_comment_approved', 'akismet_result_hold');
+		wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 	}
 	
 	if ( function_exists('wp_next_scheduled') && function_exists('wp_schedule_event') ) {
