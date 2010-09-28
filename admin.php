@@ -27,6 +27,8 @@ function akismet_admin_init() {
     add_meta_box('akismet-status', __('Akismet Status'), 'akismet_comment_status_meta_box', 'comment', 'normal');
 	wp_register_style('akismet.css', WP_PLUGIN_URL . '/akismet/akismet.css');
 	wp_enqueue_style('akismet.css');
+	wp_register_script('akismet.js', WP_PLUGIN_URL . '/akismet/akismet.js', array('jquery'));
+	wp_enqueue_script('akismet.js');
 }
 add_action('admin_init', 'akismet_admin_init');
 
@@ -279,28 +281,6 @@ function akismet_admin_warnings() {
 }
 
 // FIXME placeholder
-function author_comment_alter() {
-    echo "<style>
-			#submitted-on { position: relative; }
-			.author { padding-bottom: 5px !important; white-space: nowrap; }
-			.author a { padding-left: 42px !important; }
-			.author img { position: absolute; top: 1px; left: 0; }
-			.author strong { padding-left: 42px; font-size: 14px; position: relative; }
-			.akismet-status { position: absolute; top: 2px; right: 0; background: #EEE; border: 1px solid #E4E4E4; margin-top: 3px; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em; }}
-		  </style>
-		  <script type='text/javascript'>
-			jQuery(document).ready(function () {
-				jQuery('.akismet-status').each(function () {
-					var thisId = jQuery(this).attr('commentid');
-					jQuery(this).prependTo('#comment-' + thisId + ' #submitted-on');
-				});
-			});
-		  </script>
-		  ";
-}
-
-add_action('admin_head', 'author_comment_alter');
-
 
 function akismet_comment_row_action( $a, $comment ) {
 	
