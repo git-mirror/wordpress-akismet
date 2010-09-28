@@ -269,10 +269,14 @@ function akismet_admin_warnings() {
 		}
 		add_action('admin_notices', 'akismet_warning');
 		return;
-	} elseif ( get_option('akismet_connectivity_time') && empty($_POST) && is_admin() && !akismet_server_connectivity_ok() ) {
+	} elseif ( wp_next_scheduled('akismet_schedule_cron_recheck') ) {
 		function akismet_warning() {
-			echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(__('A server or network problem is preventing Akismet from working correctly.  <a href="%1$s">Click here for more information</a> about how to fix the problem.'), "plugins.php?page=akismet-key-config")."</p></div>
+			global $wpdb;
+				$waiting = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE meta_key = 'akismet_error'" ) );
+				$next_check = human_time_diff( wp_next_scheduled('akismet_schedule_cron_recheck') );
+				if ( $waiting > 0 )
+					echo "
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s.', $waiting), $waiting, $next_check)."</p></div>
 			";
 		}
 		add_action('admin_notices', 'akismet_warning');
