@@ -310,7 +310,7 @@ function akismet_comment_row_action( $a, $comment ) {
 		
 	if ( get_option('comment_whitelist') || get_option('comment_moderation') ) {
 		$comment_count = akimset_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
-		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;">'.sprintf( __( '%s approved' ), intval($comment_count) ).'</span>';
+		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( __( '%s approved' ), intval($comment_count) ).'</span></span>';
 	}
 	
 	return $a;
