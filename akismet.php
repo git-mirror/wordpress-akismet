@@ -452,6 +452,7 @@ function akismet_cron_recheck( $data ) {
 		if ( !empty( $msg ) ) {
 			delete_comment_meta( $comment_id, 'akismet_error' );
 			akismet_update_comment_history( $comment_id, $msg, 'cron-retry' );
+			update_comment_meta( $comment_id, 'akismet_result', $status );
 		} else {
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 			return;
