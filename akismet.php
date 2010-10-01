@@ -331,6 +331,8 @@ function akismet_auto_check_comment( $commentdata ) {
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
 	
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
+	if ( WP_DEBUG )
+		$comment['is_test'] = 'true';
 
 	$ignore = array( 'HTTP_COOKIE', 'HTTP_COOKIE2', 'PHP_AUTH_PW' );
 
@@ -418,6 +420,8 @@ function akismet_check_db_comment( $id ) {
     $c['blog_charset'] = get_option('blog_charset');
     $c['permalink']  = get_permalink($c['comment_post_ID']);
     $id = $c['comment_ID'];
+	if ( WP_DEBUG )
+		$c['is_test'] = 'true';
 
     $query_string = '';
     foreach ( $c as $key => $data )

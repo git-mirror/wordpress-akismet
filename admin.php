@@ -469,6 +469,9 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( isset( $comment->user_ID ) )
 		$comment->user_role = akismet_get_user_roles($comment->user_ID);
 
+	if ( WP_DEBUG )
+		$comment->is_test = 'true';
+
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -506,6 +509,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	$comment->user_role = '';
 	if ( !isset( $comment->user_id ) )
 		$comment->user_role = akismet_get_user_roles($comment->user_ID);
+
+	if ( WP_DEBUG )
+		$comment->is_test = 'true';
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
@@ -591,6 +597,9 @@ function akismet_recheck_queue() {
 		$c['user_role'] = '';
 		if ( isset( $c['user_ID'] ) )
 			$c['user_role']  = akismet_get_user_roles($c['user_ID']);
+
+		if ( WP_DEBUG )
+			$c['is_test'] = 'true';
 
 		$id = (int) $c['comment_ID'];
 
