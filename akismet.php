@@ -441,6 +441,7 @@ function akismet_cron_recheck( $data ) {
 	" );
 
 	foreach ( (array) $comment_errors as $comment_id ) {
+		add_comment_meta( $comment_id, 'akismet_rechecking', true );
 		$status = akismet_check_db_comment( $comment_id );
 
 		$msg = '';
@@ -457,7 +458,10 @@ function akismet_cron_recheck( $data ) {
 			delete_comment_meta( $comment_id, 'akismet_error' );
 			akismet_update_comment_history( $comment_id, $msg, 'cron-retry' );
 			update_comment_meta( $comment_id, 'akismet_result', $status );
+			if ( $status == 'true' )
+				wp_spam_comment( $comment_id );
 		} else {
+			delete_comment_meta( $comment_id, 'akismet_rechecking' );
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 			return;
 		}
