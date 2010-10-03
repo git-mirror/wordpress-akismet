@@ -236,10 +236,14 @@ function akismet_result_spam( $approved ) {
 	// bump the counter here instead of when the filter is added to reduce the possibility of overcounting
 	if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 		update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
+	// this is a one-shot deal
+	remove_filter( 'pre_comment_approved', 'akismet_result_spam' );
 	return 'spam';
 }
 
 function akismet_result_hold( $approved ) {
+	// once only
+	remove_filter( 'pre_comment_approved', 'akismet_result_hold' );
 	return '0';
 }
 
