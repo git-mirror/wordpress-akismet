@@ -10,4 +10,4 @@
 
 
 span.comment-link a { text-decoration: underline; }
-span.comment-link:after { content: " → " attr(title) " "; color: #aaa; text-decoration: none; }
+span.comment-link:after { content: " " attr(title) " "; color: #aaa; text-decoration: none; }
