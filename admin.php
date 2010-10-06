@@ -546,12 +546,12 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 		$reporter = $current_user->user_login;
 		
 	if ( $new_status == 'spam' ) {
-		if ( !empty( $_POST['spam'] ) || @$_POST['action'] == 'spam' || @$_GET['action'] == 'spam' || @$_POST['action'] == 'editedcomment' )
+		if ( !empty( $_POST['spam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'spam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'spam' ) )
 			akismet_submit_spam_comment( $comment->comment_ID );
 		elseif ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
 			akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to spam'), $reporter ), 'status-spam' );
 	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
-		if ( !empty( $_POST['unspam'] ) || @$_POST['action'] == 'unspam' || @$_GET['action'] == 'unspam' || @$_POST['action'] == 'editedcomment' )
+		if ( !empty( $_POST['unspam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'unspam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'unspam' ) )
 			akismet_submit_nonspam_comment( $comment->comment_ID );
 		elseif ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
 			akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
