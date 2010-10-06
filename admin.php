@@ -7,7 +7,7 @@ function akismet_admin_init() {
     global $wp_version;
     
     // all admin functions are disabled in old versions
-    if ( version_compare( $wp_version, '3.0', '<' ) ) {
+    if ( !function_exists('is_multisite') && version_compare( $wp_version, '3.0', '<' ) ) {
         
         function akismet_version_warning() {
             echo "
