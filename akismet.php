@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 define('AKISMET_VERSION', '2.5.0');
+define('AKISMET_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 /** If you hardcode a WP.com API key here, all key config screens will be hidden */
 if ( defined('WPCOM_API_KEY') )
