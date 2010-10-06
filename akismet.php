@@ -346,7 +346,7 @@ function akismet_delete_old() {
 
 add_action('akismet_scheduled_delete', 'akismet_delete_old');
 
-function akismet_check_db_comment( $id ) {
+function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
     global $wpdb, $akismet_api_host, $akismet_api_port;
 
     $id = (int) $id;
@@ -364,6 +364,7 @@ function akismet_check_db_comment( $id ) {
     $id = $c['comment_ID'];
 	if ( WP_DEBUG )
 		$c['is_test'] = 'true';
+	$c['recheck_reason'] = $recheck_reason;
 
     $query_string = '';
     foreach ( $c as $key => $data )
@@ -384,7 +385,7 @@ function akismet_cron_recheck( $data ) {
 
 	foreach ( (array) $comment_errors as $comment_id ) {
 		add_comment_meta( $comment_id, 'akismet_rechecking', true );
-		$status = akismet_check_db_comment( $comment_id );
+		$status = akismet_check_db_comment( $comment_id, 'retry' );
 
 		$msg = '';
 		if ( $status == 'true' ) {
