@@ -197,7 +197,7 @@ function akismet_conf() {
 	?>
 		<tr>
 		<td><?php echo htmlspecialchars($ip); ?></td>
-		<td style="padding: 0 .5em; font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('No problems') : __('Re-trying') ); ?></td>
+		<td style="padding: 0 .5em; font-weight:bold; color: #fff; background-color: <?php echo $color; ?>"><?php echo ($status ? __('Accessible') : __('Re-trying') ); ?></td>
 		
 	<?php
 		}
@@ -642,3 +642,57 @@ function akismet_recheck_queue() {
 }
 
 add_action('admin_action_akismet_recheck_queue', 'akismet_recheck_queue');
+
+// Check connectivity between the WordPress blog and Akismet's servers.
+// Returns an associative array of server IP addresses, where the key is the IP address, and value is true (available) or false (unable to connect).
+function akismet_check_server_connectivity() {
+	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
+	
+	$test_host = 'rest.akismet.com';
+	
+	// Some web hosts may disable one or both functions
+	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') )
+		return array();
+	
+	$ips = gethostbynamel($test_host);
+	if ( !$ips || !is_array($ips) || !count($ips) )
+		return array();
+		
+	$servers = array();
+	foreach ( $ips as $ip ) {
+		$response = akismet_verify_key( akismet_get_key(), $ip );
+		// even if the key is invalid, at least we know we have connectivity
+		if ( $response == 'valid' || $response == 'invalid' )
+			$servers[$ip] = true;
+		else
+			$servers[$ip] = false;
+	}
+
+	return $servers;
+}
+
+// Check the server connectivity and store the results in an option.
+// Cached results will be used if not older than the specified timeout in seconds; use $cache_timeout = 0 to force an update.
+// Returns the same associative array as akismet_check_server_connectivity()
+function akismet_get_server_connectivity( $cache_timeout = 86400 ) {
+	$servers = get_option('akismet_available_servers');
+	if ( (time() - get_option('akismet_connectivity_time') < $cache_timeout) && $servers !== false )
+		return $servers;
+	
+	// There's a race condition here but the effect is harmless.
+	$servers = akismet_check_server_connectivity();
+	update_option('akismet_available_servers', $servers);
+	update_option('akismet_connectivity_time', time());
+	return $servers;
+}
+
+// Returns true if server connectivity was OK at the last check, false if there was a problem that needs to be fixed.
+function akismet_server_connectivity_ok() {
+	// skip the check on WPMU because the status page is hidden
+	global $wpcom_api_key;
+	if ( $wpcom_api_key )
+		return true;
+	$servers = akismet_get_server_connectivity();
+	return !( empty($servers) || !count($servers) || count( array_filter($servers) ) < count($servers) );
+}
+

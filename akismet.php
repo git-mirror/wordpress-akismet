@@ -80,85 +80,6 @@ function akismet_verify_key( $key, $ip = null ) {
 	return $response[1];
 }
 
-// Check connectivity between the WordPress blog and Akismet's servers.
-// Returns an associative array of server IP addresses, where the key is the IP address, and value is true (available) or false (unable to connect).
-function akismet_check_server_connectivity() {
-	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
-	
-	$test_host = 'rest.akismet.com';
-	
-	// Some web hosts may disable one or both functions
-	if ( !function_exists('fsockopen') || !function_exists('gethostbynamel') )
-		return array();
-	
-	$ips = gethostbynamel($test_host);
-	if ( !$ips || !is_array($ips) || !count($ips) )
-		return array();
-		
-	$servers = array();
-	foreach ( $ips as $ip ) {
-		$response = akismet_verify_key( akismet_get_key(), $ip );
-		// even if the key is invalid, at least we know we have connectivity
-		if ( $response == 'valid' || $response == 'invalid' )
-			$servers[$ip] = true;
-		else
-			$servers[$ip] = false;
-	}
-
-	return $servers;
-}
-
-// Check the server connectivity and store the results in an option.
-// Cached results will be used if not older than the specified timeout in seconds; use $cache_timeout = 0 to force an update.
-// Returns the same associative array as akismet_check_server_connectivity()
-function akismet_get_server_connectivity( $cache_timeout = 86400 ) {
-	$servers = get_option('akismet_available_servers');
-	if ( (time() - get_option('akismet_connectivity_time') < $cache_timeout) && $servers !== false )
-		return $servers;
-	
-	// There's a race condition here but the effect is harmless.
-	$servers = akismet_check_server_connectivity();
-	update_option('akismet_available_servers', $servers);
-	update_option('akismet_connectivity_time', time());
-	return $servers;
-}
-
-// Returns true if server connectivity was OK at the last check, false if there was a problem that needs to be fixed.
-function akismet_server_connectivity_ok() {
-	// skip the check on WPMU because the status page is hidden
-	global $wpcom_api_key;
-	if ( $wpcom_api_key )
-		return true;
-	$servers = akismet_get_server_connectivity();
-	return !( empty($servers) || !count($servers) || count( array_filter($servers) ) < count($servers) );
-}
-
-function akismet_get_host($host) {
-	// if all servers are accessible, just return the host name.
-	// if not, return an IP that was known to be accessible at the last check.
-	if ( akismet_server_connectivity_ok() ) {
-		return $host;
-	} else {
-		$ips = akismet_get_server_connectivity();
-		// a firewall may be blocking access to some Akismet IPs
-		if ( count($ips) > 0 && count(array_filter($ips)) < count($ips) ) {
-			// use DNS to get current IPs, but exclude any known to be unreachable
-			$dns = (array)gethostbynamel( rtrim($host, '.') . '.' );
-			$dns = array_filter($dns);
-			foreach ( $dns as $ip ) {
-				if ( array_key_exists( $ip, $ips ) && empty( $ips[$ip] ) )
-					unset($dns[$ip]);
-			}
-			// return a random IP from those available
-			if ( count($dns) )
-				return $dns[ array_rand($dns) ];
-			
-		}
-	}
-	// if all else fails try the host name
-	return $host;
-}
-
 // return a comma-separated list of role names for the given user
 function akismet_get_user_roles($user_id ) {
 	$roles = false;
@@ -190,7 +111,7 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 	if ( $ip && long2ip( ip2long( $ip ) ) ) {
 		$http_host = $ip;
 	} else {
-		$http_host = akismet_get_host( $host );
+		$http_host = $host;
 	}
 	
 	// use the WP HTTP class if it is available
