@@ -306,9 +306,17 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 				if ( $akismet_last_comment['akismet_result'] == 'true' ) {
 					update_comment_meta( $comment->comment_ID, 'akismet_result', 'true' );
 					akismet_update_comment_history( $comment->comment_ID, __('Akismet caught this comment as spam'), 'check-spam' );
+					if ( $comment->comment_approved != 'spam' )
+						akismet_update_comment_history( $comment->comment_ID, sprintf( __('Comment status was changed to %s'), $comment->comment_approved), 'status-changed'.$comment->comment_approved );
 				} elseif ( $akismet_last_comment['akismet_result'] == 'false' ) {
 					update_comment_meta( $comment->comment_ID, 'akismet_result', 'false' );
 					akismet_update_comment_history( $comment->comment_ID, __('Akismet cleared this comment'), 'check-ham' );
+					if ( $comment->comment_approved == 'spam' ) {
+						if ( wp_blacklist_check($comment->comment_author, $comment->comment_author_email, $comment->comment_author_url, $comment->comment_content, $comment->comment_author_IP, $comment->comment_agent) )
+							akismet_update_comment_history( $comment->comment_ID, __('Comment was caught by wp_blacklist_check'), 'wp-blacklisted' );
+						else
+							akismet_update_comment_history( $comment->comment_ID, sprintf( __('Comment status was changed to %s'), $comment->comment_approved), 'status-changed-'.$comment->comment_approved );
+					}
 				// abnormal result: error
 				} else {
 					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
