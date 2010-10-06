@@ -38,8 +38,17 @@ $akismet_nonce = 'akismet-update-key';
 function akismet_config_page() {
 	if ( function_exists('add_submenu_page') )
 		add_submenu_page('plugins.php', __('Akismet Configuration'), __('Akismet Configuration'), 'manage_options', 'akismet-key-config', 'akismet_conf');
-
 }
+
+function akismet_plugin_action_links( $links, $file ) {
+	if ( $file == plugin_basename( dirname(__FILE__).'/akismet.php' ) ) {
+		$links[] = '<a href="plugins.php?page=akismet-key-config">'.__('Settings').'</a>';
+	}
+
+	return $links;
+}
+
+add_filter( 'plugin_action_links', 'akismet_plugin_action_links', 10, 2 );
 
 function akismet_conf() {
 	global $akismet_nonce, $wpcom_api_key;
