@@ -260,6 +260,11 @@ function akimset_get_user_comments_approved( $user_id, $comment_author_email, $c
 	return 0;
 }
 
+function akismet_microtime() {
+	$mtime = explode( ' ', microtime() );
+	return $mtime[1] + $mtime[0];
+}
+
 // log an event for a given comment, storing it in comment_meta
 function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 	global $current_user;
@@ -268,13 +273,15 @@ function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 	if ( is_object($current_user) )
 		$user = $current_user->user_login;
 
+	error_log("akismet_update_comment_history $comment_id, $message, $event");
+	
 	$event = array(
-		'time' => time(),
+		'time' => akismet_microtime(),
 		'message' => $message,
 		'event' => $event,
 		'user' => $user,
 	);
-	
+
 	// $unique = false so as to allow multiple values per comment
 	$r = add_comment_meta( $comment_id, 'akismet_history', $event, false );
 }
