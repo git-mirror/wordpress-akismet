@@ -41,7 +41,7 @@ if ( !function_exists( 'add_action' ) ) {
 	exit;
 }
 
-if ( $wp_db_version <= 9872 )
+if ( isset($wp_db_version) && $wp_db_version <= 9872 )
 	include_once dirname( __FILE__ ) . '/legacy.php';
 
 include_once dirname( __FILE__ ) . '/widget.php';
