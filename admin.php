@@ -81,6 +81,10 @@ function akismet_conf() {
 			update_option( 'akismet_discard_month', 'true' );
 		else
 			update_option( 'akismet_discard_month', 'false' );
+		if ( isset( $_POST['akismet_show_user_comments_approved'] ) )
+			update_option( 'akismet_show_user_comments_approved', 'true' );
+		else
+			update_option( 'akismet_show_user_comments_approved', 'false' );
 	} elseif ( isset($_POST['check']) ) {
 		akismet_get_server_connectivity(0);
 	}
@@ -140,6 +144,7 @@ function akismet_conf() {
 <?php } ?>
 <?php akismet_nonce_field($akismet_nonce) ?>
 <p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Auto-delete spam submitted on posts more than a month old.'); ?></label></p>
+<p><label><input name="akismet_show_user_comments_approved" id="akismet_show_user_comments_approved" value="true" type="checkbox" <?php if ( get_option('akismet_show_user_comments_approved') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Show the number of comments you\'ve approved beside each comment author.'); ?></label></p>
 	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
 </form>
 
@@ -317,7 +322,7 @@ function akismet_comment_row_action( $a, $comment ) {
 	if ( $desc )
 		echo '<span class="akismet-status" commentid="'.$comment->comment_ID.'"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
 		
-	if ( get_option('comment_whitelist') || get_option('comment_moderation') ) {
+	if ( apply_filters( 'akismet_show_user_comments_approved', get_option('akismet_show_user_comments_approved') ) == 'true' ) {
 		$comment_count = akimset_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
 		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( __( '%s approved' ), intval($comment_count) ).'</span></span>';
 	}
