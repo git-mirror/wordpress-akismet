@@ -545,6 +545,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
 	if ( $new_status == $old_status )
 		return;
+
+	if ( defined('WP_IMPORTING') && WP_IMPORTING == true )
+		return;
 		
 	global $current_user;
 	$reporter = '';
