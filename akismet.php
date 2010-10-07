@@ -377,6 +377,8 @@ function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
 function akismet_cron_recheck( $data ) {
 	global $wpdb;
 
+	delete_option('akismet_available_servers');
+
 	$comment_errors = $wpdb->get_col( "
 		SELECT comment_id
 		FROM {$wpdb->prefix}commentmeta
