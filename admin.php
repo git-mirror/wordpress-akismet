@@ -11,7 +11,7 @@ function akismet_admin_init() {
         
         function akismet_version_warning() {
             echo "
-            <div id='akismet-warning' class='updated fade'><p><strong>".sprintf(__('Akismet %s required WordPress 3.0 or higher.'), AKISMET_VERSION) ."</strong> ".sprintf(__('Please <a href="%s">upgrade WordPress</a> to a current version, or <a href="%s">downgrade to version 2.4 of the Akismet plugin</a>.'), 'http://codex.wordpress.org/Upgrading_WordPress', 'http://wordpress.org/extend/plugins/akismet/download/'). "</p></div>
+            <div id='akismet-warning' class='updated fade'><p><strong>".sprintf(__('Akismet %s requires WordPress 3.0 or higher.'), AKISMET_VERSION) ."</strong> ".sprintf(__('Please <a href="%s">upgrade WordPress</a> to a current version, or <a href="%s">downgrade to version 2.4 of the Akismet plugin</a>.'), 'http://codex.wordpress.org/Upgrading_WordPress', 'http://wordpress.org/extend/plugins/akismet/download/'). "</p></div>
             ";
         }
         add_action('admin_notices', 'akismet_version_warning'); 
