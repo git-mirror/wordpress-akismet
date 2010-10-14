@@ -59,7 +59,7 @@ function akismet_conf() {
 
 		check_admin_referer( $akismet_nonce );
 		$key = preg_replace( '/[^a-h0-9]/i', '', $_POST['key'] );
-		$home_url = @parse_url( get_bloginfo('url') );
+		$home_url = parse_url( get_bloginfo('url') );
 
 		if ( empty($key) ) {
 			$key_status = 'empty';
@@ -125,7 +125,7 @@ function akismet_conf() {
 		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/')),
 		'key_valid' => array('color' => '4AB915', 'text' => __('This key is valid.')),
 		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')),
-		'bad_home_url' => array('color' => '888', 'text' => sprintf( __('Your WordPress home URL %s is invalid.  Please fix the <a href="%s">home option</a>.'), get_bloginfo('url'), admin_url('options.php#home') ) ),
+		'bad_home_url' => array('color' => '888', 'text' => sprintf( __('Your WordPress home URL %s is invalid.  Please fix the <a href="%s">home option</a>.'), esc_html( get_bloginfo('url') ), admin_url('options.php#home') ) ),
 	);
 ?>
 <?php if ( !empty($_POST['submit'] ) ) : ?>
