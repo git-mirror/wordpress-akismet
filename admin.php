@@ -59,11 +59,15 @@ function akismet_conf() {
 
 		check_admin_referer( $akismet_nonce );
 		$key = preg_replace( '/[^a-h0-9]/i', '', $_POST['key'] );
+		$home_url = @parse_url( get_bloginfo('url') );
 
 		if ( empty($key) ) {
 			$key_status = 'empty';
 			$ms[] = 'new_key_empty';
 			delete_option('wordpress_api_key');
+		} elseif ( empty($home_url['host']) ) {
+			$key_status = 'empty';
+			$ms[] = 'bad_home_url';
 		} else {
 			$key_status = akismet_verify_key( $key );
 		}
@@ -120,7 +124,9 @@ function akismet_conf() {
 		'no_connection' => array('color' => '888', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
 		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/')),
 		'key_valid' => array('color' => '4AB915', 'text' => __('This key is valid.')),
-		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')));
+		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')),
+		'bad_home_url' => array('color' => '888', 'text' => sprintf( __('Your WordPress home URL %s is invalid.  Please fix the <a href="%s">home option</a>.'), get_bloginfo('url'), admin_url('options.php#home') ) ),
+	);
 ?>
 <?php if ( !empty($_POST['submit'] ) ) : ?>
 <div id="message" class="updated fade"><p><strong><?php _e('Options saved.') ?></strong></p></div>
@@ -243,7 +249,7 @@ addLoadEvent(resizeIframeInit);
 
 function akismet_stats_display() {
 	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
-	$blog = urlencode( get_option('home') );
+	$blog = urlencode( get_bloginfo('url') );
 
 	$url = 'http://';
 	if ( is_ssl() )
@@ -469,7 +475,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
 		return;
-	$comment->blog = get_option('home');
+	$comment->blog = get_bloginfo('url');
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
@@ -510,7 +516,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 		return;
 	if ( 'spam' != $comment->comment_approved )
 		return;
-	$comment->blog = get_option('home');
+	$comment->blog = get_bloginfo('url');
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
@@ -607,7 +613,7 @@ function akismet_recheck_queue() {
 		$c['user_ip']    = $c['comment_author_IP'];
 		$c['user_agent'] = $c['comment_agent'];
 		$c['referrer']   = '';
-		$c['blog']       = get_option('home');
+		$c['blog']       = get_bloginfo('url');
 		$c['blog_lang']  = get_locale();
 		$c['blog_charset'] = get_option('blog_charset');
 		$c['permalink']  = get_permalink($c['comment_post_ID']);
