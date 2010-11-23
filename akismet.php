@@ -192,13 +192,15 @@ function akismet_microtime() {
 // log an event for a given comment, storing it in comment_meta
 function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 	global $current_user;
+
+	// failsafe for old WP versions
+	if ( !function_exists('add_comment_meta') )
+		return false;
 	
 	$user = '';
 	if ( is_object($current_user) )
 		$user = $current_user->user_login;
 
-	error_log("akismet_update_comment_history $comment_id, $message, $event");
-	
 	$event = array(
 		'time' => akismet_microtime(),
 		'message' => $message,
@@ -213,6 +215,10 @@ function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 // get the full comment history for a given comment, as an array in reverse chronological order
 function akismet_get_comment_history( $comment_id ) {
 	
+	// failsafe for old WP versions
+	if ( !function_exists('add_comment_meta') )
+		return false;
+
 	$history = get_comment_meta( $comment_id, 'akismet_history', false );
 	usort( $history, 'akismet_cmp_time' );
 	return $history;
@@ -226,6 +232,10 @@ function akismet_cmp_time( $a, $b ) {
 // because we don't know the comment ID at that point.
 function akismet_auto_check_update_meta( $id, $comment ) {
 	global $akismet_last_comment;
+
+	// failsafe for old WP versions
+	if ( !function_exists('add_comment_meta') )
+		return false;
 
 	// wp_insert_comment() might be called in other contexts, so make sure this is the same comment
 	// as was checked by akismet_auto_check_comment

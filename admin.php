@@ -308,7 +308,11 @@ function akismet_admin_warnings() {
 // FIXME placeholder
 
 function akismet_comment_row_action( $a, $comment ) {
-	
+
+	// failsafe for old WP versions
+	if ( !function_exists('add_comment_meta') )
+		return $a;
+
 	$akismet_result = get_comment_meta( $comment->comment_ID, 'akismet_result', true );
 	$user_result = get_comment_meta( $comment->comment_ID, 'akismet_user_result', true);
 	$desc = null;
