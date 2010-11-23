@@ -6,8 +6,7 @@
 .author strong { padding-left: 42px; font-size: 14px; position: relative; }
 .author .akismet-user-comment-count { display: inline; }
 .author .akismet-user-comment-counts { padding-left: 42px; }
-.akismet-status { position: absolute; top: 2px; right: 0; background: #EEE; border: 1px solid #E4E4E4; margin-top: 3px; color: #999; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em; }}
-
-
+.akismet-status { background: #EEE; border: 1px solid #E4E4E4; color: #999; margin-bottom: 5px; padding: 1px 8px 2px 8px; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; float: right; line-height: 1.2em; }
+.row-actions { margin-top: -3px; }
 span.comment-link a { text-decoration: underline; }
 span.comment-link:after { content: " " attr(title) " "; color: #aaa; text-decoration: none; }
