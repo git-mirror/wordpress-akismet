@@ -479,10 +479,18 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID = '$comment_id'");
 	if ( !$comment ) // it was deleted
 		return;
+		
+	// use the original version stored in comment_meta if available	
+	$as_submitted = get_comment_meta( $comment_id, 'akismet_as_submitted', true);
+	if ( $as_submitted && is_array($as_submitted) && isset($as_submitted['comment_content']) ) {
+		$comment = (object) $as_submitted;
+	}
+	
 	$comment->blog = get_bloginfo('url');
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
+	$comment->reporter_ip = $_SERVER['REMOTE_ADDR'];
 	if ( is_object($current_user) ) {
 	    $comment->reporter = $current_user->user_login;
 	}
@@ -520,10 +528,18 @@ function akismet_submit_spam_comment ( $comment_id ) {
 		return;
 	if ( 'spam' != $comment->comment_approved )
 		return;
+	
+	// use the original version stored in comment_meta if available	
+	$as_submitted = get_comment_meta( $comment_id, 'akismet_as_submitted', true);
+	if ( $as_submitted && is_array($as_submitted) && isset($as_submitted['comment_content']) ) {
+		$comment = (object) $as_submitted;
+	}
+	
 	$comment->blog = get_bloginfo('url');
 	$comment->blog_lang = get_locale();
 	$comment->blog_charset = get_option('blog_charset');
 	$comment->permalink = get_permalink($comment->comment_post_ID);
+	$comment->reporter_ip = $_SERVER['REMOTE_ADDR'];
 	if ( is_object($current_user) ) {
 	    $comment->reporter = $current_user->user_login;
 	}
@@ -532,7 +548,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	}
 
 	$comment->user_role = '';
-	if ( !isset( $comment->user_id ) )
+	if ( isset( $comment->user_ID ) )
 		$comment->user_role = akismet_get_user_roles($comment->user_ID);
 
 	if ( WP_DEBUG )

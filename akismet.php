@@ -264,6 +264,9 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s), will automatically retry again later.'), $akismet_last_comment['akismet_result']), 'check-error' );
 				}
 				
+				// record the complete original data as submitted for checking
+				if ( isset($akismet_last_comment['comment_as_submitted']) )
+					update_comment_meta( $comment->comment_ID, 'akismet_as_submitted', $akismet_last_comment['comment_as_submitted'] );
 		}
 	}
 }
@@ -286,18 +289,26 @@ function akismet_auto_check_comment( $commentdata ) {
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
 	if ( WP_DEBUG )
 		$comment['is_test'] = 'true';
+		
+	foreach ($_POST as $key => $value ) {
+		if ( is_string($value) )
+			$comment["POST_{$key}"] = $value;
+	}
 
 	$ignore = array( 'HTTP_COOKIE', 'HTTP_COOKIE2', 'PHP_AUTH_PW' );
 
-	foreach ( $_SERVER as $key => $value )
+	foreach ( $_SERVER as $key => $value ) {
 		if ( !in_array( $key, $ignore ) && is_string($value) )
 			$comment["$key"] = $value;
 		else
 			$comment["$key"] = '';
+	}
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
+		
+	$commentdata['comment_as_submitted'] = $comment;
 
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 	$commentdata['akismet_result'] = $response[1];
