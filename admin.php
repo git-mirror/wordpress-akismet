@@ -133,6 +133,9 @@ function akismet_conf() {
 <?php endif; ?>
 <div class="wrap">
 <h2><?php _e('Akismet Configuration'); ?></h2>
+<?php if (isset($_GET['message']) && $_GET['message'] == 'success') { ?>
+	<div class="updated below-h2" id="message"><p><strong>Sign up success!</strong> Please check your email for your Akismet API Key and enter it below.</p></div>
+<?php } ?>
 <div class="narrow">
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
 <?php if ( !$wpcom_api_key ) { ?>
