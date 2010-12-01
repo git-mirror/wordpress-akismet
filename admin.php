@@ -486,7 +486,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	// use the original version stored in comment_meta if available	
 	$as_submitted = get_comment_meta( $comment_id, 'akismet_as_submitted', true);
 	if ( $as_submitted && is_array($as_submitted) && isset($as_submitted['comment_content']) ) {
-		$comment = (object) $as_submitted;
+		$comment = (object) array_merge( (array)$comment, $as_submitted );
 	}
 	
 	$comment->blog = get_bloginfo('url');
@@ -505,7 +505,7 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 	if ( isset( $comment->user_ID ) )
 		$comment->user_role = akismet_get_user_roles($comment->user_ID);
 
-	if ( WP_DEBUG )
+	if ( akismet_test_mode() )
 		$comment->is_test = 'true';
 
 	$query_string = '';
@@ -535,7 +535,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	// use the original version stored in comment_meta if available	
 	$as_submitted = get_comment_meta( $comment_id, 'akismet_as_submitted', true);
 	if ( $as_submitted && is_array($as_submitted) && isset($as_submitted['comment_content']) ) {
-		$comment = (object) $as_submitted;
+		$comment = (object) array_merge( (array)$comment, $as_submitted );
 	}
 	
 	$comment->blog = get_bloginfo('url');
@@ -554,7 +554,7 @@ function akismet_submit_spam_comment ( $comment_id ) {
 	if ( isset( $comment->user_ID ) )
 		$comment->user_role = akismet_get_user_roles($comment->user_ID);
 
-	if ( WP_DEBUG )
+	if ( akismet_test_mode() )
 		$comment->is_test = 'true';
 
 	$query_string = '';
@@ -645,7 +645,7 @@ function akismet_recheck_queue() {
 		if ( isset( $c['user_ID'] ) )
 			$c['user_role']  = akismet_get_user_roles($c['user_ID']);
 
-		if ( WP_DEBUG )
+		if ( akismet_test_mode() )
 			$c['is_test'] = 'true';
 
 		$id = (int) $c['comment_ID'];

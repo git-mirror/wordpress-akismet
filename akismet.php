@@ -81,6 +81,15 @@ function akismet_verify_key( $key, $ip = null ) {
 	return $response[1];
 }
 
+// if we're in debug or test modes, use a reduced service level so as not to polute training or stats data
+function akismet_test_mode() {
+	if ( defined('WP_DEBUG') && WP_DEBUG )
+		return true;
+	if ( defined('AKISMET_TEST_MODE') && AKISMET_TEST_MODE )
+		return true;
+	return false;
+}
+
 // return a comma-separated list of role names for the given user
 function akismet_get_user_roles($user_id ) {
 	$roles = false;
@@ -287,7 +296,7 @@ function akismet_auto_check_comment( $commentdata ) {
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
 	
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
-	if ( WP_DEBUG )
+	if ( akismet_test_mode() )
 		$comment['is_test'] = 'true';
 		
 	foreach ($_POST as $key => $value ) {
@@ -384,7 +393,7 @@ function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
     $c['blog_charset'] = get_option('blog_charset');
     $c['permalink']  = get_permalink($c['comment_post_ID']);
     $id = $c['comment_ID'];
-	if ( WP_DEBUG )
+	if ( akismet_test_mode() )
 		$c['is_test'] = 'true';
 	$c['recheck_reason'] = $recheck_reason;
 
