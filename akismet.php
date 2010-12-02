@@ -436,6 +436,13 @@ function akismet_cron_recheck( $data ) {
 			update_comment_meta( $comment_id, 'akismet_result', $status );
 			if ( $status == 'true' )
 				wp_spam_comment( $comment_id );
+			elseif ( $status == 'false' ) {
+				// comment is good, but it's still in the pending queue. depending on the moderation settings
+				// we may need to change it to approved.
+				$comment = get_comment( $comment_id );
+				if ( check_comment($comment->comment_author, $comment->comment_author_email, $comment->comment_author_url, $comment->comment_content, $comment->comment_author_IP, $comment->comment_agent, $comment->comment_type) )
+					wp_set_comment_status( $comment_id, 1 );
+			}
 		} else {
 			delete_comment_meta( $comment_id, 'akismet_rechecking' );
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
