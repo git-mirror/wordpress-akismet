@@ -304,6 +304,10 @@ function akismet_auto_check_comment( $commentdata ) {
 		if ( isset( $_POST['akismet_comment_nonce'] ) && wp_verify_nonce( $_POST['akismet_comment_nonce'], 'akismet_comment_nonce_' . $comment['comment_post_ID'] ) )
 			$comment['akismet_comment_nonce'] = 'passed';
 
+		// comment reply in wp-admin
+		if ( isset( $_POST['_ajax_nonce-replyto-comment'] ) && check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' ) )
+			$comment['akismet_comment_nonce'] = 'passed';
+
 	}
 
 	if ( akismet_test_mode() )
