@@ -296,6 +296,16 @@ function akismet_auto_check_comment( $commentdata ) {
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
 	
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
+
+	$akismet_nonce_option = get_option( 'akismet_comment_nonce' );
+	$comment['akismet_comment_nonce'] = 'inactive';
+	if ( $akismet_nonce_option == 'true' || $akismet_nonce_option == '' ) {
+		$comment['akismet_comment_nonce'] = 'failed';
+		if ( isset( $_POST['akismet_comment_nonce'] ) && wp_verify_nonce( $_POST['akismet_comment_nonce'], 'akismet_comment_nonce_' . $comment['comment_post_ID'] ) )
+			$comment['akismet_comment_nonce'] = 'passed';
+
+	}
+
 	if ( akismet_test_mode() )
 		$comment['is_test'] = 'true';
 		
@@ -437,7 +447,7 @@ function akismet_cron_recheck( $data ) {
 			if ( $status == 'true' )
 				wp_spam_comment( $comment_id );
 			elseif ( $status == 'false' ) {
-				// comment is good, but it's still in the pending queue. depending on the moderation settings
+				// comment is good, but it's still in the pending queue.  depending on the moderation settings
 				// we may need to change it to approved.
 				$comment = get_comment( $comment_id );
 				if ( check_comment($comment->comment_author, $comment->comment_author_email, $comment->comment_author_url, $comment->comment_content, $comment->comment_author_IP, $comment->comment_agent, $comment->comment_type) )
@@ -451,3 +461,10 @@ function akismet_cron_recheck( $data ) {
 	}
 }
 add_action( 'akismet_schedule_cron_recheck', 'akismet_cron_recheck' );
+
+function akismet_add_comment_nonce( $post_id ) {
+	wp_nonce_field( 'akismet_comment_nonce_' . $post_id, 'akismet_comment_nonce', FALSE );
+}
+
+if ( get_option( 'akismet_comment_nonce' ) == 'true' || get_option( 'akismet_comment_nonce' ) == '' )
+	add_action( 'comment_form', 'akismet_add_comment_nonce' );
