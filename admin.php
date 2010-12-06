@@ -161,7 +161,7 @@ function akismet_conf() {
 <?php akismet_nonce_field($akismet_nonce) ?>
 <p><label><input name="akismet_discard_month" id="akismet_discard_month" value="true" type="checkbox" <?php if ( get_option('akismet_discard_month') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Auto-delete spam submitted on posts more than a month old.'); ?></label></p>
 <p><label><input name="akismet_show_user_comments_approved" id="akismet_show_user_comments_approved" value="true" type="checkbox" <?php if ( get_option('akismet_show_user_comments_approved') == 'true' ) echo ' checked="checked" '; ?> /> <?php _e('Show the number of comments you\'ve approved beside each comment author.'); ?></label></p>
-<p><label><input type="akismet_comment_nonce" id="akismet_comment_nonce" value="true" type="checkbox" <?php if ( get_option( 'akismet_comment_nonce' ) == 'true' || get_option( 'akismet_comment_nonce' ) == '' ) echo ' checked="checked" '; ?> /> <?php _e( 'Use a nonce on the comment form.' ); ?></label></p>
+<p><label><input name="akismet_comment_nonce" id="akismet_comment_nonce" value="true" type="checkbox" <?php if ( get_option( 'akismet_comment_nonce' ) == 'true' || get_option( 'akismet_comment_nonce' ) == '' ) echo ' checked="checked" '; ?> /> <?php _e( 'Use a nonce on the comment form.' ); ?></label></p>
 	<p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
 </form>
 
