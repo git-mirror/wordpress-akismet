@@ -1,7 +1,7 @@
 === Akismet ===
-Contributors: matt, ryan, andy, mdawaffe, tellyworth, josephscott, automattic
+Contributors: matt, ryan, andy, mdawaffe, tellyworth, josephscott, lessbloat, automattic
 Tags: akismet, comments, spam
-Requires at least: 2.0
+Requires at least: 3.0
 Tested up to: 3.0
 Stable tag: 2.5.0
 License: GPLv2
@@ -34,6 +34,13 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Use HTTPS for the stats IFRAME when wp-admin is using HTTPS
 * Use the WordPress HTTP class if available
 * Move the admin UI code to a separate file, only loaded when needed
+* Add cron retry feature, to replace the old connectivity check
+* Display Akismet status badge beside each comment
+* Record history for each comment, and display it on the edit page
+* Record the complete comment as originally submitted in comment_meta, to use when reporting spam and ham
+* Highlight links in comment content
+* New option, "Show the number of comments you've approved beside each comment author."
+* New option, "Use a nonce on the comment form."
 
 = 2.4.0 =
 
