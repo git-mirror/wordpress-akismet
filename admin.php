@@ -301,7 +301,7 @@ function akismet_admin_warnings() {
 		}
 		add_action('admin_notices', 'akismet_warning');
 		return;
-	} elseif ( wp_next_scheduled('akismet_schedule_cron_recheck') ) {
+	} elseif ( ( empty($_SERVER['SCRIPT_FILENAME']) || basename($_SERVER['SCRIPT_FILENAME']) == 'edit-comments.php' ) &&  wp_next_scheduled('akismet_schedule_cron_recheck') ) {
 		function akismet_warning() {
 			global $wpdb;
 				$waiting = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE meta_key = 'akismet_error'" ) );
@@ -593,15 +593,14 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 		
 	if ( $new_status == 'spam' ) {
 		if ( !empty( $_POST['spam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'spam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'spam' ) )
-			akismet_submit_spam_comment( $comment->comment_ID );
-		elseif ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
-			akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to spam'), $reporter ), 'status-spam' );
+			return akismet_submit_spam_comment( $comment->comment_ID );
 	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
 		if ( !empty( $_POST['unspam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'unspam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'unspam' ) )
-			akismet_submit_nonspam_comment( $comment->comment_ID );
-		elseif ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
-			akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
+			return akismet_submit_nonspam_comment( $comment->comment_ID );
 	}
+	
+	if ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
+		akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
 }
 
 add_action( 'transition_comment_status', 'akismet_transition_comment_status', 10, 3 );

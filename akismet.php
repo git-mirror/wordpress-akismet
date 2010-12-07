@@ -448,14 +448,17 @@ function akismet_cron_recheck( $data ) {
 			delete_comment_meta( $comment_id, 'akismet_error' );
 			akismet_update_comment_history( $comment_id, $msg, 'cron-retry' );
 			update_comment_meta( $comment_id, 'akismet_result', $status );
-			if ( $status == 'true' )
-				wp_spam_comment( $comment_id );
-			elseif ( $status == 'false' ) {
-				// comment is good, but it's still in the pending queue.  depending on the moderation settings
-				// we may need to change it to approved.
-				$comment = get_comment( $comment_id );
-				if ( check_comment($comment->comment_author, $comment->comment_author_email, $comment->comment_author_url, $comment->comment_content, $comment->comment_author_IP, $comment->comment_agent, $comment->comment_type) )
-					wp_set_comment_status( $comment_id, 1 );
+			// make sure the comment status is still pending.  if it isn't, that means the user has already moved it elsewhere.
+			$comment = get_comment( $comment_id );
+			if ( $comment && 'unapproved' == wp_get_comment_status( $comment_id ) ) {
+				if ( $status == 'true' ) {
+					wp_spam_comment( $comment_id );
+				} elseif ( $status == 'false' ) {
+					// comment is good, but it's still in the pending queue.  depending on the moderation settings
+					// we may need to change it to approved.
+					if ( check_comment($comment->comment_author, $comment->comment_author_email, $comment->comment_author_url, $comment->comment_content, $comment->comment_author_IP, $comment->comment_agent, $comment->comment_type) )
+						wp_set_comment_status( $comment_id, 1 );
+				}
 			}
 		} else {
 			delete_comment_meta( $comment_id, 'akismet_rechecking' );
