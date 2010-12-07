@@ -590,13 +590,19 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 	$reporter = '';
 	if ( is_object( $current_user ) )
 		$reporter = $current_user->user_login;
-		
-	if ( $new_status == 'spam' ) {
-		if ( !empty( $_POST['spam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'spam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'spam' ) )
-			return akismet_submit_spam_comment( $comment->comment_ID );
-	} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
-		if ( !empty( $_POST['unspam'] ) || ( isset($_POST['action']) && ( $_POST['action']  == 'unspam' || $_POST['action'] == 'editedcomment' ) ) || ( isset($_GET['action']) && $_GET['action'] == 'unspam' ) )
-			return akismet_submit_nonspam_comment( $comment->comment_ID );
+	
+	// Assumption alert:
+	// We want to submit comments to Akismet only when a moderator explicitly spams or approves it - not if the status
+	// is changed automatically by another plugin.  Unfortunately WordPress doesn't provide an unambiguous way to
+	// determine why the transition_comment_status action was triggered.  And there are several different ways by which
+	// to spam and unspam comments: bulk actions, ajax, links in moderation emails, the dashboard, and perhaps others.
+	// We'll assume that this is an explicit user action if POST or GET has an 'action' key.
+	if ( isset($_POST['action']) || isset($_GET['action']) ) {
+		if ( $new_status == 'spam' && ( $old_status == 'approved' || $old_status == 'unapproved' || !$old_status ) ) {
+				return akismet_submit_spam_comment( $comment->comment_ID );
+		} elseif ( $old_status == 'spam' && ( $new_status == 'approved' || $new_status == 'unapproved' ) ) {
+				return akismet_submit_nonspam_comment( $comment->comment_ID );
+		}
 	}
 	
 	if ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
