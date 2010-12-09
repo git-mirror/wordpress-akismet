@@ -351,6 +351,7 @@ function akismet_auto_check_comment( $commentdata ) {
 			if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
 			wp_redirect( $_SERVER['HTTP_REFERER'] );
+			die();
 		}
 	}
 	

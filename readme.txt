@@ -31,6 +31,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.5.1 =
+
+* Fix a bug that caused the "Auto delete" option to fail to discard comments correctly
+
 = 2.5.0 =
 
 * Track comment actions under 'Akismet Status' on the edit comment screen
