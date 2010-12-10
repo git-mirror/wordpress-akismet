@@ -429,6 +429,7 @@ function akismet_cron_recheck( $data ) {
 		SELECT comment_id
 		FROM {$wpdb->prefix}commentmeta
 		WHERE meta_key = 'akismet_error'
+		LIMIT 100
 	" );
 
 	foreach ( (array) $comment_errors as $comment_id ) {
@@ -466,6 +467,11 @@ function akismet_cron_recheck( $data ) {
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 			return;
 		}
+	}
+	
+	$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE meta_key = 'akismet_error'" ) );
+	if ( $remaining && !wp_next_scheduled('akismet_schedule_cron_recheck') ) {
+		wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 	}
 }
 add_action( 'akismet_schedule_cron_recheck', 'akismet_cron_recheck' );
