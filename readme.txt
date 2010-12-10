@@ -21,7 +21,7 @@ Major new features in Akismet 2.5 include:
 * Moderators can see the number of approved comments for each user
 * Spam and Unspam reports now include more information, to help improve accuracy
 
-PS: You'll need an [Akismet.com API key](http://akismet.com/signup/) to use it.  Keys are free for personal blogs, with paid subscriptions available for businesses and commercial sites.
+PS: You'll need an [Akismet.com API key](http://akismet.com/get/) to use it.  Keys are free for personal blogs, with paid subscriptions available for businesses and commercial sites.
 
 == Installation ==
 
