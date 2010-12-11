@@ -83,8 +83,6 @@ function akismet_verify_key( $key, $ip = null ) {
 
 // if we're in debug or test modes, use a reduced service level so as not to polute training or stats data
 function akismet_test_mode() {
-	if ( defined('WP_DEBUG') && WP_DEBUG )
-		return true;
 	if ( defined('AKISMET_TEST_MODE') && AKISMET_TEST_MODE )
 		return true;
 	return false;
