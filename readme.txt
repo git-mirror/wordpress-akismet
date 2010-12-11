@@ -34,6 +34,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 = 2.5.1 =
 
 * Fix a bug that caused the "Auto delete" option to fail to discard comments correctly
+* Remove the comment nonce form field from the 'Akismet Configuration' page in favor of using a filter, akismet_comment_nonce
 
 = 2.5.0 =
 

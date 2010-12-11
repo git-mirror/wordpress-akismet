@@ -297,7 +297,7 @@ function akismet_auto_check_comment( $commentdata ) {
 	
 	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
 
-	$akismet_nonce_option = get_option( 'akismet_comment_nonce' );
+	$akismet_nonce_option = apply_filters( 'akismet_comment_nonce', get_option( 'akismet_comment_nonce' ) );
 	$comment['akismet_comment_nonce'] = 'inactive';
 	if ( $akismet_nonce_option == 'true' || $akismet_nonce_option == '' ) {
 		$comment['akismet_comment_nonce'] = 'failed';
@@ -480,5 +480,7 @@ function akismet_add_comment_nonce( $post_id ) {
 	wp_nonce_field( 'akismet_comment_nonce_' . $post_id, 'akismet_comment_nonce', FALSE );
 }
 
-if ( get_option( 'akismet_comment_nonce' ) == 'true' || get_option( 'akismet_comment_nonce' ) == '' )
+$akismet_comment_nonce_option = apply_filters( 'akismet_comment_nonce', get_option( 'akismet_comment_nonce' ) );
+
+if ( $akismet_comment_nonce_option == 'true' || $akismet_comment_nonce_option == '' )
 	add_action( 'comment_form', 'akismet_add_comment_nonce' );
