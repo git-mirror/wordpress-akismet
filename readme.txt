@@ -35,6 +35,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 * Fix a bug that caused the "Auto delete" option to fail to discard comments correctly
 * Remove the comment nonce form field from the 'Akismet Configuration' page in favor of using a filter, akismet_comment_nonce
+* Fixed padding bug in "author" column of posts screen
+* Added margin-top to "cleared by ..." badges on dashboard
 
 = 2.5.0 =
 
