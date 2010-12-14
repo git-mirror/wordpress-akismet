@@ -205,7 +205,7 @@ function akismet_update_comment_history( $comment_id, $message, $event=null ) {
 		return false;
 	
 	$user = '';
-	if ( is_object($current_user) )
+	if ( is_object($current_user) && isset($current_user->user_login) )
 		$user = $current_user->user_login;
 
 	$event = array(
@@ -418,7 +418,7 @@ function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
     return $response[1];
 }
 
-function akismet_cron_recheck( $data ) {
+function akismet_cron_recheck() {
 	global $wpdb;
 
 	delete_option('akismet_available_servers');
