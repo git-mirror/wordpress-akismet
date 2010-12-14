@@ -39,6 +39,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Added margin-top to "cleared by ..." badges on dashboard
 * Fix possible error when calling akismet_cron_recheck()
 * Clean up more PHP warnings
+* Clean up XHTML warnings for comment nonce
 
 = 2.5.0 =
 

@@ -475,7 +475,9 @@ function akismet_cron_recheck() {
 add_action( 'akismet_schedule_cron_recheck', 'akismet_cron_recheck' );
 
 function akismet_add_comment_nonce( $post_id ) {
+	echo '<p style="display: none;">';
 	wp_nonce_field( 'akismet_comment_nonce_' . $post_id, 'akismet_comment_nonce', FALSE );
+	echo '</p>';
 }
 
 $akismet_comment_nonce_option = apply_filters( 'akismet_comment_nonce', get_option( 'akismet_comment_nonce' ) );
