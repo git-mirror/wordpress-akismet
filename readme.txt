@@ -38,8 +38,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Fixed padding bug in "author" column of posts screen
 * Added margin-top to "cleared by ..." badges on dashboard
 * Fix possible error when calling akismet_cron_recheck()
-* Clean up more PHP warnings
+* Fix more PHP warnings
 * Clean up XHTML warnings for comment nonce
+* Fix for possible condition where scheduled comment re-checks could get stuck
+* Clean up the comment meta details after deleting a comment
 
 = 2.5.0 =
 
