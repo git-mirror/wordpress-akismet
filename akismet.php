@@ -429,8 +429,14 @@ function akismet_cron_recheck() {
 		WHERE meta_key = 'akismet_error'
 		LIMIT 100
 	" );
-
+	
 	foreach ( (array) $comment_errors as $comment_id ) {
+		// if the comment no longer exists, remove the meta entry from the queue to avoid getting stuck
+		if ( !get_comment( $comment_id ) ) {
+			delete_comment_meta( $comment_id, 'akismet_error' );
+			continue;
+		}
+		
 		add_comment_meta( $comment_id, 'akismet_rechecking', true );
 		$status = akismet_check_db_comment( $comment_id, 'retry' );
 
