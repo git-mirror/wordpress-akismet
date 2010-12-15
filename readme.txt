@@ -42,6 +42,8 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Clean up XHTML warnings for comment nonce
 * Fix for possible condition where scheduled comment re-checks could get stuck
 * Clean up the comment meta details after deleting a comment
+* Only show the status badge if the comment status has been changed by someone/something other than Akismet
+* Show a 'History' link in the row-actions
 
 = 2.5.0 =
 

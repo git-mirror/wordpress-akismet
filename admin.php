@@ -320,12 +320,13 @@ function akismet_comment_row_action( $a, $comment ) {
 
 	$akismet_result = get_comment_meta( $comment->comment_ID, 'akismet_result', true );
 	$user_result = get_comment_meta( $comment->comment_ID, 'akismet_user_result', true);
+	$comment_status = wp_get_comment_status( $comment->comment_ID );
 	$desc = null;
 	if ( !$user_result || $user_result == $akismet_result ) {
 		// Show the original Akismet result if the user hasn't overridden it, or if their decision was the same
-		if ( $akismet_result == 'true' )
+		if ( $akismet_result == 'true' && $comment_status != 'spam' && $comment_status != 'trash' )
 			$desc = 'Flagged as spam by Akismet';
-		elseif ( $akismet_result == 'false' )
+		elseif ( $akismet_result == 'false' && $comment_status == 'spam' )
 			$desc = 'Cleared by Akismet';
 	} else {
 		$who = get_comment_meta( $comment->comment_ID, 'akismet_user', true );
@@ -334,7 +335,19 @@ function akismet_comment_row_action( $a, $comment ) {
 		else
 			$desc = sprintf( __('Un-spammed by %s'), $who );
 	}
-	
+
+	// add a History item to the hover links, just after Edit
+	if ( $akismet_result ) {
+		$b = array();
+		foreach ( $a as $k => $item ) {
+			$b[ $k ] = $item;
+			if ( $k == 'edit' )
+				$b['history'] = '<a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="'. esc_attr__( 'View comment history' ) . '"> '. __('History') . '</a>';
+		}
+		
+		$a = $b;
+	}
+		
 	if ( $desc )
 		echo '<span class="akismet-status" commentid="'.$comment->comment_ID.'"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
 		
