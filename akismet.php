@@ -379,9 +379,13 @@ function akismet_delete_old() {
 	$comment_ids = $wpdb->get_col("SELECT comment_id FROM $wpdb->comments WHERE DATE_SUB('$now_gmt', INTERVAL 15 DAY) > comment_date_gmt AND comment_approved = 'spam'");
 	if ( empty( $comment_ids ) )
 		return;
+		
+	$comma_comment_ids = implode( ', ', array_map('intval', $comment_ids) );
 
 	do_action( 'delete_comment', $comment_ids );
-	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_id IN ( " . implode( ', ', $comment_ids ) . " )");
+	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_id IN ( $comma_comment_ids )");
+	$wpdb->query("DELETE FROM $wpdb->commentmeta WHERE comment_id IN ( $comma_comment_ids )");
+	clean_comment_cache( $comment_ids );
 	$n = mt_rand(1, 5000);
 	if ( apply_filters('akismet_optimize_table', ($n == 11)) ) // lucky number
 		$wpdb->query("OPTIMIZE TABLE $wpdb->comments");
