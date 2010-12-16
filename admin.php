@@ -136,7 +136,7 @@ function akismet_conf() {
 <div class="wrap">
 <h2><?php _e('Akismet Configuration'); ?></h2>
 <?php if (isset($_GET['message']) && $_GET['message'] == 'success') { ?>
-	<div class="updated below-h2" id="message"><p><strong>Sign up success!</strong> Please check your email for your Akismet API Key and enter it below.</p></div>
+	<div class="updated below-h2" id="message"><p><?php _e( '<strong>Sign up success!</strong> Please check your email for your Akismet API Key and enter it below.' ); ?></p></div>
 <?php } ?>
 <div class="narrow">
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
@@ -275,13 +275,13 @@ function akismet_stats() {
 	if ( !$count = get_option('akismet_spam_count') )
 		return;
 	$path = plugin_basename(__FILE__);
-	echo '<h3>'.__('Spam').'</h3>';
+	echo '<h3>' . _x( 'Spam', 'comments' ) . '</h3>';
 	global $submenu;
 	if ( isset( $submenu['edit-comments.php'] ) )
 		$link = 'edit-comments.php';
 	else
 		$link = 'edit.php';
-	echo '<p>'.sprintf(__('<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.'), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
+	echo '<p>'.sprintf( _n( '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', $count ), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
 }
 add_action('activity_box_end', 'akismet_stats');
 
@@ -302,7 +302,7 @@ function akismet_admin_warnings() {
 				$next_check = human_time_diff( wp_next_scheduled('akismet_schedule_cron_recheck') );
 				if ( $waiting > 0 )
 					echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s.', $waiting), $waiting, $next_check)."</p></div>
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s.', $waiting), number_format_i18n( $waiting ), $next_check)."</p></div>
 			";
 		}
 		add_action('admin_notices', 'akismet_warning');
@@ -325,9 +325,9 @@ function akismet_comment_row_action( $a, $comment ) {
 	if ( !$user_result || $user_result == $akismet_result ) {
 		// Show the original Akismet result if the user hasn't overridden it, or if their decision was the same
 		if ( $akismet_result == 'true' && $comment_status != 'spam' && $comment_status != 'trash' )
-			$desc = 'Flagged as spam by Akismet';
+			$desc = __( 'Flagged as spam by Akismet' );
 		elseif ( $akismet_result == 'false' && $comment_status == 'spam' )
-			$desc = 'Cleared by Akismet';
+			$desc = __( 'Cleared by Akismet' );
 	} else {
 		$who = get_comment_meta( $comment->comment_ID, 'akismet_user', true );
 		if ( $user_result == 'true' )
@@ -353,7 +353,7 @@ function akismet_comment_row_action( $a, $comment ) {
 		
 	if ( apply_filters( 'akismet_show_user_comments_approved', get_option('akismet_show_user_comments_approved') ) == 'true' ) {
 		$comment_count = akimset_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
-		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( __( '%s approved' ), intval($comment_count) ).'</span></span>';
+		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( _n( '%s approved', '%s approved', $comment_count ), intval($comment_count) ).'</span></span>';
 	}
 	
 	return $a;
@@ -448,30 +448,25 @@ function akismet_rightnow() {
 
 	if ( $count = get_option('akismet_spam_count') ) {
 		$intro = sprintf( $plural_func(
-			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already,',
-			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already,',
+			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already. ',
+			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already. ',
 			$count
 		), 'http://akismet.com/', number_format_i18n( $count ) );
 	} else {
-		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog,'), 'http://akismet.com/' );
+		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog. '), 'http://akismet.com/' );
 	}
 
 	if ( $queue_count = akismet_spam_count() ) {
 		$queue_text = sprintf( $plural_func(
-			'and there\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
-			'and there are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
+			'There\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
+			'There are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
 		), number_format_i18n( $queue_count ), $esc_url($link) );
 	} else {
-		$queue_text = sprintf( __( " but there's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
+		$queue_text = sprintf( __( "There's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
 	}
 
-	// _c was deprecated in WP 2.9.0
-	if ( function_exists( '_x' ) )
-		$text = sprintf( _x( '%1$s%2$s', 'akismet_rightnow' ), $intro, $queue_text );
-	else 
-		$text = sprintf( _c( '%1$s%2$s|akismet_rightnow' ), $intro, $queue_text );
-
+	$text = $intro . '<br />' . $queue_text;
 	echo "<p class='akismet-right-now'>$text</p>\n";
 }
 	
