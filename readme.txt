@@ -45,6 +45,9 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Only show the status badge if the comment status has been changed by someone/something other than Akismet
 * Show a 'History' link in the row-actions
 * Translation fixes
+* Reduced font-size on author name
+* Moved "flagged by..." notification to top right corner of comment container and removed heavy styling
+* Hid "flagged by..." notification while on dashboard
 
 = 2.5.0 =
 

@@ -25,9 +25,9 @@ function akismet_admin_init() {
         $hook = 'dashboard_page_akismet-stats-display';
     add_action('admin_head-'.$hook, 'akismet_stats_script');
     add_meta_box('akismet-status', __('Comment History'), 'akismet_comment_status_meta_box', 'comment', 'normal');
-	wp_register_style('akismet.css', AKISMET_PLUGIN_URL . '/akismet.css');
+	wp_register_style('akismet.css', AKISMET_PLUGIN_URL . 'akismet.css');
 	wp_enqueue_style('akismet.css');
-	wp_register_script('akismet.js', AKISMET_PLUGIN_URL . '/akismet.js', array('jquery'));
+	wp_register_script('akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'));
 	wp_enqueue_script('akismet.js');
 }
 add_action('admin_init', 'akismet_admin_init');
