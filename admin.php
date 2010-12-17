@@ -584,6 +584,12 @@ function akismet_submit_spam_comment ( $comment_id ) {
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
 	if ( $new_status == $old_status )
 		return;
+		
+	if ( !is_admin() )
+		return;
+		
+	if ( !current_user_can( 'edit_post', $comment->comment_post_ID ) && !current_user_can( 'moderate_comments' ) )
+		return;
 
 	if ( defined('WP_IMPORTING') && WP_IMPORTING == true )
 		return;
