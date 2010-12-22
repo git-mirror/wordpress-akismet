@@ -31,6 +31,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.6.0 =
+
+* Properly format the comment count for author counts
+
 = 2.5.1 =
 
 * Fix a bug that caused the "Auto delete" option to fail to discard comments correctly
