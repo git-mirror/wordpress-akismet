@@ -431,10 +431,6 @@ add_filter('comment_text', 'akismet_text_add_link_class');
 function akismet_rightnow() {
 	global $submenu, $wp_db_version;
 
-	$plural_func = '__ngettext';
-	if ( function_exists( '_n' ) )
-		$plural_func = '_n';
-
 	// clean_url was deprecated in WP 3.0
 	$esc_url = 'clean_url';
 	if ( function_exists( 'esc_url' ) )
@@ -448,7 +444,7 @@ function akismet_rightnow() {
 		$link = 'edit.php?page=akismet-admin';
 
 	if ( $count = get_option('akismet_spam_count') ) {
-		$intro = sprintf( $plural_func(
+		$intro = sprintf( _n(
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already. ',
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already. ',
 			$count
@@ -458,7 +454,7 @@ function akismet_rightnow() {
 	}
 
 	if ( $queue_count = akismet_spam_count() ) {
-		$queue_text = sprintf( $plural_func(
+		$queue_text = sprintf( _n(
 			'There\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
 			'There are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
