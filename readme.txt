@@ -34,6 +34,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 = 2.6.0 =
 
 * Properly format the comment count for author counts
+* Look for super admins on multisite installs when looking up user roles
 
 = 2.5.1 =
 

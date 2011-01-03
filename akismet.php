@@ -100,7 +100,16 @@ function akismet_get_user_roles($user_id ) {
 		if ( isset($comment_user->roles) )
 			$roles = join(',', $comment_user->roles);
 	}
-	
+
+	if ( is_multisite() && is_super_admin( $user_id ) ) {
+		if ( empty( $roles ) ) {
+			$roles = 'super_admin';
+		} else {
+			$comment_user->roles[] = 'super_admin';
+			$roles = join( ',', $comment_user->roles );
+		}
+	}
+
 	return $roles;
 }
 
