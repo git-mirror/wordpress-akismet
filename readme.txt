@@ -35,6 +35,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 * Properly format the comment count for author counts
 * Look for super admins on multisite installs when looking up user roles
+* Increase the HTTP request timeout
 
 = 2.5.1 =
 

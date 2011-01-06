@@ -141,7 +141,8 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 				'Host'			=> $host,
 				'User-Agent'	=> $akismet_ua
 			),
-			'httpversion'	=> '1.0'
+			'httpversion'	=> '1.0',
+			'timeout'		=> 15
 		);
 		$akismet_url = "http://{$http_host}{$path}";
 		$response = wp_remote_post( $akismet_url, $http_args );
