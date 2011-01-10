@@ -28,7 +28,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-define('AKISMET_VERSION', '2.5.0');
+define('AKISMET_VERSION', '2.5.1');
 define('AKISMET_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 /** If you hardcode a WP.com API key here, all key config screens will be hidden */
@@ -189,7 +189,7 @@ function akismet_result_hold( $approved ) {
 }
 
 // how many approved comments does this author have?
-function akimset_get_user_comments_approved( $user_id, $comment_author_email, $comment_author, $comment_author_url ) {
+function akismet_get_user_comments_approved( $user_id, $comment_author_email, $comment_author, $comment_author_url ) {
 	global $wpdb;
 	
 	if ( !empty($user_id) )
