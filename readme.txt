@@ -37,6 +37,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Look for super admins on multisite installs when looking up user roles
 * Increase the HTTP request timeout
 * Removed padding for author approved count
+* Fix typo in function name
 
 = 2.5.1 =
 
