@@ -1,6 +1,5 @@
 #submitted-on { position: relative; }
 #the-comment-list .author .akismet-user-comment-count { display: inline; }
-#the-comment-list .author .akismet-user-comment-counts { padding-left: 42px; }
 #dashboard_recent_comments .akismet-status { display: none; } /* never show the flagged by text on the dashboard */
 .akismet-status { float: right; }
 .akismet-status a { color: #AAA; font-style: italic; }
