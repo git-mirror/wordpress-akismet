@@ -236,11 +236,8 @@ function akismet_stats_script() {
 	?>
 <script type="text/javascript">
 function resizeIframe() {
-    var height = document.documentElement.clientHeight;
-    height -= document.getElementById('akismet-stats-frame').offsetTop;
-    height += 100; // magic padding
-    
-    document.getElementById('akismet-stats-frame').style.height = height +"px";
+  
+    document.getElementById('akismet-stats-frame').style.height = "2000px";
     
 };
 function resizeIframeInit() {
