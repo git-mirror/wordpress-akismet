@@ -3,7 +3,7 @@ Contributors: matt, ryan, andy, mdawaffe, tellyworth, josephscott, lessbloat, au
 Tags: akismet, comments, spam
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv2
 
 Akismet checks your comments against the Akismet web service to see if they look like spam or not.
@@ -30,6 +30,15 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 1, 2, 3: You're done!
 
 == Changelog ==
+
+= 2.5.2 =
+
+* Properly format the comment count for author counts
+* Look for super admins on multisite installs when looking up user roles
+* Increase the HTTP request timeout
+* Removed padding for author approved count
+* Fix typo in function name
+* Set Akismet stats iframe height to fixed 2500px.  Better to have one tall scroll bar than two side by side.
 
 = 2.5.1 =
 

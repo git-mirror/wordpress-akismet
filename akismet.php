@@ -6,7 +6,7 @@
 Plugin Name: Akismet
 Plugin URI: http://akismet.com/
 Description: Used by millions, Akismet is quite possibly the best way in the world to <strong>protect your blog from comment and track-back spam</strong>. It keeps your site protected from spam even while you sleep. To get started: 1) Click the "Activate" link to the left of this description, 2) <a href="http://akismet.com/get/?return=true">Sign up for an Akismet API key</a>, and 3) Go to your <a href="plugins.php?page=akismet-key-config">Akismet configuration</a> page, and save your API key.
-Version: 2.5.1
+Version: 2.5.2
 Author: Automattic
 Author URI: http://automattic.com/wordpress-plugins/
 License: GPLv2
@@ -28,7 +28,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-define('AKISMET_VERSION', '2.5.0');
+define('AKISMET_VERSION', '2.5.2');
 define('AKISMET_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 /** If you hardcode a WP.com API key here, all key config screens will be hidden */
@@ -100,7 +100,16 @@ function akismet_get_user_roles($user_id ) {
 		if ( isset($comment_user->roles) )
 			$roles = join(',', $comment_user->roles);
 	}
-	
+
+	if ( is_multisite() && is_super_admin( $user_id ) ) {
+		if ( empty( $roles ) ) {
+			$roles = 'super_admin';
+		} else {
+			$comment_user->roles[] = 'super_admin';
+			$roles = join( ',', $comment_user->roles );
+		}
+	}
+
 	return $roles;
 }
 
@@ -132,7 +141,8 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 				'Host'			=> $host,
 				'User-Agent'	=> $akismet_ua
 			),
-			'httpversion'	=> '1.0'
+			'httpversion'	=> '1.0',
+			'timeout'		=> 15
 		);
 		$akismet_url = "http://{$http_host}{$path}";
 		$response = wp_remote_post( $akismet_url, $http_args );
@@ -179,7 +189,7 @@ function akismet_result_hold( $approved ) {
 }
 
 // how many approved comments does this author have?
-function akimset_get_user_comments_approved( $user_id, $comment_author_email, $comment_author, $comment_author_url ) {
+function akismet_get_user_comments_approved( $user_id, $comment_author_email, $comment_author, $comment_author_url ) {
 	global $wpdb;
 	
 	if ( !empty($user_id) )

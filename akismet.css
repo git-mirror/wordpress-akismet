@@ -1,10 +1,5 @@
 #submitted-on { position: relative; }
-#the-comment-list .author { padding-bottom: 5px !important; white-space: nowrap; }
-#the-comment-list .author a { padding-left: 42px !important; }
-#the-comment-list .author img { position: absolute; top: 0; left: 0; }
-#the-comment-list .author strong { padding-left: 42px; font-size: 12px; position: relative; }
 #the-comment-list .author .akismet-user-comment-count { display: inline; }
-#the-comment-list .author .akismet-user-comment-counts { padding-left: 42px; }
 #dashboard_recent_comments .akismet-status { display: none; } /* never show the flagged by text on the dashboard */
 .akismet-status { float: right; }
 .akismet-status a { color: #AAA; font-style: italic; }

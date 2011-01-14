@@ -236,11 +236,8 @@ function akismet_stats_script() {
 	?>
 <script type="text/javascript">
 function resizeIframe() {
-    var height = document.documentElement.clientHeight;
-    height -= document.getElementById('akismet-stats-frame').offsetTop;
-    height += 100; // magic padding
-    
-    document.getElementById('akismet-stats-frame').style.height = height +"px";
+  
+    document.getElementById('akismet-stats-frame').style.height = "2500px";
     
 };
 function resizeIframeInit() {
@@ -352,8 +349,9 @@ function akismet_comment_row_action( $a, $comment ) {
 		echo '<span class="akismet-status" commentid="'.$comment->comment_ID.'"><a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="' . esc_attr__( 'View comment history' ) . '">'.htmlspecialchars($desc).'</a></span>';
 		
 	if ( apply_filters( 'akismet_show_user_comments_approved', get_option('akismet_show_user_comments_approved') ) == 'true' ) {
-		$comment_count = akimset_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
-		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( _n( '%s approved', '%s approved', $comment_count ), intval($comment_count) ).'</span></span>';
+		$comment_count = akismet_get_user_comments_approved( $comment->user_id, $comment->comment_author_email, $comment->comment_author, $comment->comment_author_url );
+		$comment_count = intval( $comment_count );
+		echo '<span class="akismet-user-comment-count" commentid="'.$comment->comment_ID.'" style="display:none;"><br><span class="akismet-user-comment-counts">'.sprintf( _n( '%s approved', '%s approved', $comment_count ), number_format_i18n( $comment_count ) ) . '</span></span>';
 	}
 	
 	return $a;
@@ -430,10 +428,6 @@ add_filter('comment_text', 'akismet_text_add_link_class');
 function akismet_rightnow() {
 	global $submenu, $wp_db_version;
 
-	$plural_func = '__ngettext';
-	if ( function_exists( '_n' ) )
-		$plural_func = '_n';
-
 	// clean_url was deprecated in WP 3.0
 	$esc_url = 'clean_url';
 	if ( function_exists( 'esc_url' ) )
@@ -447,7 +441,7 @@ function akismet_rightnow() {
 		$link = 'edit.php?page=akismet-admin';
 
 	if ( $count = get_option('akismet_spam_count') ) {
-		$intro = sprintf( $plural_func(
+		$intro = sprintf( _n(
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already. ',
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already. ',
 			$count
@@ -457,7 +451,7 @@ function akismet_rightnow() {
 	}
 
 	if ( $queue_count = akismet_spam_count() ) {
-		$queue_text = sprintf( $plural_func(
+		$queue_text = sprintf( _n(
 			'There\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
 			'There are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
