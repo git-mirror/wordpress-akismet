@@ -237,7 +237,7 @@ function akismet_stats_script() {
 <script type="text/javascript">
 function resizeIframe() {
   
-    document.getElementById('akismet-stats-frame').style.height = "2000px";
+    document.getElementById('akismet-stats-frame').style.height = "2500px";
     
 };
 function resizeIframeInit() {

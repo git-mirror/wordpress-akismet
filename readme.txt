@@ -38,7 +38,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Increase the HTTP request timeout
 * Removed padding for author approved count
 * Fix typo in function name
-* Set Akismet stats iframe height to fixed 2000px.  Better to have one tall scroll bar than two side by side.
+* Set Akismet stats iframe height to fixed 2500px.  Better to have one tall scroll bar than two side by side.
 
 = 2.5.1 =
 
