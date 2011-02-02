@@ -578,6 +578,10 @@ function akismet_submit_spam_comment ( $comment_id ) {
 function akismet_transition_comment_status( $new_status, $old_status, $comment ) {
 	if ( $new_status == $old_status )
 		return;
+
+	# we don't need to record a history item for deleted comments
+	if ( $new_status == 'delete' )
+		return;
 		
 	if ( !is_admin() )
 		return;
