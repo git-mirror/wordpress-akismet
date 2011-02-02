@@ -33,6 +33,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 = 2.6 = 
 * Specify the license is GPL v2 or later
+* Fix a bug that could result in orphaned commentmeta entries
 
 = 2.5.2 =
 
