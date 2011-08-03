@@ -1,6 +1,5 @@
 #submitted-on { position: relative; }
 #the-comment-list .author .akismet-user-comment-count { display: inline; }
-#the-comment-list .author a span { text-decoration: none; color: #999; }
 #the-comment-list .remove_url { margin-left: 5px; color: #999; padding: 2px 3px 2px 0; }
 #the-comment-list .remove_url:hover { color: #A7301F; font-weight: bold; }
 #dashboard_recent_comments .akismet-status { display: none; } /* never show the flagged by text on the dashboard */

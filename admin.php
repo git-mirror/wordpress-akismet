@@ -25,12 +25,28 @@ function akismet_admin_init() {
         $hook = 'dashboard_page_akismet-stats-display';
     add_action('admin_head-'.$hook, 'akismet_stats_script');
     add_meta_box('akismet-status', __('Comment History'), 'akismet_comment_status_meta_box', 'comment', 'normal');
-	wp_register_style('akismet.css', AKISMET_PLUGIN_URL . 'akismet.css');
-	wp_enqueue_style('akismet.css');
-	wp_register_script('akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'));
-	wp_enqueue_script('akismet.js');
 }
 add_action('admin_init', 'akismet_admin_init');
+
+add_action( 'admin_enqueue_scripts', 'akismet_load_js_and_css' );
+function akismet_load_js_and_css() {
+	global $hook_suffix;
+
+	if (
+		$hook_suffix == 'index.php'	# dashboard
+		|| $hook_suffix == 'edit-comments.php' 
+		|| $hook_suffix == 'comment.php' 
+		|| $hook_suffix == 'post.php' 
+		|| $hook_suffix == 'plugins_page_akismet-key-config'
+	) {
+		wp_register_style( 'akismet.css', AKISMET_PLUGIN_URL . 'akismet.css' );
+		wp_enqueue_style( 'akismet.css');
+	
+		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery') );
+		wp_enqueue_script( 'akismet.js' );
+	}
+}
+
 
 function akismet_nonce_field($action = -1) { return wp_nonce_field($action); }
 $akismet_nonce = 'akismet-update-key';
@@ -124,7 +140,7 @@ function akismet_conf() {
 		'new_key_invalid' => array('color' => '888', 'text' => __('The key you entered is invalid. Please double-check it.')),
 		'new_key_failed' => array('color' => '888', 'text' => __('The key you entered could not be verified because a connection to akismet.com could not be established. Please check your server configuration.')),
 		'no_connection' => array('color' => '888', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
-		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/')),
+		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/?return=true')),
 		'key_valid' => array('color' => '4AB915', 'text' => __('This key is valid.')),
 		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')),
 		'bad_home_url' => array('color' => '888', 'text' => sprintf( __('Your WordPress home URL %s is invalid.  Please fix the <a href="%s">home option</a>.'), esc_html( get_bloginfo('url') ), admin_url('options.php#home') ) ),
@@ -141,13 +157,13 @@ function akismet_conf() {
 <div class="narrow">
 <form action="" method="post" id="akismet-conf" style="margin: auto; width: 400px; ">
 <?php if ( !$wpcom_api_key ) { ?>
-	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have an API key yet, you can get one at <a href="%2$s">Akismet.com</a>.'), 'http://akismet.com/', 'http://akismet.com/get/'); ?></p>
+	<p><?php printf(__('For many people, <a href="%1$s">Akismet</a> will greatly reduce or even completely eliminate the comment and trackback spam you get on your site. If one does happen to get through, simply mark it as "spam" on the moderation screen and Akismet will learn from the mistakes. If you don\'t have an API key yet, you can get one at <a href="%2$s">Akismet.com</a>.'), 'http://akismet.com/?return=true', 'http://akismet.com/get/?return=true'); ?></p>
 
 <h3><label for="key"><?php _e('Akismet API Key'); ?></label></h3>
 <?php foreach ( $ms as $m ) : ?>
 	<p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
 <?php endforeach; ?>
-<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://akismet.com/get/">What is this?</a>'); ?>)</p>
+<p><input id="key" name="key" type="text" size="15" maxlength="12" value="<?php echo get_option('wordpress_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://akismet.com/get/?return=true">What is this?</a>'); ?>)</p>
 <?php if ( isset( $invalid_key) && $invalid_key ) { ?>
 <h3><?php _e('Why might my key be invalid?'); ?></h3>
 <p><?php _e('This can mean one of two things, either you copied the key wrong or that the plugin is unable to reach the Akismet servers, which is most often caused by an issue with your web host around firewalls or similar.'); ?></p>
@@ -278,7 +294,7 @@ function akismet_stats() {
 		$link = 'edit-comments.php';
 	else
 		$link = 'edit.php';
-	echo '<p>'.sprintf( _n( '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', $count ), 'http://akismet.com/', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
+	echo '<p>'.sprintf( _n( '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', '<a href="%1$s">Akismet</a> has protected your site from <a href="%2$s">%3$s spam comments</a>.', $count ), 'http://akismet.com/?return=true', clean_url("$link?page=akismet-admin"), number_format_i18n($count) ).'</p>';
 }
 add_action('activity_box_end', 'akismet_stats');
 
@@ -445,9 +461,9 @@ function akismet_rightnow() {
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comment already. ',
 			'<a href="%1$s">Akismet</a> has protected your site from %2$s spam comments already. ',
 			$count
-		), 'http://akismet.com/', number_format_i18n( $count ) );
+		), 'http://akismet.com/?return=true', number_format_i18n( $count ) );
 	} else {
-		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog. '), 'http://akismet.com/' );
+		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog. '), 'http://akismet.com/?return=true' );
 	}
 
 	if ( $queue_count = akismet_spam_count() ) {
@@ -643,33 +659,6 @@ function akismet_spam_count( $type = false ) {
 	return (int) $wpdb->get_var("SELECT COUNT(comment_ID) FROM $wpdb->comments WHERE comment_approved = 'spam' AND comment_type='$type'");
 }
 
-function akismet_remove_comment_author_url() {
-    if (!empty($_POST['id'])) {
-        global $wpdb;
-        $comment = get_comment( intval($_POST['id']), ARRAY_A );
-        if (current_user_can('edit_post', $comment['comment_post_ID'])) {
-            $comment['comment_author_url'] = '';
-            print(wp_update_comment( $comment ));
-            die();
-        }
-    }
-}
-
-add_action('wp_ajax_comment_author_deurl', 'akismet_remove_comment_author_url');
-
-function akismet_add_comment_author_url() {
-    if (!empty($_POST['id']) && !empty($_POST['url'])) {
-        global $wpdb;
-        $comment = get_comment( intval($_POST['id']), ARRAY_A );
-        if (current_user_can('edit_post', $comment['comment_post_ID'])) {
-            $comment['comment_author_url'] = esc_url($_POST['url']);
-            print(wp_update_comment( $comment ));
-            die();
-        }
-    }
-}
-
-add_action('wp_ajax_comment_author_reurl', 'akismet_add_comment_author_url');
 
 function akismet_recheck_queue() {
 	global $wpdb, $akismet_api_host, $akismet_api_port;
@@ -721,6 +710,35 @@ function akismet_recheck_queue() {
 }
 
 add_action('admin_action_akismet_recheck_queue', 'akismet_recheck_queue');
+
+// Adds an 'x' link next to author URLs, clicking will remove the author URL and show an undo link
+function akismet_remove_comment_author_url() {
+    if (!empty($_POST['id'])) {
+        global $wpdb;
+        $comment = get_comment( intval($_POST['id']), ARRAY_A );
+        if (current_user_can('edit_post', $comment['comment_post_ID'])) {
+            $comment['comment_author_url'] = '';
+            print(wp_update_comment( $comment ));
+            die();
+        }
+    }
+}
+
+add_action('wp_ajax_comment_author_deurl', 'akismet_remove_comment_author_url');
+
+function akismet_add_comment_author_url() {
+    if (!empty($_POST['id']) && !empty($_POST['url'])) {
+        global $wpdb;
+        $comment = get_comment( intval($_POST['id']), ARRAY_A );
+        if (current_user_can('edit_post', $comment['comment_post_ID'])) {
+            $comment['comment_author_url'] = esc_url($_POST['url']);
+            print(wp_update_comment( $comment ));
+            die();
+        }
+    }
+}
+
+add_action('wp_ajax_comment_author_reurl', 'akismet_add_comment_author_url');
 
 // Check connectivity between the WordPress blog and Akismet's servers.
 // Returns an associative array of server IP addresses, where the key is the IP address, and value is true (available) or false (unable to connect).
@@ -774,4 +792,3 @@ function akismet_server_connectivity_ok() {
 	$servers = akismet_get_server_connectivity();
 	return !( empty($servers) || !count($servers) || count( array_filter($servers) ) < count($servers) );
 }
-

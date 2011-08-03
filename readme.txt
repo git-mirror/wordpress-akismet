@@ -31,11 +31,14 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.5.4 =
+* Limit Akismet CSS and Javascript loading in wp-admin to just the pages that need it
+* Added author URL quick removal functionality
+
 = 2.5.3 = 
 * Specify the license is GPL v2 or later
 * Fix a bug that could result in orphaned commentmeta entries
 * Include hotfix for WordPress 3.0.5 filter issue
-* Added author URL quick removal functionality
 
 = 2.5.2 =
 
