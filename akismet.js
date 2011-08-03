@@ -23,31 +23,50 @@ jQuery(document).ready(function () {
  			action: 'comment_author_deurl',
  			id: thisId
  		};
- 		jQuery.post(ajaxurl, data, function(response) {
- 			if (response) {
- 				// Removes "x" link
- 				jQuery("a[commentid='"+ thisId +"']").hide();
- 				// Show status/undo link
- 				jQuery("#author_comment_url_"+ thisId).attr('cid', thisId).addClass('akismet_undo_link_removal').html('<span>URL removed (</span>undo<span>)</span>');
- 			}
- 		});
+ 		jQuery.ajax({
+		    url: ajaxurl,
+		    type: 'POST',
+		    data: data,
+		    beforeSend: function () {
+		        // Removes "x" link
+	 			jQuery("a[commentid='"+ thisId +"']").hide();
+	 			// Show temp status
+		        jQuery("#author_comment_url_"+ thisId).html('<span>Removing...</span>');
+		    },
+		    success: function (response) {
+		        if (response) {
+	 				// Show status/undo link
+	 				jQuery("#author_comment_url_"+ thisId).attr('cid', thisId).addClass('akismet_undo_link_removal').html('<span>URL removed (</span>undo<span>)</span>');
+	 			}
+		    }
+		});
+
  		return false;
  	});
  	jQuery('.akismet_undo_link_removal').live('click', function () {
  		var thisId = jQuery(this).attr('cid');
-		var thisUrl = jQuery(this).attr('href');
+		var thisUrl = jQuery(this).attr('href').replace("http://www.", "").replace("http://", "");
  		var data = {
  			action: 'comment_author_reurl',
  			id: thisId,
  			url: thisUrl
  		};
- 		jQuery.post(ajaxurl, data, function(response) {
-			if (response) {
-				// Add "x" link
-				jQuery("a[commentid='"+ thisId +"']").show();
-				// Show link
-				jQuery("#author_comment_url_"+ thisId).removeClass('akismet_undo_link_removal').html(thisUrl);
-			}
+		jQuery.ajax({
+		    url: ajaxurl,
+		    type: 'POST',
+		    data: data,
+		    beforeSend: function () {
+	 			// Show temp status
+		        jQuery("#author_comment_url_"+ thisId).html('<span>Re-adding…</span>');
+		    },
+		    success: function (response) {
+		        if (response) {
+	 				// Add "x" link
+					jQuery("a[commentid='"+ thisId +"']").show();
+					// Show link
+					jQuery("#author_comment_url_"+ thisId).removeClass('akismet_undo_link_removal').html(thisUrl);
+	 			}
+		    }
 		});
  		
  		return false;
