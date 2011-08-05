@@ -716,7 +716,7 @@ function akismet_remove_comment_author_url() {
     if (!empty($_POST['id'])) {
         global $wpdb;
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
-        if (current_user_can('edit_comment', $comment['comment_post_ID'])) {
+        if (current_user_can('edit_comment', $comment['comment_ID'])) {
             $comment['comment_author_url'] = '';
             print(wp_update_comment( $comment ));
             die();
@@ -730,7 +730,7 @@ function akismet_add_comment_author_url() {
     if (!empty($_POST['id']) && !empty($_POST['url'])) {
         global $wpdb;
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
-        if (current_user_can('edit_comment', $comment['comment_post_ID'])) {
+        if (current_user_can('edit_comment', $comment['comment_ID'])) {
             $comment['comment_author_url'] = esc_url($_POST['url']);
             print(wp_update_comment( $comment ));
             die();
