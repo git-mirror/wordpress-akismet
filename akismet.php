@@ -119,6 +119,7 @@ function akismet_http_post($request, $host, $path, $port = 80, $ip=null) {
 
 	$akismet_ua = "WordPress/{$wp_version} | ";
 	$akismet_ua .= 'Akismet/' . constant( 'AKISMET_VERSION' );
+	$akismet_ua = apply_filters( 'akismet_ua', $akismet_ua );
 
 	$content_length = strlen( $request );
 
