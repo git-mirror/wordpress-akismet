@@ -42,7 +42,7 @@ function akismet_load_js_and_css() {
 		wp_register_style( 'akismet.css', AKISMET_PLUGIN_URL . 'akismet.css' );
 		wp_enqueue_style( 'akismet.css');
 	
-		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery') );
+		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'), '2.5.4.1' );
 		wp_enqueue_script( 'akismet.js' );
 	}
 }
@@ -718,6 +718,7 @@ function akismet_remove_comment_author_url() {
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
         if (current_user_can('edit_comment', $comment['comment_ID'])) {
             $comment['comment_author_url'] = '';
+            do_action( 'comment_remove_author_url' );
             print(wp_update_comment( $comment ));
             die();
         }
@@ -732,6 +733,7 @@ function akismet_add_comment_author_url() {
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
         if (current_user_can('edit_comment', $comment['comment_ID'])) {
             $comment['comment_author_url'] = esc_url($_POST['url']);
+            do_action( 'comment_add_author_url' );
             print(wp_update_comment( $comment ));
             die();
         }

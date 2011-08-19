@@ -14,7 +14,7 @@ jQuery(document).ready(function () {
  		jQuery(this).attr("id", "author_comment_url_"+ thisCommentId[1]);
  		
  		if (thisTitle) {
- 			jQuery(this).after('<a href="#" class="remove_url" commentid="'+ thisCommentId[1] +'" title="Remove this URL">x</a>');
+ 			jQuery(this).after(' <a href="#" class="remove_url" commentid="'+ thisCommentId[1] +'" title="Remove this URL">x</a>');
  		}
  	});
  	jQuery('.remove_url').live('click', function () {
@@ -71,5 +71,34 @@ jQuery(document).ready(function () {
  		
  		return false;
  	});
-
+ 	jQuery('a[id^="author_comment_url"]').mouseover(function () {
+		// Need to determine size of author column
+		var thisParentWidth = jQuery(this).parent().width();
+		// It changes based on if there is a gravatar present
+		thisParentWidth = (jQuery(this).parent().find('.grav-hijack').length) ? thisParentWidth - 42 + 'px' : thisParentWidth + 'px';
+		if (jQuery(this).find('.mShot').length == 0 && !jQuery(this).hasClass('akismet_undo_link_removal')) {
+			var thisId = jQuery(this).attr('id').replace('author_comment_url_', '');
+			jQuery('.widefat td').css('overflow', 'visible');
+			jQuery(this).css('position', 'relative');
+			var thisHref = jQuery.URLEncode(jQuery(this).attr('href'));
+			jQuery(this).append('<div class="mShot mshot-container" style="left: '+thisParentWidth+'"><div class="mshot-arrow"></div><img src="http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250" width="250" height="188" class="mshot-image_'+thisId+'" style="margin: 0;" /></div>');
+			setTimeout(function () {
+				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250&r=2');
+			}, 6000);
+			setTimeout(function () {
+				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250&r=3');
+			}, 12000);
+		} else {
+			jQuery(this).find('.mShot').css('left', thisParentWidth).show();
+		}
+	}).mouseout(function () {
+		jQuery(this).find('.mShot').hide();
+	});
+});
+// URL encode plugin
+jQuery.extend({URLEncode:function(c){var o='';var x=0;c=c.toString();var r=/(^[a-zA-Z0-9_.]*)/;
+  while(x<c.length){var m=r.exec(c.substr(x));
+    if(m!=null && m.length>1 && m[1]!=''){o+=m[1];x+=m[1].length;
+    }else{if(c[x]==' ')o+='+';else{var d=c.charCodeAt(x);var h=d.toString(16);
+    o+='%'+(h.length<2?'0':'')+h.toUpperCase();}x++;}}return o;}
 });
