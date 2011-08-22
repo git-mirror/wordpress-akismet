@@ -81,12 +81,12 @@ jQuery(document).ready(function () {
 			jQuery('.widefat td').css('overflow', 'visible');
 			jQuery(this).css('position', 'relative');
 			var thisHref = jQuery.URLEncode(jQuery(this).attr('href'));
-			jQuery(this).append('<div class="mShot mshot-container" style="left: '+thisParentWidth+'"><div class="mshot-arrow"></div><img src="http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250" width="250" height="188" class="mshot-image_'+thisId+'" style="margin: 0;" /></div>');
+			jQuery(this).append('<div class="mShot mshot-container" style="left: '+thisParentWidth+'"><div class="mshot-arrow"></div><img src="http://s.wordpress.com/mshots/v1/'+thisHref+'?w=450" width="450" class="mshot-image_'+thisId+'" style="margin: 0;" /></div>');
 			setTimeout(function () {
-				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250&r=2');
+				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=450&r=2');
 			}, 6000);
 			setTimeout(function () {
-				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=250&r=3');
+				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=450&r=3');
 			}, 12000);
 		} else {
 			jQuery(this).find('.mShot').css('left', thisParentWidth).show();

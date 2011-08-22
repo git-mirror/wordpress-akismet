@@ -9,4 +9,4 @@
 span.comment-link a { text-decoration: underline; }
 span.comment-link:after { content: " " attr(title) " "; color: #aaa; text-decoration: none; }
 .mshot-arrow { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-right:10px solid #5C5C5C; position: absolute; left: -6px; top: 91px; }
-.mshot-container { background: #5C5C5C; position: absolute; top: -94px; padding: 7px; width: 250px; height: 188px; z-index: 20000; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; }
+.mshot-container { background: #5C5C5C; position: absolute; top: -94px; padding: 7px; width: 450px; height: 338px; z-index: 20000; -moz-border-radius:6px; border-radius:6px; -webkit-border-radius:6px; }
