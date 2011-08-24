@@ -7,7 +7,7 @@ jQuery(document).ready(function () {
 		var thisId = jQuery(this).attr('commentid');
 		jQuery(this).insertAfter('#comment-' + thisId + ' .author strong:first').show();
 	});
-	jQuery('#the-comment-list .column-author a[title !=""]').each(function () {
+	jQuery('#the-comment-list tr.comment .column-author a[title !=""]').each(function () {
  		var thisTitle = jQuery(this).attr('title');
  		    thisCommentId = jQuery(this).parents('tr:first').attr('id').split("-");
  		
