@@ -305,7 +305,9 @@ function akismet_auto_check_comment( $commentdata ) {
 	$comment['blog_charset'] = get_option('blog_charset');
 	$comment['permalink']  = get_permalink($comment['comment_post_ID']);
 	
-	$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
+	if ( !empty( $comment['user_ID'] ) ) {
+		$comment['user_role'] = akismet_get_user_roles($comment['user_ID']);
+	}
 
 	$akismet_nonce_option = apply_filters( 'akismet_comment_nonce', get_option( 'akismet_comment_nonce' ) );
 	$comment['akismet_comment_nonce'] = 'inactive';
