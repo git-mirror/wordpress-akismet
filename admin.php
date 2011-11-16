@@ -42,7 +42,7 @@ function akismet_load_js_and_css() {
 		wp_register_style( 'akismet.css', AKISMET_PLUGIN_URL . 'akismet.css', array(), '2.5.4.4' );
 		wp_enqueue_style( 'akismet.css');
 	
-		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'), '2.5.4.5' );
+		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'), '2.5.4.6' );
 		wp_enqueue_script( 'akismet.js' );
 	}
 }
