@@ -362,7 +362,7 @@ function akismet_auto_check_comment( $commentdata ) {
 			// akismet_result_spam() won't be called so bump the counter here
 			if ( $incr = apply_filters('akismet_spam_count_incr', 1) )
 				update_option( 'akismet_spam_count', get_option('akismet_spam_count') + $incr );
-			wp_redirect( $_SERVER['HTTP_REFERER'] );
+			wp_safe_redirect( $_SERVER['HTTP_REFERER'] );
 			die();
 		}
 	}

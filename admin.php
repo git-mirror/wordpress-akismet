@@ -705,7 +705,7 @@ function akismet_recheck_queue() {
 		}
 
 	}
-	wp_redirect( $_SERVER['HTTP_REFERER'] );
+	wp_safe_redirect( $_SERVER['HTTP_REFERER'] );
 	exit;
 }
 
