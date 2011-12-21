@@ -35,6 +35,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Limit Akismet CSS and Javascript loading in wp-admin to just the pages that need it
 * Added author URL quick removal functionality
 * Added mShot preview on Author URL hover
+* Added empty index.php to prevent directory listing
 
 = 2.5.3 = 
 * Specify the license is GPL v2 or later
