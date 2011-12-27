@@ -36,6 +36,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 * Added author URL quick removal functionality
 * Added mShot preview on Author URL hover
 * Added empty index.php to prevent directory listing
+* Move wp-admin menu items under Jetpack, if it is installed
 
 = 2.5.3 = 
 * Specify the license is GPL v2 or later
