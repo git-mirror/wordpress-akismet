@@ -339,6 +339,9 @@ function akismet_auto_check_comment( $commentdata ) {
 			$comment["$key"] = '';
 	}
 
+	$post = get_post( $comment['comment_post_ID'] );
+	$comment[ 'comment_post_modified_gmt' ] = $post->post_modified_gmt;
+
 	$query_string = '';
 	foreach ( $comment as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
@@ -353,7 +356,6 @@ function akismet_auto_check_comment( $commentdata ) {
 
 		do_action( 'akismet_spam_caught' );
 
-		$post = get_post( $comment['comment_post_ID'] );
 		$last_updated = strtotime( $post->post_modified_gmt );
 		$diff = time() - $last_updated;
 		$diff = $diff / 86400;

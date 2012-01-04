@@ -538,6 +538,9 @@ function akismet_submit_nonspam_comment ( $comment_id ) {
 
 	if ( akismet_test_mode() )
 		$comment->is_test = 'true';
+		
+	$post = get_post( $comment->comment_post_ID );
+	$comment->comment_post_modified_gmt = $post->post_modified_gmt;
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
@@ -587,6 +590,9 @@ function akismet_submit_spam_comment ( $comment_id ) {
 
 	if ( akismet_test_mode() )
 		$comment->is_test = 'true';
+
+	$post = get_post( $comment->comment_post_ID );
+	$comment->comment_post_modified_gmt = $post->post_modified_gmt;
 
 	$query_string = '';
 	foreach ( $comment as $key => $data )
