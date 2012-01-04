@@ -408,8 +408,43 @@ function akismet_delete_old() {
 
 }
 
-add_action('akismet_scheduled_delete', 'akismet_delete_old');
+function akismet_delete_old_metadata() { 
+   global $wpdb; 
 
+   $now_gmt = current_time( 'mysql', 1 ); 
+   $interval = apply_filters( 'akismet_delete_commentmeta_interval', 15 );
+
+   # enfore a minimum of 1 day
+   $interval = absint( $interval );
+   if ( $interval < 1 ) {
+       return;
+   }
+
+   // akismet_as_submitted meta values are large, so expire them 
+   // after $interval days regardless of the comment status 
+   while ( TRUE ) {
+       $comment_ids = $wpdb->get_col( "SELECT $wpdb->comments.comment_id FROM $wpdb->commentmeta INNER JOIN $wpdb->comments USING(comment_id) WHERE meta_key = 'akismet_as_submitted' AND DATE_SUB('$now_gmt', INTERVAL {$interval} DAY) > comment_date_gmt LIMIT 10000" ); 
+
+       if ( empty( $comment_ids ) ) {
+           return; 
+       }
+
+       foreach ( $comment_ids as $comment_id ) {
+           delete_comment_meta( $comment_id, 'akismet_as_submitted' );
+       }
+   }
+
+
+   /*
+   $n = mt_rand( 1, 5000 ); 
+   if ( apply_filters( 'akismet_optimize_table', ( $n == 11 ), 'commentmeta' ) ) { // lucky number 
+       $wpdb->query( "OPTIMIZE TABLE $wpdb->commentmeta" ); 
+   }
+   */
+} 
+
+ add_action('akismet_scheduled_delete', 'akismet_delete_old');
+add_action('akismet_scheduled_delete', 'akismet_delete_old_metadata'); 
 function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
     global $wpdb, $akismet_api_host, $akismet_api_port;
 
