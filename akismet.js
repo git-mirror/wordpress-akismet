@@ -21,6 +21,7 @@ jQuery(document).ready(function () {
  		var thisId = jQuery(this).attr('commentid');
  		var data = {
  			action: 'comment_author_deurl',
+			_wpnonce: WPAkismet.comment_author_url_nonce,
  			id: thisId
  		};
  		jQuery.ajax({
@@ -48,6 +49,7 @@ jQuery(document).ready(function () {
 		var thisUrl = jQuery(this).attr('href').replace("http://www.", "").replace("http://", "");
  		var data = {
  			action: 'comment_author_reurl',
+			_wpnonce: WPAkismet.comment_author_url_nonce,
  			id: thisId,
  			url: thisUrl
  		};

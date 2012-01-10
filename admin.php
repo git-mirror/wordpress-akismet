@@ -44,6 +44,9 @@ function akismet_load_js_and_css() {
 	
 		wp_register_script( 'akismet.js', AKISMET_PLUGIN_URL . 'akismet.js', array('jquery'), '2.5.4.6' );
 		wp_enqueue_script( 'akismet.js' );
+		wp_localize_script( 'akismet.js', 'WPAkismet', array(
+			'comment_author_url_nonce' => wp_create_nonce( 'comment_author_url_nonce' )
+		) );
 	}
 }
 
@@ -708,7 +711,7 @@ add_action('admin_action_akismet_recheck_queue', 'akismet_recheck_queue');
 
 // Adds an 'x' link next to author URLs, clicking will remove the author URL and show an undo link
 function akismet_remove_comment_author_url() {
-    if (!empty($_POST['id'])) {
+    if ( !empty($_POST['id'] ) && check_admin_referer( 'comment_author_url_nonce' ) ) {
         global $wpdb;
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
         if (current_user_can('edit_comment', $comment['comment_ID'])) {
@@ -723,7 +726,7 @@ function akismet_remove_comment_author_url() {
 add_action('wp_ajax_comment_author_deurl', 'akismet_remove_comment_author_url');
 
 function akismet_add_comment_author_url() {
-    if (!empty($_POST['id']) && !empty($_POST['url'])) {
+    if ( !empty( $_POST['id'] ) && !empty( $_POST['url'] ) && check_admin_referer( 'comment_author_url_nonce' ) ) {
         global $wpdb;
         $comment = get_comment( intval($_POST['id']), ARRAY_A );
         if (current_user_can('edit_comment', $comment['comment_ID'])) {
