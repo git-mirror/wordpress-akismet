@@ -31,6 +31,10 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.5.5 =
+* Add nonce check for comment author URL remove action
+* Fix the settings link
+
 = 2.5.4 =
 * Limit Akismet CSS and Javascript loading in wp-admin to just the pages that need it
 * Added author URL quick removal functionality
