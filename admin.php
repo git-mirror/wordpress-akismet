@@ -347,8 +347,9 @@ function akismet_comment_row_action( $a, $comment ) {
 		$b = array();
 		foreach ( $a as $k => $item ) {
 			$b[ $k ] = $item;
-			if ( $k == 'edit' )
+			if ( $k == 'edit' || $k == 'unspam' ) {
 				$b['history'] = '<a href="comment.php?action=editcomment&amp;c='.$comment->comment_ID.'#akismet-status" title="'. esc_attr__( 'View comment history' ) . '"> '. __('History') . '</a>';
+			}
 		}
 		
 		$a = $b;
