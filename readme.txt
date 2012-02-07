@@ -31,6 +31,9 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.5.6 =
+* Add more checks on the scheduled re-check feature, force it to be no more than 20 minutes in the future
+
 = 2.5.5 =
 * Add nonce check for comment author URL remove action
 * Fix the settings link

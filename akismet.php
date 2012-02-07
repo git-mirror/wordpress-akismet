@@ -374,7 +374,9 @@ function akismet_auto_check_comment( $commentdata ) {
 		if ( !wp_get_current_user() ) {
 			add_filter('pre_comment_approved', 'akismet_result_hold');
 		}
-		wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
+		if ( !wp_next_scheduled( 'akismet_schedule_cron_recheck' ) ) {
+			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
+		}
 	}
 	
 	if ( function_exists('wp_next_scheduled') && function_exists('wp_schedule_event') ) {
@@ -386,6 +388,8 @@ function akismet_auto_check_comment( $commentdata ) {
 		akismet_delete_old();
 	}
 	$akismet_last_comment = $commentdata;
+
+	akismet_fix_scheduled_recheck();
 	return $commentdata;
 }
 
@@ -552,4 +556,17 @@ if ( '3.0.5' == $wp_version ) {
 	remove_filter( 'comment_text', 'wp_kses_data' ); 
 	if ( is_admin() ) 
 		add_filter( 'comment_text', 'wp_kses_post' ); 
+}
+
+function akismet_fix_scheduled_recheck() {
+	$future_check = wp_next_scheduled( 'akismet_schedule_cron_recheck' );
+	if ( !$future_check ) {
+		return;
+	}
+
+	$check_range = time() + 1200;
+	if ( $future_check > $check_range ) {
+		wp_clear_scheduled_hook( 'akismet_schedule_cron_recheck' );
+		wp_schedule_single_event( time() + 300, 'akismet_schedule_cron_recheck' );
+	}
 }
