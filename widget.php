@@ -11,7 +11,7 @@ function widget_akismet_register() {
 		$count = get_option('akismet_spam_count');
 		?>
 			<?php echo $before_widget; ?>
-				<?php echo $before_title . $options['title'] . $after_title; ?>
+				<?php echo $before_title . esc_html( $options['title'] ) . $after_title; ?>
                 <div id="akismetwrap"><div id="akismetstats"><a id="aka" href="http://akismet.com" title=""><?php printf( _n( '%1$s%2$s%3$s %4$sspam comment%5$s %6$sblocked by%7$s<br />%8$sAkismet%9$s', '%1$s%2$s%3$s %4$sspam comments%5$s %6$sblocked by%7$s<br />%8$sAkismet%9$s', $count ), '<span id="akismet1"><span id="akismetcount">', number_format_i18n( $count ), '</span>', '<span id="akismetsc">', '</span></span>', '<span id="akismet2"><span id="akismetbb">', '</span>', '<span id="akismeta">', '</span></span>' ); ?></a></div></div> 
 			<?php echo $after_widget; ?>
 	<?php
@@ -46,7 +46,7 @@ function widget_akismet_register() {
 			$options = $newoptions;
 			update_option('widget_akismet', $options);
 		}
-		$title = htmlspecialchars($options['title'], ENT_QUOTES);
+		$title = esc_html($options['title']);
 	?>
 				<p><label for="akismet-title"><?php _e('Title:'); ?> <input style="width: 250px;" id="akismet-title" name="akismet-title" type="text" value="<?php echo $title; ?>" /></label></p>
 				<input type="hidden" id="akismet-submit" name="akismet-submit" value="1" />
