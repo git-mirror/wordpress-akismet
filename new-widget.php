@@ -93,7 +93,7 @@ class Akismet_New_Widget extends WP_Widget {
 ?>
 
 	<div class="a-stats">
-		<a href="http://akismet.com" target="_blank" title=""><strong class="count"><?php echo number_format_i18n( $count ) . _( ' spam</strong> blocked by <strong>Akismet' ); ?></strong></a>
+		<a href="http://akismet.com" target="_blank" title=""><strong class="count"><?php echo number_format_i18n( $count ) . __( ' spam</strong> blocked by <strong>Akismet' ); ?></strong></a>
 	</div>
 
 <?php
