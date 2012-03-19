@@ -20,14 +20,40 @@ class Akismet_New_Widget extends WP_Widget {
 ?>
 
 <style type="text/css">
-#aka,#aka:link,#aka:hover,#aka:visited,#aka:active{color:#fff;text-decoration:none}
-#aka:hover{border:none;text-decoration:none}
-#aka:hover #akismet1{display:none}
-#aka:hover #akismet2,#akismet1{display:block}
-#akismet2{display:none;padding-top:2px}
-#akismeta{font-size:16px;font-weight:bold;line-height:18px;text-decoration:none}
-#akismetcount{display:block;font:15px Verdana,Arial,Sans-Serif;font-weight:bold;text-decoration:none}
-#akismetwrap #akismetstats{background:url('<?php echo plugin_dir_url( __FILE__ ); ?>akismet.gif') no-repeat top left;border:none;color:#fff;font:11px 'Trebuchet MS','Myriad Pro',sans-serif;height:40px;line-height:100%;overflow:hidden;padding:8px 0 0;text-align:center;width:120px}
+.a-stats {
+	width: auto;
+}
+.a-stats a { 
+	background: #7CA821;
+	background-image:-moz-linear-gradient(0% 100% 90deg,#5F8E14,#7CA821);
+	background-image:-webkit-gradient(linear,0% 0,0% 100%,from(#7CA821),to(#5F8E14));
+	border: 1px solid #5F8E14;
+	border-radius:3px;
+	color: #CFEA93;
+	cursor: pointer;
+	display: block;
+	font-weight: normal;
+	height: 100%;
+	-moz-border-radius:3px;
+	padding: 7px 0 8px;
+	text-align: center;
+	text-decoration: none;
+	-webkit-border-radius:3px;
+	width: 100%;
+}
+.a-stats a:hover { 
+	text-decoration: none;
+	background-image:-moz-linear-gradient(0% 100% 90deg,#6F9C1B,#659417);
+	background-image:-webkit-gradient(linear,0% 0,0% 100%,from(#659417),to(#6F9C1B));
+}
+.a-stats .count {
+	color: #FFF;
+	display: block;
+	font-size: 15px;
+	line-height: 16px;
+	padding: 0 13px;
+	white-space: nowrap;
+}
 </style>
 
 <?php
@@ -66,27 +92,8 @@ class Akismet_New_Widget extends WP_Widget {
 		}
 ?>
 
-	<div id="akismetwrap">
-		<div id="akismetstats">
-			<a id="aka" href="http://akismet.com" title=""><?php
-				printf(
-					_n(
-						'%1$s%2$s%3$s %4$sspam comment%5$s %6$sblocked by%7$s<br />%8$sAkismet%9$s',
-						'%1$s%2$s%3$s %4$sspam comments%5$s %6$sblocked by%7$s<br />%8$sAkismet%9$s',
-						$count
-					),
-					'<span id="akismet1">',
-						'<span id="akismetcount">',
-							number_format_i18n( $count ),
-						'</span>',
-						'<span id="akismetsc"></span></span>',
-					'<span id="akismet2">',
-						'<span id="akismetbb"></span>',
-						'<span id="akismeta">',
-					'</span></span>'
-				); 
-			?></a>
-		</div>
+	<div class="a-stats">
+		<a href="http://akismet.com" target="_blank" title=""><strong class="count"><?php echo number_format_i18n( $count ) . _( ' spam</strong> blocked by <strong>Akismet' ); ?></strong></a>
 	</div>
 
 <?php
