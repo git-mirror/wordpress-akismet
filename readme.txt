@@ -34,6 +34,7 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 = 2.5.6 =
 * Add more checks on the scheduled re-check feature, force it to be no more than 20 minutes in the future
 * Preloading mshot screens on comment page after everything else on the page has loaded
+* Updated widget code
 
 = 2.5.5 =
 * Add nonce check for comment author URL remove action

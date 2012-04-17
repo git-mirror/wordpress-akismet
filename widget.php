@@ -7,12 +7,12 @@ class Akismet_New_Widget extends WP_Widget {
 	function __construct() {
 		parent::__construct(
 			'akismet_new_widget',
-			'Akismet New Widget',
+			__( 'Akismet New Widget' ),
 			array( 'description' => __( 'Display the number of spam comments Akismet has caught' ) )
 		);
 
 		if ( is_active_widget( false, false, $this->id_base ) ) {
-			add_action( 'wp_head', 'Akismet_New_Widget::css' );
+			add_action( 'wp_head', array( $this, 'css' ) );
 		}
 	}
 
@@ -93,7 +93,7 @@ class Akismet_New_Widget extends WP_Widget {
 ?>
 
 	<div class="a-stats">
-		<a href="http://akismet.com" target="_blank" title=""><strong class="count"><?php echo number_format_i18n( $count ) . __( ' spam</strong> blocked by <strong>Akismet' ); ?></strong></a>
+		<a href="http://akismet.com" target="_blank" title=""><?php printf( _n( '<strong class="count">%1$s spam</strong> blocked by <strong>Akismet</strong>', '<strong class="count">%1$s spam</strong> blocked by <strong>Akismet</strong>', $count ), number_format_i18n( $count ) ); ?></a>
 	</div>
 
 <?php
