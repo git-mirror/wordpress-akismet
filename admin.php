@@ -292,6 +292,29 @@ add_action('activity_box_end', 'akismet_stats');
 
 function akismet_admin_warnings() {
 	global $wpcom_api_key;
+
+	if (
+		basename( $_SERVER['SCRIPT_FILENAME'] ) == 'edit-comments.php'
+		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-key-config' )
+		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-stats-display' )
+	) {
+		if ( get_option( 'akismet_alert' ) ) {
+			function akismet_alert() {
+				$alert = json_decode( get_option( 'akismet_alert' ), true );
+				$code = (int) $alert['code'];
+			?>
+				<div class='error'>
+					<p><strong>Akismet Error Code: <?php echo $code; ?></strong></p>
+					<p><?php esc_html_e( $alert['message'] ); ?></p>
+					<p>More information is available at <a href="https://akismet.com/errors/<?php echo $code; ?>">https://akismet.com/errors/<?php echo $code; ?></a></p>
+				</div>
+			<?php
+			}
+
+			add_action( 'admin_notices', 'akismet_alert' );
+		}
+	}
+
 	if ( !get_option('wordpress_api_key') && !$wpcom_api_key && !isset($_POST['submit']) ) {
 		function akismet_warning() {
 			echo "
