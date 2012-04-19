@@ -298,15 +298,17 @@ function akismet_admin_warnings() {
 		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-key-config' )
 		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-stats-display' )
 	) {
-		if ( get_option( 'akismet_alert' ) ) {
+		if ( get_option( 'akismet_alert_code' ) ) {
 			function akismet_alert() {
-				$alert = json_decode( get_option( 'akismet_alert' ), true );
-				$code = (int) $alert['code'];
+				$alert = array(
+					'code' => (int) get_option( 'akismet_alert_code' ),
+					'msg' => get_option( 'akismet_alert_msg' )
+				);
 			?>
 				<div class='error'>
-					<p><strong>Akismet Error Code: <?php echo $code; ?></strong></p>
-					<p><?php esc_html_e( $alert['message'] ); ?></p>
-					<p>More information is available at <a href="https://akismet.com/errors/<?php echo $code; ?>">https://akismet.com/errors/<?php echo $code; ?></a></p>
+					<p><strong>Akismet Error Code: <?php echo $alert['code']; ?></strong></p>
+					<p><?php esc_html_e( $alert['msg'] ); ?></p>
+					<p>More information is available at <a href="https://akismet.com/errors/<?php echo $alert['code']; ?>">https://akismet.com/errors/<?php echo $alert['code']; ?></a></p>
 				</div>
 			<?php
 			}
