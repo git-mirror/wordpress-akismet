@@ -330,10 +330,10 @@ function akismet_admin_warnings() {
 			global $wpdb;
 				akismet_fix_scheduled_recheck();
 				$waiting = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE meta_key = 'akismet_error'" ) );
-				$next_check = human_time_diff( wp_next_scheduled('akismet_schedule_cron_recheck') );
-				if ( $waiting > 0 )
+				$next_check = wp_next_scheduled('akismet_schedule_cron_recheck');
+				if ( $waiting > 0 && $next_check > time() )
 					echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s.', $waiting), number_format_i18n( $waiting ), $next_check)."</p></div>
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s. ', $waiting), number_format_i18n( $waiting ), human_time_diff($next_check) )."</p></div>
 			";
 		}
 		add_action('admin_notices', 'akismet_warning');
@@ -350,10 +350,13 @@ function akismet_comment_row_action( $a, $comment ) {
 		return $a;
 
 	$akismet_result = get_comment_meta( $comment->comment_ID, 'akismet_result', true );
+	$akismet_error = get_comment_meta( $comment->comment_ID, 'akismet_error', true );
 	$user_result = get_comment_meta( $comment->comment_ID, 'akismet_user_result', true);
 	$comment_status = wp_get_comment_status( $comment->comment_ID );
 	$desc = null;
-	if ( !$user_result || $user_result == $akismet_result ) {
+	if ( $akismet_error ) {
+		$desc = __( 'Awaiting spam check' );
+	} elseif ( !$user_result || $user_result == $akismet_result ) {
 		// Show the original Akismet result if the user hasn't overridden it, or if their decision was the same
 		if ( $akismet_result == 'true' && $comment_status != 'spam' && $comment_status != 'trash' )
 			$desc = __( 'Flagged as spam by Akismet' );
@@ -635,6 +638,10 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 
 	if ( defined('WP_IMPORTING') && WP_IMPORTING == true )
 		return;
+
+	// if this is present, it means the status has been changed by a re-check, not an explicit user action
+	if ( get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
+		return;
 		
 	global $current_user;
 	$reporter = '';
@@ -655,8 +662,7 @@ function akismet_transition_comment_status( $new_status, $old_status, $comment )
 		}
 	}
 	
-	if ( !get_comment_meta( $comment->comment_ID, 'akismet_rechecking' ) )
-		akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
+	akismet_update_comment_history( $comment->comment_ID, sprintf( __('%s changed the comment status to %s'), $reporter, $new_status ), 'status-' . $new_status );
 }
 
 add_action( 'transition_comment_status', 'akismet_transition_comment_status', 10, 3 );
@@ -719,21 +725,25 @@ function akismet_recheck_queue() {
 		foreach ( $c as $key => $data )
 		$query_string .= $key . '=' . urlencode( stripslashes($data) ) . '&';
 
+		add_comment_meta( $c['comment_ID'], 'akismet_rechecking', true );
 		$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
 		if ( 'true' == $response[1] ) {
 			wp_set_comment_status($c['comment_ID'], 'spam');
 			update_comment_meta( $c['comment_ID'], 'akismet_result', 'true' );
+			delete_comment_meta( $c['comment_ID'], 'akismet_error' );
 			akismet_update_comment_history( $c['comment_ID'], __('Akismet re-checked and caught this comment as spam'), 'check-spam' );
 		
 		} elseif ( 'false' == $response[1] ) {
 			update_comment_meta( $c['comment_ID'], 'akismet_result', 'false' );
+			delete_comment_meta( $c['comment_ID'], 'akismet_error' );
 			akismet_update_comment_history( $c['comment_ID'], __('Akismet re-checked and cleared this comment'), 'check-ham' );
 		// abnormal result: error
 		} else {
 			update_comment_meta( $c['comment_ID'], 'akismet_result', 'error' );
-			akismet_update_comment_history( $c['comment_ID'], sprintf( __('Akismet was unable to re-check this comment (response: %s)'), $response[1]), 'check-error' );
+			akismet_update_comment_history( $c['comment_ID'], sprintf( __('Akismet was unable to re-check this comment (response: %s)'), substr($response[1], 0, 50)), 'check-error' );
 		}
 
+		delete_comment_meta( $c['comment_ID'], 'akismet_rechecking' );
 	}
 	wp_safe_redirect( $_SERVER['HTTP_REFERER'] );
 	exit;

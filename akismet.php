@@ -280,7 +280,7 @@ function akismet_auto_check_update_meta( $id, $comment ) {
 				// abnormal result: error
 				} else {
 					update_comment_meta( $comment->comment_ID, 'akismet_error', time() );
-					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s), will automatically retry again later.'), $akismet_last_comment['akismet_result']), 'check-error' );
+					akismet_update_comment_history( $comment->comment_ID, sprintf( __('Akismet was unable to check this comment (response: %s), will automatically retry again later.'), substr($akismet_last_comment['akismet_result'], 0, 50)), 'check-error' );
 				}
 				
 				// record the complete original data as submitted for checking
@@ -532,6 +532,7 @@ function akismet_cron_recheck() {
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 			return;
 		}
+		delete_comment_meta( $comment_id, 'akismet_rechecking' );
 	}
 	
 	$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE meta_key = 'akismet_error'" ) );
