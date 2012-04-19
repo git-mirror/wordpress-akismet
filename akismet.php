@@ -70,12 +70,17 @@ function akismet_get_key() {
 	return get_option('wordpress_api_key');
 }
 
-function akismet_verify_key( $key, $ip = null ) {
+function akismet_check_key_status( $key, $ip = null ) {
 	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
 	$blog = urlencode( get_option('home') );
 	if ( $wpcom_api_key )
 		$key = $wpcom_api_key;
 	$response = akismet_http_post("key=$key&blog=$blog", 'rest.akismet.com', '/1.1/verify-key', $akismet_api_port, $ip);
+	return $response;
+}
+
+function akismet_verify_key( $key, $ip = null ) {
+	$response = akismet_check_key_status( $key, $ip );
 	if ( !is_array($response) || !isset($response[1]) || $response[1] != 'valid' && $response[1] != 'invalid' )
 		return 'failed';
 	return $response[1];
@@ -482,6 +487,17 @@ function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
 function akismet_cron_recheck() {
 	global $wpdb;
 
+	// this should probably live in a function by itself
+	$status = akismet_check_key_status( akismet_get_key() );
+	if ( isset($status[0]['x-akismet-alert-code']) ) { // or whatever header/s we decide on
+		update_option( 'akismet_alert_code', $status[0]['x-akismet-alert-code'] );
+		update_option( 'akismet_alert_msg', $status[0]['x-akismet-alert-msg'] );
+		
+		// since there is currently a problem with the key, reschedule a check for 6 hours hence
+		wp_schedule_single_event( time() + 21600, 'akismet_schedule_cron_recheck' );
+		return false;
+	}
+	
 	delete_option('akismet_available_servers');
 
 	$comment_errors = $wpdb->get_col( "
