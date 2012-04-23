@@ -582,6 +582,10 @@ function akismet_fix_scheduled_recheck() {
 		return;
 	}
 
+	if ( get_option( 'akismet_alert_code' ) > 0 ) {
+		return;
+	}
+
 	$check_range = time() + 1200;
 	if ( $future_check > $check_range ) {
 		wp_clear_scheduled_hook( 'akismet_schedule_cron_recheck' );
