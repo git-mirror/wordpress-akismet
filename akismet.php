@@ -508,8 +508,9 @@ function akismet_cron_recheck() {
 	" );
 	
 	foreach ( (array) $comment_errors as $comment_id ) {
-		// if the comment no longer exists, remove the meta entry from the queue to avoid getting stuck
-		if ( !get_comment( $comment_id ) ) {
+		// if the comment no longer exists, or is too old, remove the meta entry from the queue to avoid getting stuck
+		$comment = get_comment( $comment_id );
+		if ( !$comment || strtotime( $comment->comment_date_gmt ) < strtotime( "-15 days" ) ) {
 			delete_comment_meta( $comment_id, 'akismet_error' );
 			continue;
 		}
