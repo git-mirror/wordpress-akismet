@@ -291,10 +291,10 @@ function akismet_stats() {
 add_action('activity_box_end', 'akismet_stats');
 
 function akismet_admin_warnings() {
-	global $wpcom_api_key;
+	global $wpcom_api_key, $pagenow;
 
 	if (
-		basename( $_SERVER['SCRIPT_FILENAME'] ) == 'edit-comments.php'
+		$pagenow == 'edit-comments.php'
 		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-key-config' )
 		|| ( !empty( $_GET['page'] ) && $_GET['page'] == 'akismet-stats-display' )
 	) {
