@@ -573,6 +573,7 @@ $akismet_comment_nonce_option = apply_filters( 'akismet_comment_nonce', get_opti
 if ( $akismet_comment_nonce_option == 'true' || $akismet_comment_nonce_option == '' )
 	add_action( 'comment_form', 'akismet_add_comment_nonce' );
 
+global $wp_version;
 if ( '3.0.5' == $wp_version ) { 
 	remove_filter( 'comment_text', 'wp_kses_data' ); 
 	if ( is_admin() ) 
