@@ -489,13 +489,16 @@ function akismet_cron_recheck() {
 
 	// this should probably live in a function by itself
 	$status = akismet_check_key_status( akismet_get_key() );
-	if ( isset($status[0]['x-akismet-alert-code']) ) { // or whatever header/s we decide on
+	if ( isset($status[0]['x-akismet-alert-code']) ) {
 		update_option( 'akismet_alert_code', $status[0]['x-akismet-alert-code'] );
 		update_option( 'akismet_alert_msg', $status[0]['x-akismet-alert-msg'] );
 		
 		// since there is currently a problem with the key, reschedule a check for 6 hours hence
 		wp_schedule_single_event( time() + 21600, 'akismet_schedule_cron_recheck' );
 		return false;
+	} else {
+		update_option( 'akismet_alert_code', '' );
+		update_option( 'akismet_alert_code', '' );
 	}
 	
 	delete_option('akismet_available_servers');
