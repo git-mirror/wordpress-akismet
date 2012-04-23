@@ -2,12 +2,12 @@
 /**
  * @package Akismet
  */
-class Akismet_New_Widget extends WP_Widget {
+class Akismet_Widget extends WP_Widget {
 
 	function __construct() {
 		parent::__construct(
-			'akismet_new_widget',
-			__( 'Akismet New Widget' ),
+			'akismet_widget',
+			__( 'Akismet Widget' ),
 			array( 'description' => __( 'Display the number of spam comments Akismet has caught' ) )
 		);
 
@@ -102,7 +102,7 @@ class Akismet_New_Widget extends WP_Widget {
 }
 
 function akismet_register_widgets() {
-	register_widget( 'Akismet_New_Widget' );
+	register_widget( 'Akismet_Widget' );
 }
 
 add_action( 'widgets_init', 'akismet_register_widgets' );
