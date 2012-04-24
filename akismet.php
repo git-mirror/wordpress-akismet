@@ -79,8 +79,20 @@ function akismet_check_key_status( $key, $ip = null ) {
 	return $response;
 }
 
+// given a response from an API call like akismet_check_key_status(), update the alert code options if an alert is present.
+function akismet_update_alert( $response ) {
+	if ( isset($response[0]['x-akismet-alert-code']) ) {
+		update_option( 'akismet_alert_code', $response[0]['x-akismet-alert-code'] );
+		update_option( 'akismet_alert_msg', $response[0]['x-akismet-alert-msg'] );
+	} else {
+		update_option( 'akismet_alert_code', '' );
+		update_option( 'akismet_alert_code', '' );
+	}
+}
+
 function akismet_verify_key( $key, $ip = null ) {
 	$response = akismet_check_key_status( $key, $ip );
+	akismet_update_alert( $response );
 	if ( !is_array($response) || !isset($response[1]) || $response[1] != 'valid' && $response[1] != 'invalid' )
 		return 'failed';
 	return $response[1];
@@ -487,18 +499,11 @@ function akismet_check_db_comment( $id, $recheck_reason = 'recheck_queue' ) {
 function akismet_cron_recheck() {
 	global $wpdb;
 
-	// this should probably live in a function by itself
-	$status = akismet_check_key_status( akismet_get_key() );
-	if ( isset($status[0]['x-akismet-alert-code']) ) {
-		update_option( 'akismet_alert_code', $status[0]['x-akismet-alert-code'] );
-		update_option( 'akismet_alert_msg', $status[0]['x-akismet-alert-msg'] );
-		
+	$status = akismet_verify_key( akismet_get_key() );
+	if ( get_option( 'akismet_alert_code' ) || $status == 'invalid' ) {
 		// since there is currently a problem with the key, reschedule a check for 6 hours hence
 		wp_schedule_single_event( time() + 21600, 'akismet_schedule_cron_recheck' );
 		return false;
-	} else {
-		update_option( 'akismet_alert_code', '' );
-		update_option( 'akismet_alert_code', '' );
 	}
 	
 	delete_option('akismet_available_servers');
