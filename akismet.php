@@ -396,6 +396,9 @@ function akismet_auto_check_comment( $commentdata ) {
 		}
 	}
 	
+	if ( !get_option( 'akismet_alert_code' ) )
+		akismet_update_alert( $response );
+	
 	if ( function_exists('wp_next_scheduled') && function_exists('wp_schedule_event') ) {
 		// WP 2.1+: delete old comments daily
 		if ( !wp_next_scheduled('akismet_scheduled_delete') )
