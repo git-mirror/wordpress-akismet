@@ -125,8 +125,7 @@ function akismet_conf() {
 		if ( $key_status == 'valid' ) {
 			$ms[] = 'key_valid';
 		} else if ( $key_status == 'invalid' ) {
-			delete_option('wordpress_api_key');
-			$ms[] = 'key_empty';
+			$ms[] = 'key_invalid';
 		} else if ( !empty($key) && $key_status == 'failed' ) {
 			$ms[] = 'key_failed';
 		}
@@ -140,6 +139,7 @@ function akismet_conf() {
 		'no_connection' => array('color' => '888', 'text' => __('There was a problem connecting to the Akismet server. Please check your server configuration.')),
 		'key_empty' => array('color' => 'aa0', 'text' => sprintf(__('Please enter an API key. (<a href="%s" style="color:#fff">Get your key.</a>)'), 'http://akismet.com/get/?return=true')),
 		'key_valid' => array('color' => '4AB915', 'text' => __('This key is valid.')),
+		'key_invalid' => array('color' => '888', 'text' => __('This key is invalid.')),
 		'key_failed' => array('color' => 'aa0', 'text' => __('The key below was previously validated but a connection to akismet.com can not be established at this time. Please check your server configuration.')),
 		'bad_home_url' => array('color' => '888', 'text' => sprintf( __('Your WordPress home URL %s is invalid.  Please fix the <a href="%s">home option</a>.'), esc_html( get_bloginfo('url') ), admin_url('options.php#home') ) ),
 	);
