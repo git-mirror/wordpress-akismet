@@ -469,11 +469,6 @@ add_filter('comment_text', 'akismet_text_add_link_class');
 function akismet_rightnow() {
 	global $submenu, $wp_db_version;
 
-	// clean_url was deprecated in WP 3.0
-	$esc_url = 'clean_url';
-	if ( function_exists( 'esc_url' ) )
-		$esc_url = 'esc_url';
-
 	if ( 8645 < $wp_db_version  ) // 2.7
 		$link = 'edit-comments.php?comment_status=spam';
 	elseif ( isset( $submenu['edit-comments.php'] ) )
@@ -491,14 +486,15 @@ function akismet_rightnow() {
 		$intro = sprintf( __('<a href="%1$s">Akismet</a> blocks spam from getting to your blog. '), 'http://akismet.com/?return=true' );
 	}
 
+	$link = function_exists( 'esc_url' ) ? esc_url( $link ) : clean_url( $link );
 	if ( $queue_count = akismet_spam_count() ) {
 		$queue_text = sprintf( _n(
 			'There\'s <a href="%2$s">%1$s comment</a> in your spam queue right now.',
 			'There are <a href="%2$s">%1$s comments</a> in your spam queue right now.',
 			$queue_count
-		), number_format_i18n( $queue_count ), $esc_url($link) );
+		), number_format_i18n( $queue_count ), $link );
 	} else {
-		$queue_text = sprintf( __( "There's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $esc_url($link) );
+		$queue_text = sprintf( __( "There's nothing in your <a href='%1\$s'>spam queue</a> at the moment." ), $link );
 	}
 
 	$text = $intro . '<br />' . $queue_text;
