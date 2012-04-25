@@ -333,7 +333,7 @@ function akismet_admin_warnings() {
 				$next_check = wp_next_scheduled('akismet_schedule_cron_recheck');
 				if ( $waiting > 0 && $next_check > time() )
 					echo "
-			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(_n('A server or network problem prevented Akismet from checking %d comment. It has been temporarily held for moderation and will be automatically re-checked in %s.', 'A server or network problem prevented Akismet from checking %d comments. They have been temporarily held for moderation and will be automatically re-checked in %s. ', $waiting), number_format_i18n( $waiting ), human_time_diff($next_check) )."</p></div>
+			<div id='akismet-warning' class='updated fade'><p><strong>".__('Akismet has detected a problem.')."</strong> ".sprintf(__('Some comments have not yet been checked for spam by Akismet. They have been temporarily held for moderation. Please check your <a href="%s">Akismet configuration</a> and contact your web host if problems persist.'), 'admin.php?page=akismet-key-config')."</p></div>
 			";
 		}
 		add_action('admin_notices', 'akismet_warning');
