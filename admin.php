@@ -23,7 +23,6 @@ function akismet_admin_init() {
         $hook = get_plugin_page_hook( 'akismet-stats-display', 'index.php' );
     else
         $hook = 'dashboard_page_akismet-stats-display';
-    add_action('admin_head-'.$hook, 'akismet_stats_script');
     add_meta_box('akismet-status', __('Comment History'), 'akismet_comment_status_meta_box', 'comment', 'normal');
 }
 add_action('admin_init', 'akismet_admin_init');
@@ -240,23 +239,6 @@ function akismet_conf() {
 <?php
 }
 
-function akismet_stats_script() {
-	?>
-<script type="text/javascript">
-function resizeIframe() {
-  
-    document.getElementById('akismet-stats-frame').style.height = "2500px";
-    
-};
-function resizeIframeInit() {
-	document.getElementById('akismet-stats-frame').onload = resizeIframe;
-	window.onresize = resizeIframe;
-}
-addLoadEvent(resizeIframeInit);
-</script><?php
-}
-
-
 function akismet_stats_display() {
 	global $akismet_api_host, $akismet_api_port, $wpcom_api_key;
 	$blog = urlencode( get_bloginfo('url') );
@@ -269,7 +251,7 @@ function akismet_stats_display() {
 	$url .= "?blog={$blog}&api_key=" . akismet_get_key();
 	?>
 	<div class="wrap">
-	<iframe src="<?php echo $url; ?>" width="100%" height="100%" frameborder="0" id="akismet-stats-frame"></iframe>
+	<iframe src="<?php echo $url; ?>" width="100%" height="2500px" frameborder="0" id="akismet-stats-frame"></iframe>
 	</div>
 	<?php
 }

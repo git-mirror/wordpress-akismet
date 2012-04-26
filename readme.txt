@@ -31,6 +31,9 @@ Upload the Akismet plugin to your blog, Activate it, then enter your [Akismet.co
 
 == Changelog ==
 
+= 2.5.7 =
+* FireFox Stats iframe preview bug
+
 = 2.5.6 =
 * Prevent retry scheduling problems on sites where wp_cron is misbehaving
 * Preload mshot previews
