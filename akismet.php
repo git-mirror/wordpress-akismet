@@ -81,12 +81,16 @@ function akismet_check_key_status( $key, $ip = null ) {
 
 // given a response from an API call like akismet_check_key_status(), update the alert code options if an alert is present.
 function akismet_update_alert( $response ) {
+	$code = $msg = null;
 	if ( isset($response[0]['x-akismet-alert-code']) ) {
-		update_option( 'akismet_alert_code', $response[0]['x-akismet-alert-code'] );
-		update_option( 'akismet_alert_msg', $response[0]['x-akismet-alert-msg'] );
-	} else {
-		update_option( 'akismet_alert_code', '' );
-		update_option( 'akismet_alert_code', '' );
+		$code = $response[0]['x-akismet-alert-code'];
+		$msg = $response[0]['x-akismet-alert-msg'];
+	}
+	
+	// only call update_option() if the value has changed
+	if ( $code != get_option( 'akismet_alert_code' ) ) {
+		update_option( 'akismet_alert_code', $code );
+		update_option( 'akismet_alert_msg', $msg );
 	}
 }
 
@@ -366,6 +370,7 @@ function akismet_auto_check_comment( $commentdata ) {
 	$commentdata['comment_as_submitted'] = $comment;
 
 	$response = akismet_http_post($query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port);
+	akismet_update_alert( $response );
 	$commentdata['akismet_result'] = $response[1];
 	if ( 'true' == $response[1] ) {
 		// akismet_spam_count will be incremented later by akismet_result_spam()
@@ -395,9 +400,6 @@ function akismet_auto_check_comment( $commentdata ) {
 			wp_schedule_single_event( time() + 1200, 'akismet_schedule_cron_recheck' );
 		}
 	}
-	
-	if ( !get_option( 'akismet_alert_code' ) )
-		akismet_update_alert( $response );
 	
 	if ( function_exists('wp_next_scheduled') && function_exists('wp_schedule_event') ) {
 		// WP 2.1+: delete old comments daily
