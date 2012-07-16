@@ -82,7 +82,7 @@ jQuery(document).ready(function () {
 			var thisId = jQuery(this).attr('id').replace('author_comment_url_', '');
 			jQuery('.widefat td').css('overflow', 'visible');
 			jQuery(this).css('position', 'relative');
-			var thisHref = jQuery.URLEncode(jQuery(this).attr('href'));
+			var thisHref = encodeURIComponent(jQuery(this).attr('href'));
 			jQuery(this).append('<div class="mShot mshot-container" style="left: '+thisParentWidth+'"><div class="mshot-arrow"></div><img src="http://s.wordpress.com/mshots/v1/'+thisHref+'?w=450" width="450" class="mshot-image_'+thisId+'" style="margin: 0;" /></div>');
 			setTimeout(function () {
 				jQuery('.mshot-image_'+thisId).attr('src', 'http://s.wordpress.com/mshots/v1/'+thisHref+'?w=450&r=2');
@@ -97,16 +97,10 @@ jQuery(document).ready(function () {
 		jQuery(this).find('.mShot').hide();
 	});
 });
-// URL encode plugin
-jQuery.extend({URLEncode:function(c){var o='';var x=0;c=c.toString();var r=/(^[a-zA-Z0-9_.]*)/;
-  while(x<c.length){var m=r.exec(c.substr(x));
-    if(m!=null && m.length>1 && m[1]!=''){o+=m[1];x+=m[1].length;
-    }else{if(c[x]==' ')o+='+';else{var d=c.charCodeAt(x);var h=d.toString(16);
-    o+='%'+(h.length<2?'0':'')+h.toUpperCase();}x++;}}return o;}
-});
+
 // Preload mshot images after everything else has loaded
 jQuery(window).load(function() {
 	jQuery('a[id^="author_comment_url"]').each(function () {
-		jQuery.get('http://s.wordpress.com/mshots/v1/'+jQuery.URLEncode(jQuery(this).attr('href'))+'?w=450');
+		jQuery.get('http://s.wordpress.com/mshots/v1/'+encodeURIComponent(jQuery(this).attr('href'))+'?w=450');
 	});
 });
